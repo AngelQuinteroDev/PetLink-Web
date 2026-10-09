@@ -1,0 +1,83 @@
+.chip-group {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  box-sizing: border-box;
+}
+
+/* Con bandeja translúcida (Especie, Sexo) */
+.chip-group--tray {
+  padding: 8px 10px;
+
+  justify-content: space-between;
+
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.chip-group--tray .chip-group__chip {
+  flex: 1;
+}
+
+/* Sin bandeja (Tamaño) */
+.chip-group--plain {
+  flex-wrap: wrap;
+}
+
+.chip-group__chip {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  padding: 7px 14px;
+
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background: #ffffff;
+
+  color: var(--titulos, #7519ff);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  box-sizing: border-box;
+}
+
+.chip-group__chip:focus {
+  outline: none;
+}
+
+.chip-group__chip:active {
+  transform: scale(0.96);
+}
+
+.chip-group__chip.is-active {
+  border-color: var(--titulos, #7519ff);
+  background: #ede8ff;
+  box-shadow: 0 0 8px 2px rgba(189, 175, 239, 0.7);
+}
+
+.chip-group__icon {
+  display: flex;
+  align-items: center;
+}
+
+.chip-group__icon-img {
+  width: 16px;
+  height: 16px;
+
+  object-fit: contain;
+
+  pointer-events: none;
+}

@@ -1,0 +1,47 @@
+.info-notice {
+  display: flex;
+
+  align-items: center;
+  gap: 14px;
+
+  padding: 14px 16px;
+
+  border: 1px solid var(--titulos, #7519ff);
+  border-radius: 10px;
+  background: rgba(209, 196, 255, 0.35);
+  box-shadow: 0 4px 4px 0 rgba(148, 132, 191, 0.42);
+
+  box-sizing: border-box;
+}
+
+.info-notice__icon {
+  display: flex;
+
+  flex-shrink: 0;
+
+  width: 26px;
+  height: 26px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid var(--titulos, #7519ff);
+  border-radius: 50%;
+
+  color: var(--titulos, #7519ff);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.info-notice__text {
+  margin: 0;
+
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}

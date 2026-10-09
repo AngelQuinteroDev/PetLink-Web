@@ -17,6 +17,10 @@ import MyPetsSection from "./assets/components/MyPetsSection.jsx";
 import AccountSection from "./assets/components/AccountSection.jsx";
 import ReportModal from "./assets/components/ReportModal.jsx";
 import SettingsPage from "./assets/components/SettingsPage.jsx";
+import AddPetPage from "./assets/components/AddPetPage.jsx";
+import ChangeEmailPage from "./assets/components/ChangeEmailPage.jsx";
+import ReportLostPage from "./assets/components/ReportLostPage.jsx";
+import ReportFoundPage from "./assets/components/ReportFoundPage.jsx";
 import backIcon from "./assets/svg/Back.svg";
 import bellIcon from "./assets/svg/bell.svg";
 import verTodoIcon from "./assets/svg/Ver_todo.svg";
@@ -35,6 +39,12 @@ const SettingsIcon = () => (
   </svg>
 );
 
+// Mascotas del usuario (compartidas entre Perfil y Reportar mascota)
+const MY_PETS = [
+  { id: 1, name: "Mati", species: "Perro", location: "Parque Usaquén · hoy" },
+  { id: 2, name: "Luna", species: "Gato", location: "Parque Usaquén · hoy" },
+];
+
 function App() {
   const [view, setView] = useState("login");
   const [userEmail, setUserEmail] = useState("");
@@ -42,6 +52,10 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAddPet, setShowAddPet] = useState(false);
+  const [showChangeEmail, setShowChangeEmail] = useState(false);
+  const [showReportLost, setShowReportLost] = useState(false);
+  const [showReportFound, setShowReportFound] = useState(false);
 
   const handleLoginSuccess = (email) => {
     setUserEmail(email);
@@ -106,6 +120,121 @@ function App() {
   }
 
   /* ============================
+     REPORTAR MASCOTA PERDIDA
+  ============================ */
+  if (showReportLost) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <ReportLostPage
+            pets={MY_PETS}
+            onBack={() => setShowReportLost(false)}
+            onNotifications={() => {
+              setShowReportLost(false);
+              setShowNotifications(true);
+            }}
+            onNotListed={() => {
+              setShowReportLost(false);
+              setActiveTab("profile");
+              setShowAddPet(true);
+            }}
+            onSubmit={(report) => {
+              console.log("Alerta publicada:", report);
+              setShowReportLost(false);
+              setActiveTab("home");
+            }}
+          />
+
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setShowReportLost(false);
+              if (id === "report") {
+                setShowReportModal(true);
+              } else {
+                setActiveTab(id);
+              }
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* ============================
+     ENCONTRÉ MASCOTA
+  ============================ */
+  if (showReportFound) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <ReportFoundPage
+            onBack={() => setShowReportFound(false)}
+            onNotifications={() => {
+              setShowReportFound(false);
+              setShowNotifications(true);
+            }}
+            onSubmit={(report) => {
+              console.log("Alerta de mascota encontrada:", report);
+              setShowReportFound(false);
+              setActiveTab("home");
+            }}
+          />
+
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setShowReportFound(false);
+              if (id === "report") {
+                setShowReportModal(true);
+              } else {
+                setActiveTab(id);
+              }
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* ============================
+     CAMBIAR CORREO
+  ============================ */
+  if (showChangeEmail) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <ChangeEmailPage
+            currentEmail={userEmail || "pepito.perez@gmail.com"}
+            verified
+            onBack={() => {
+              setShowChangeEmail(false);
+              setShowSettings(true);
+            }}
+            onSubmit={({ newEmail }) => {
+              console.log("Enviar confirmación a:", newEmail);
+              setShowChangeEmail(false);
+              setShowSettings(true);
+            }}
+          />
+
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setShowChangeEmail(false);
+              if (id === "report") {
+                setShowReportModal(true);
+              } else {
+                setActiveTab(id);
+              }
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* ============================
      AJUSTES
   ============================ */
   if (showSettings) {
@@ -117,6 +246,10 @@ function App() {
             onNotifications={() => {
               setShowSettings(false);
               setShowNotifications(true);
+            }}
+            onChangeEmail={() => {
+              setShowSettings(false);
+              setShowChangeEmail(true);
             }}
           />
 
@@ -137,15 +270,48 @@ function App() {
   }
 
   /* ============================
+     INSCRIBIR MASCOTA
+  ============================ */
+  if (showAddPet) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <AddPetPage
+            onBack={() => setShowAddPet(false)}
+            onNotifications={() => {
+              setShowAddPet(false);
+              setShowNotifications(true);
+            }}
+            onSave={(pet) => {
+              console.log("Mascota guardada:", pet);
+              setShowAddPet(false);
+            }}
+          />
+
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setShowAddPet(false);
+              if (id === "report") {
+                setShowReportModal(true);
+              } else {
+                setActiveTab(id);
+              }
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* ============================
      APP PRINCIPAL
   ============================ */
   return (
     <div className="phone-frame">
       <main className="app">
 
-        {/* ============================
-            INICIO
-        ============================ */}
+        {/* INICIO */}
         {activeTab === "home" && (
           <>
             <header className="home-header">
@@ -228,9 +394,7 @@ function App() {
           </>
         )}
 
-        {/* ============================
-            MAPA
-        ============================ */}
+        {/* MAPA */}
         {activeTab === "map" && (
           <>
             <header className="page-header">
@@ -278,9 +442,7 @@ function App() {
           </>
         )}
 
-        {/* ============================
-            COMUNIDAD
-        ============================ */}
+        {/* COMUNIDAD */}
         {activeTab === "community" && (
           <>
             <header className="page-header">
@@ -305,9 +467,7 @@ function App() {
           </>
         )}
 
-        {/* ============================
-            PERFIL
-        ============================ */}
+        {/* PERFIL */}
         {activeTab === "profile" && (
           <>
             <header className="page-header">
@@ -342,16 +502,13 @@ function App() {
             </section>
 
             <section className="home-section">
-              <ProfileStats pets={2} posts={14} activeReports={0} />
+              <ProfileStats pets={MY_PETS.length} posts={14} activeReports={0} />
             </section>
 
             <section className="home-section">
               <MyPetsSection
-                pets={[
-                  { id: 1, name: "Nombre", species: "Gato", location: "Parque Usaquén · hoy" },
-                  { id: 2, name: "Nombre", species: "Perro", location: "Parque Usaquén · hoy" },
-                ]}
-                onEnroll={() => console.log("Inscribir mascota")}
+                pets={MY_PETS}
+                onEnroll={() => setShowAddPet(true)}
                 onPetClick={(pet) => console.log("Ver mascota:", pet)}
               />
             </section>
@@ -368,15 +525,17 @@ function App() {
           </>
         )}
 
-        {/* ============================
-            MODAL DE REPORTAR
-        ============================ */}
+        {/* MODAL DE REPORTAR */}
         <ReportModal
           open={showReportModal}
           onClose={() => setShowReportModal(false)}
           onSelectOption={(optionId) => {
-            console.log("Opción elegida:", optionId);
             setShowReportModal(false);
+            if (optionId === "lost") {
+              setShowReportLost(true);
+            } else if (optionId === "found") {
+              setShowReportFound(true);
+            }
           }}
           onCommunityPost={() => {
             setShowReportModal(false);

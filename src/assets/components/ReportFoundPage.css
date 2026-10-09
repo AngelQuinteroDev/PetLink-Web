@@ -1,0 +1,76 @@
+/* Foto principal */
+.found__photo-block {
+  display: flex;
+
+  flex-direction: column;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.found__photo {
+  position: relative;
+
+  width: 83px;
+  height: 83px;
+
+  border-radius: 50%;
+  background: #ffb1e2;
+}
+
+.found__photo > img {
+  width: 100%;
+  height: 100%;
+
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.found__photo-edit {
+  position: absolute;
+
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+
+  width: 22px;
+  height: 22px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: var(--activado, #ae77ff);
+
+  cursor: pointer;
+}
+
+.found__photo-edit img {
+  width: 12px;
+  height: 12px;
+}
+
+.found__photo-hint {
+  margin: 0;
+
+  color: var(--desctivado, #66557e);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.found__group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+/* Botón publicar (EF4B4B) */
+.report-found__submit {
+  background: #ef4b4b;
+}

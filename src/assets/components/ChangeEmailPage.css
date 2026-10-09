@@ -1,0 +1,119 @@
+.change-email {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+
+  padding-bottom: 10px;
+}
+
+/* ===== Correo actual ===== */
+
+.change-email__current {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  padding: 14px 16px;
+
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1);
+
+  box-sizing: border-box;
+}
+
+.change-email__current-label {
+  color: var(--desctivado, #66557e);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.change-email__current-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+.change-email__current-value {
+  min-width: 0;
+
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.change-email__badge {
+  flex-shrink: 0;
+
+  padding: 3px 12px;
+
+  border-radius: 27px;
+  background: #d5f5dc;
+
+  color: #2e7d5b;
+
+  font-family: "Nata Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ===== Íconos de los campos ===== */
+
+.change-email__field-icon {
+  width: 20px;
+  height: 20px;
+
+  object-fit: contain;
+
+  pointer-events: none;
+}
+
+/* ===== Botón ===== */
+
+.change-email__submit {
+  height: 44px;
+
+  margin: 6px 12px 0;
+
+  border: none;
+  border-radius: 10px;
+  background: var(--activado, #ae77ff);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+
+  color: #ffffff;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.change-email__submit:focus {
+  outline: none;
+}
+
+.change-email__submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.change-email__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

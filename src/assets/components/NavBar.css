@@ -63,6 +63,22 @@
   height: clamp(20px, 6vw, 26px);
 }
 
+/* Ícono de comunidad (SVG importado) */
+.nav-icon-svg {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 26px;
+}
+
+.nav-icon-svg svg {
+  width: 100%;
+  height: 100%;
+}
+
 .nav-label {
   display: flex;
 

@@ -21,13 +21,6 @@ import "./SettingsPage.css";
 
 /* ===== Íconos que aún no tienen SVG exportado ===== */
 
-const LockIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="5" y="11" width="14" height="9" rx="2" stroke="var(--titulos, #7519FF)" strokeWidth="2" />
-    <path d="M8 11V7C8 4.79 9.79 3 12 3C14.21 3 16 4.79 16 7V11" stroke="var(--titulos, #7519FF)" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-
 const InfoCircleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="12" r="9" stroke="var(--titulos, #7519FF)" strokeWidth="2" />
@@ -78,7 +71,7 @@ function SettingsRow({ icon, label, sublabel, value, danger, right, onClick }) {
 
 const DISTANCES = ["500 m", "1 Km", "3 Km", "5 Km"];
 
-function SettingsPage({ onBack, onNotifications }) {
+function SettingsPage({ onBack, onNotifications, onChangeEmail }) {
   const [petAlerts, setPetAlerts] = useState(true);
   const [distance, setDistance] = useState("1 Km");
   const [postReplies, setPostReplies] = useState(true);
@@ -97,8 +90,8 @@ function SettingsPage({ onBack, onNotifications }) {
       <section className="settings-section">
         <h2 className="settings-section__title">Cuenta</h2>
         <div className="settings-card">
-          <SettingsRow icon={correoIcon} label="Correo electrónico" onClick={() => console.log("Correo")} />
-          <SettingsRow icon={<LockIcon />} label="Cambiar contraseña" onClick={() => console.log("Contraseña")} />
+          <SettingsRow icon={correoIcon} label="Correo electrónico" onClick={onChangeEmail} />
+          <SettingsRow icon={privacidadIcon} label="Cambiar contraseña" onClick={() => console.log("Contraseña")} />
           <SettingsRow icon={ayudaIcon} label="Ayuda y soporte" onClick={() => console.log("Ayuda")} />
         </div>
       </section>

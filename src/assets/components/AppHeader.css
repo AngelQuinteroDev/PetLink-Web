@@ -1,0 +1,61 @@
+/* Reserva el espacio del header fijo */
+.app-header__spacer {
+  height: 66px;
+  margin-bottom: 14px;
+}
+
+.app-header {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+
+  display: flex;
+
+  width: calc(100% - 24px);
+  max-width: 366px;
+
+  padding: 0 1px;
+
+  align-items: center;
+  gap: 22px;
+
+  border-radius: 30px;
+
+  box-sizing: border-box;
+}
+
+/* Glass suave */
+.app-header--glass {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
+  background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+
+  box-shadow: 0 2px 8px rgba(117, 25, 255, 0.06);
+}
+
+.app-header__title {
+  flex: 1;
+
+  margin: 0;
+
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: clamp(20px, 6vw, 26px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Mantiene el título centrado si falta un botón */
+.app-header__empty {
+  width: 49px;
+  flex-shrink: 0;
+}
