@@ -1,0 +1,171 @@
+.city-picker__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.4);
+
+  overscroll-behavior: contain;
+}
+
+.city-picker__sheet {
+  position: relative;
+
+  display: flex;
+
+  width: 100%;
+  max-width: 393px;
+  max-height: 85vh;
+
+  flex-direction: column;
+  gap: 12px;
+
+  padding: 12px 18px 22px;
+
+  border-radius: 30px 30px 0 0;
+  background: #ffffff;
+
+  box-sizing: border-box;
+  overflow: hidden;
+
+  animation: city-picker-up 0.25s ease-out;
+}
+
+/* El contenido va por encima de las huellas */
+.city-picker__sheet > *:not(.paw-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes city-picker-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.city-picker__handle {
+  width: 80px;
+  height: 7px;
+
+  align-self: center;
+  flex-shrink: 0;
+
+  border-radius: 14px;
+  background: #ddd6fb;
+}
+
+.city-picker__title {
+  margin: 0;
+
+  color: var(--titulos, #7519ff);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.city-picker__subtitle {
+  margin: -6px 0 0;
+
+  color: var(--desctivado, #66557e);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Buscador sobre fondo lila */
+.city-picker__sheet .search-bar {
+  background: #ede8ff;
+}
+
+/* Lista con scroll propio */
+.city-picker__list {
+  flex: 1;
+  min-height: 0;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.city-picker__item {
+  display: flex;
+
+  width: 100%;
+
+  padding: 13px 14px;
+
+  align-items: center;
+  justify-content: space-between;
+
+  border: none;
+  border-bottom: 1px solid #f0ecf9;
+
+  background: transparent;
+
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.city-picker__item:focus { outline: none; }
+.city-picker__item:active { background: #faf8ff; }
+
+.city-picker__item.is-active {
+  border-radius: 10px;
+  background: #ede8ff;
+
+  color: var(--titulos, #7519ff);
+}
+
+.city-picker__check {
+  color: var(--titulos, #7519ff);
+  font-weight: 700;
+}
+
+.city-picker__empty {
+  padding: 20px 0;
+
+  color: var(--desctivado, #66557e);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.city-picker__cancel {
+  height: 44px;
+
+  border: none;
+  border-radius: 10px;
+  background: #e4ddfb;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+
+  color: var(--titulos, #7519ff);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.city-picker__cancel:focus { outline: none; }

@@ -1,6 +1,7 @@
 .report-modal__overlay {
   position: fixed;
   inset: 0;
+  z-index: 200;
 
   display: flex;
 
@@ -8,11 +9,11 @@
   justify-content: center;
 
   background: rgba(0, 0, 0, 0.4);
-
-  z-index: 200;
 }
 
 .report-modal__sheet {
+  position: relative;
+
   display: flex;
 
   width: 100%;
@@ -30,17 +31,20 @@
   box-shadow: 0 -4px 12px 0 rgba(0, 0, 0, 0.25);
 
   box-sizing: border-box;
+  overflow: hidden;
 
   animation: report-modal-slide-up 0.25s ease-out;
 }
 
+/* El contenido va por encima de las huellas */
+.report-modal__sheet > *:not(.paw-bg) {
+  position: relative;
+  z-index: 1;
+}
+
 @keyframes report-modal-slide-up {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 .report-modal__handle {
@@ -68,11 +72,8 @@
 
 .report-modal__titles {
   display: flex;
-
   flex-direction: column;
-
   gap: 3px;
-
   min-width: 0;
 }
 
@@ -83,7 +84,6 @@
 
   font-family: "Kodchasan", sans-serif;
   font-size: clamp(17px, 5vw, 20px);
-  font-style: normal;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -95,7 +95,6 @@
 
   font-family: "Kodchasan", sans-serif;
   font-size: 12px;
-  font-style: normal;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -113,29 +112,20 @@
 
   border: none;
   border-radius: 50%;
-
   background: #ede8ff;
 
   cursor: pointer;
 }
 
-.report-modal__close:focus {
-  outline: none;
-}
-
-.report-modal__close:active {
-  transform: scale(0.92);
-}
+.report-modal__close:focus { outline: none; }
+.report-modal__close:active { transform: scale(0.92); }
 
 /* ===== Opciones ===== */
 
 .report-modal__options {
   display: flex;
-
   width: 100%;
-
   flex-direction: column;
-
   gap: 15px;
 }
 
@@ -145,30 +135,22 @@
   width: 100%;
 
   align-items: center;
-
   gap: 15px;
 
   padding: 12px;
 
   border-radius: 10px;
   border: 1px solid transparent;
-
   box-shadow: 0 4px 8.5px 0 rgba(0, 0, 0, 0.25);
 
   cursor: pointer;
-
   text-align: left;
 
   box-sizing: border-box;
 }
 
-.report-modal__option:focus {
-  outline: none;
-}
-
-.report-modal__option:active {
-  transform: scale(0.98);
-}
+.report-modal__option:focus { outline: none; }
+.report-modal__option:active { transform: scale(0.98); }
 
 .report-modal__option--lost {
   border-color: #ffcaca;
@@ -178,6 +160,11 @@
 .report-modal__option--found {
   border-color: #c2ecd4;
   background: rgba(183, 240, 192, 0.35);
+}
+
+.report-modal__option--adoption {
+  border-color: #cfc2f5;
+  background: rgba(216, 183, 255, 0.35);
 }
 
 .report-modal__icon {
@@ -194,65 +181,48 @@
   border-radius: 10px;
 }
 
-.report-modal__icon--lost {
-  background: #ffb7b7;
-}
-
-.report-modal__icon--found {
-  background: #b7f0c0;
-}
+.report-modal__icon--lost { background: #ffb7b7; }
+.report-modal__icon--found { background: #b7f0c0; }
+.report-modal__icon--adoption { background: #c9a9ff; }
 
 .report-modal__icon-img {
   width: 24px;
   height: 24px;
-
   object-fit: contain;
-
   pointer-events: none;
 }
 
 .report-modal__option-text {
   display: flex;
-
   flex: 1;
   min-width: 0;
-
   flex-direction: column;
-
   gap: 3px;
 }
 
 .report-modal__option-title {
   font-family: "Kodchasan", sans-serif;
   font-size: 14px;
-  font-style: normal;
   font-weight: 600;
   line-height: 1.3;
 }
 
-.report-modal__option-title--lost {
-  color: #a54545;
-}
-
-.report-modal__option-title--found {
-  color: #2e7d5b;
-}
+.report-modal__option-title--lost { color: #a54545; }
+.report-modal__option-title--found { color: #2e7d5b; }
+.report-modal__option-title--adoption { color: var(--titulos, #7519ff); }
 
 .report-modal__option-description {
   color: #66557e;
 
   font-family: "Nata Sans", sans-serif;
   font-size: 10px;
-  font-style: normal;
   font-weight: 600;
   line-height: 1.4;
 }
 
 .report-modal__chevron {
   display: flex;
-
   flex-shrink: 0;
-
   align-items: center;
   justify-content: center;
 }
@@ -276,18 +246,14 @@
 
   font-family: "Kodchasan", sans-serif;
   font-size: 12px;
-  font-style: normal;
   font-weight: 700;
   line-height: 16px;
 }
 
-.report-modal__community:focus {
-  outline: none;
-}
+.report-modal__community:focus { outline: none; }
 
 .report-modal__community-icon {
   width: 16px;
   height: 16px;
-
   object-fit: contain;
 }

@@ -3,14 +3,16 @@
 
   align-items: center;
 
-  gap: 10px;
+  gap: 8px;
+
+  max-width: 100%;
 
   box-sizing: border-box;
 }
 
-/* Con bandeja translúcida (Especie, Sexo) */
+/* Bandeja translúcida (Especie, Sexo) */
 .chip-group--tray {
-  padding: 8px 10px;
+  padding: 8px;
 
   justify-content: space-between;
 
@@ -19,12 +21,16 @@
 }
 
 .chip-group--tray .chip-group__chip {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
+
+  padding: 7px 6px;
 }
 
-/* Sin bandeja (Tamaño) */
+/* Tamaño: centrado */
 .chip-group--plain {
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .chip-group__chip {
@@ -33,9 +39,9 @@
   align-items: center;
   justify-content: center;
 
-  gap: 5px;
+  gap: 4px;
 
-  padding: 7px 14px;
+  padding: 7px clamp(8px, 3vw, 14px);
 
   border: 1px solid transparent;
   border-radius: 20px;
@@ -44,7 +50,7 @@
   color: var(--titulos, #7519ff);
 
   font-family: "Kodchasan", sans-serif;
-  font-size: 13px;
+  font-size: clamp(11px, 3.4vw, 13px);
   font-weight: 700;
 
   cursor: pointer;

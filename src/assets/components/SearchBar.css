@@ -1,0 +1,38 @@
+.search-bar {
+  display: flex;
+
+  height: 40px;
+
+  padding: 0 14px;
+
+  align-items: center;
+  gap: 12px;
+
+  border-radius: 10px;
+  background: #ffffff;
+
+  box-sizing: border-box;
+}
+
+.search-bar:focus-within {
+  outline: 2px solid var(--activado, #ae77ff);
+}
+
+.search-bar__input {
+  flex: 1;
+  min-width: 0;
+
+  border: none;
+  background: transparent;
+
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 13px;
+
+  outline: none;
+}
+
+.search-bar__input::placeholder {
+  color: var(--desctivado, #66557e);
+}

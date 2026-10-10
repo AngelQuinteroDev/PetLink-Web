@@ -2,15 +2,10 @@ import { useState } from "react";
 import LoginScreen from "./assets/components/LoginScreen.jsx";
 import RegisterScreen from "./assets/components/RegisterScreen.jsx";
 import NavBar from "./assets/components/NavBar.jsx";
-import PetCard from "./assets/components/PetCard.jsx";
-import VetCard from "./assets/components/VetCard.jsx";
-import AlertNotification from "./assets/components/AlertNotification.jsx";
-import ForumPost from "./assets/components/ForumPost.jsx";
+import HomePage from "./assets/components/HomePage.jsx";
+import MapPage from "./assets/components/MapPage.jsx";
 import CircleIconButton from "./assets/components/CircleIconButton.jsx";
-import PillButton from "./assets/components/PillButton.jsx";
 import NotificationsPage from "./assets/components/NotificationsPage.jsx";
-import MapFilterTabs from "./assets/components/MapFilterTabs.jsx";
-import MapView from "./assets/components/MapView.jsx";
 import ProfileCard from "./assets/components/ProfileCard.jsx";
 import ProfileStats from "./assets/components/ProfileStats.jsx";
 import MyPetsSection from "./assets/components/MyPetsSection.jsx";
@@ -19,11 +14,18 @@ import ReportModal from "./assets/components/ReportModal.jsx";
 import SettingsPage from "./assets/components/SettingsPage.jsx";
 import AddPetPage from "./assets/components/AddPetPage.jsx";
 import ChangeEmailPage from "./assets/components/ChangeEmailPage.jsx";
+import ChangePasswordPage from "./assets/components/ChangePasswordPage.jsx";
 import ReportLostPage from "./assets/components/ReportLostPage.jsx";
 import ReportFoundPage from "./assets/components/ReportFoundPage.jsx";
+import CommunityPage from "./assets/components/CommunityPage.jsx";
+import PetListPage from "./assets/components/PetListPage.jsx";
+import HelpPage from "./assets/components/HelpPage.jsx";
+import PetDetailModal from "./assets/components/PetDetailModal.jsx";
+import PhotoPickerModal from "./assets/components/PhotoPickerModal.jsx";
+import CityPickerModal from "./assets/components/CityPickerModal.jsx";
+import ConfirmModal from "./assets/components/ConfirmModal.jsx";
+import PawBackground from "./assets/components/PawBackground.jsx";
 import backIcon from "./assets/svg/Back.svg";
-import bellIcon from "./assets/svg/bell.svg";
-import verTodoIcon from "./assets/svg/Ver_todo.svg";
 import "./App.css";
 
 const SettingsIcon = () => (
@@ -39,11 +41,58 @@ const SettingsIcon = () => (
   </svg>
 );
 
-// Mascotas del usuario (compartidas entre Perfil y Reportar mascota)
+const sample = (id, species, status) => ({
+  id,
+  name: "Nombre",
+  species,
+  status,
+  location: "Parque Usaquén · hoy",
+  breed: "Mestizo",
+  age: "2 años",
+  sex: "Macho",
+  size: "Mediano",
+  color: "Gris",
+  marks:
+    "Pecho y patas blancas, ojos verdes. Tiene una pequeña mancha oscura en la nariz y una marca en la oreja izquierda.",
+});
+
 const MY_PETS = [
-  { id: 1, name: "Mati", species: "Perro", location: "Parque Usaquén · hoy" },
-  { id: 2, name: "Luna", species: "Gato", location: "Parque Usaquén · hoy" },
+  { ...sample(1, "Perro", "Perro"), name: "Mati" },
+  { ...sample(2, "Gato", "Gato"), name: "Luna" },
 ];
+
+const SPECIES_CYCLE = ["Perro", "Gato"];
+
+const makeList = (n, status) =>
+  Array.from({ length: n }, (_, i) => {
+    const species = SPECIES_CYCLE[i % 2];
+    return sample(i + 1, species, status ?? species);
+  });
+
+const ADOPTION_PETS = makeList(6);
+const FOUND_PETS = makeList(6);
+const NEAR_PETS = makeList(6, "Perdido");
+
+const CONFIRMS = {
+  logout: {
+    title: "¿Estás seguro que quieres cerrar sesión?",
+    description:
+      "Tu cuenta quedará desconectada y tendrás que iniciar sesión nuevamente para volver a acceder a PetClue.",
+    confirmLabel: "Sí, cerrar sesión",
+  },
+  deactivate: {
+    title: "¿Estás seguro que quieres desactivar tu cuenta?",
+    description:
+      "Tu cuenta quedará desactivada temporalmente. Tu perfil y tu información permanecerán guardados, y podrás volver a activar tu cuenta cuando decidas regresar a PetClue.",
+    confirmLabel: "Sí, desactivar cuenta",
+  },
+  delete: {
+    title: "¿Estás seguro que quieres eliminar tu cuenta?",
+    description:
+      "Esta acción es permanente y no podrás recuperar tu cuenta una vez eliminada. Se eliminarán tu perfil y tus datos asociados según nuestra política de privacidad.",
+    confirmLabel: "Sí, eliminar cuenta",
+  },
+};
 
 function App() {
   const [view, setView] = useState("login");
@@ -54,26 +103,61 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAddPet, setShowAddPet] = useState(false);
   const [showChangeEmail, setShowChangeEmail] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const [showReportLost, setShowReportLost] = useState(false);
   const [showReportFound, setShowReportFound] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [listPage, setListPage] = useState(null);
+
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [profilePhotoOpen, setProfilePhotoOpen] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+
+  const [city, setCity] = useState("Bogotá");
+  const [cityPickerOpen, setCityPickerOpen] = useState(false);
+
+  const [confirmAction, setConfirmAction] = useState(null); // "logout" | "deactivate" | "delete" | null
 
   const handleLoginSuccess = (email) => {
     setUserEmail(email);
     setView("app");
   };
 
-  const handleCall = (name) => {
-    console.log(`Llamando a: ${name}`);
-  };
-
+  const handleCall = (name) => console.log(`Llamando a: ${name}`);
   const goHome = () => setActiveTab("home");
   const openNotifications = () => setShowNotifications(true);
 
   const userName = userEmail.split("@")[0] || "usuario";
 
-  /* ============================
-     LOGIN / REGISTRO
-  ============================ */
+  const sharedModals = (
+    <>
+      <PetDetailModal
+        pet={selectedPet}
+        onClose={() => setSelectedPet(null)}
+        onContact={(pet) => console.log("Contactar dueño de:", pet.name)}
+      />
+      <PhotoPickerModal
+        open={profilePhotoOpen}
+        onClose={() => setProfilePhotoOpen(false)}
+        onFile={(file) => setProfilePhoto(URL.createObjectURL(file))}
+      />
+    </>
+  );
+
+  const confirmModal = (
+    <ConfirmModal
+      open={Boolean(confirmAction)}
+      {...(CONFIRMS[confirmAction] ?? {})}
+      onClose={() => setConfirmAction(null)}
+      onConfirm={() => {
+        setConfirmAction(null);
+        setShowSettings(false);
+        setActiveTab("home");
+        setView("login");
+      }}
+    />
+  );
+
   if (view === "login") {
     return (
       <LoginScreen
@@ -93,25 +177,19 @@ function App() {
     );
   }
 
-  /* ============================
-     NOTIFICACIONES
-  ============================ */
+  /* NOTIFICACIONES */
   if (showNotifications) {
     return (
       <div className="phone-frame">
         <main className="app">
+          <PawBackground />
           <NotificationsPage onBack={() => setShowNotifications(false)} />
-
           <NavBar
             active={activeTab}
             onNavigate={(id) => {
-              if (id === "report") {
-                setShowNotifications(false);
-                setShowReportModal(true);
-              } else {
-                setActiveTab(id);
-                setShowNotifications(false);
-              }
+              setShowNotifications(false);
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
             }}
           />
         </main>
@@ -119,13 +197,64 @@ function App() {
     );
   }
 
-  /* ============================
-     REPORTAR MASCOTA PERDIDA
-  ============================ */
+  /* EN ADOPCIÓN / ENCONTRADOS */
+  if (listPage) {
+    const isAdoption = listPage === "adoption";
+
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <PawBackground />
+          <PetListPage
+            title={isAdoption ? "En adopción" : "Encontrados"}
+            pets={isAdoption ? ADOPTION_PETS : FOUND_PETS}
+            onBack={() => setListPage(null)}
+            onNotifications={() => {
+              setListPage(null);
+              setShowNotifications(true);
+            }}
+            onPetClick={setSelectedPet}
+          />
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setListPage(null);
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
+            }}
+          />
+          {sharedModals}
+        </main>
+      </div>
+    );
+  }
+
+  /* AYUDA */
+  if (showHelp) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <PawBackground />
+          <HelpPage onBack={() => setShowHelp(false)} />
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setShowHelp(false);
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* REPORTAR PERDIDA */
   if (showReportLost) {
     return (
       <div className="phone-frame">
         <main className="app">
+          <PawBackground />
           <ReportLostPage
             pets={MY_PETS}
             onBack={() => setShowReportLost(false)}
@@ -144,16 +273,12 @@ function App() {
               setActiveTab("home");
             }}
           />
-
           <NavBar
             active={activeTab}
             onNavigate={(id) => {
               setShowReportLost(false);
-              if (id === "report") {
-                setShowReportModal(true);
-              } else {
-                setActiveTab(id);
-              }
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
             }}
           />
         </main>
@@ -161,13 +286,12 @@ function App() {
     );
   }
 
-  /* ============================
-     ENCONTRÉ MASCOTA
-  ============================ */
+  /* ENCONTRÉ MASCOTA */
   if (showReportFound) {
     return (
       <div className="phone-frame">
         <main className="app">
+          <PawBackground />
           <ReportFoundPage
             onBack={() => setShowReportFound(false)}
             onNotifications={() => {
@@ -180,16 +304,12 @@ function App() {
               setActiveTab("home");
             }}
           />
-
           <NavBar
             active={activeTab}
             onNavigate={(id) => {
               setShowReportFound(false);
-              if (id === "report") {
-                setShowReportModal(true);
-              } else {
-                setActiveTab(id);
-              }
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
             }}
           />
         </main>
@@ -197,13 +317,42 @@ function App() {
     );
   }
 
-  /* ============================
-     CAMBIAR CORREO
-  ============================ */
+  /* CAMBIAR CONTRASEÑA */
+  if (showChangePassword) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <PawBackground />
+          <ChangePasswordPage
+            onBack={() => {
+              setShowChangePassword(false);
+              setShowSettings(true);
+            }}
+            onSubmit={() => {
+              console.log("Contraseña actualizada");
+              setShowChangePassword(false);
+              setShowSettings(true);
+            }}
+          />
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setShowChangePassword(false);
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* CAMBIAR CORREO */
   if (showChangeEmail) {
     return (
       <div className="phone-frame">
         <main className="app">
+          <PawBackground />
           <ChangeEmailPage
             currentEmail={userEmail || "pepito.perez@gmail.com"}
             verified
@@ -217,16 +366,12 @@ function App() {
               setShowSettings(true);
             }}
           />
-
           <NavBar
             active={activeTab}
             onNavigate={(id) => {
               setShowChangeEmail(false);
-              if (id === "report") {
-                setShowReportModal(true);
-              } else {
-                setActiveTab(id);
-              }
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
             }}
           />
         </main>
@@ -234,13 +379,12 @@ function App() {
     );
   }
 
-  /* ============================
-     AJUSTES
-  ============================ */
+  /* AJUSTES */
   if (showSettings) {
     return (
       <div className="phone-frame">
         <main className="app">
+          <PawBackground />
           <SettingsPage
             onBack={() => setShowSettings(false)}
             onNotifications={() => {
@@ -251,31 +395,45 @@ function App() {
               setShowSettings(false);
               setShowChangeEmail(true);
             }}
+            onChangePassword={() => {
+              setShowSettings(false);
+              setShowChangePassword(true);
+            }}
+            onHelp={() => {
+              setShowSettings(false);
+              setShowHelp(true);
+            }}
+            city={city}
+            onCityClick={() => setCityPickerOpen(true)}
+            onDeactivate={() => setConfirmAction("deactivate")}
+            onDelete={() => setConfirmAction("delete")}
           />
-
           <NavBar
             active={activeTab}
             onNavigate={(id) => {
               setShowSettings(false);
-              if (id === "report") {
-                setShowReportModal(true);
-              } else {
-                setActiveTab(id);
-              }
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
             }}
           />
+          <CityPickerModal
+            open={cityPickerOpen}
+            value={city}
+            onClose={() => setCityPickerOpen(false)}
+            onSelect={setCity}
+          />
+          {confirmModal}
         </main>
       </div>
     );
   }
 
-  /* ============================
-     INSCRIBIR MASCOTA
-  ============================ */
+  /* INSCRIBIR MASCOTA */
   if (showAddPet) {
     return (
       <div className="phone-frame">
         <main className="app">
+          <PawBackground />
           <AddPetPage
             onBack={() => setShowAddPet(false)}
             onNotifications={() => {
@@ -287,16 +445,12 @@ function App() {
               setShowAddPet(false);
             }}
           />
-
           <NavBar
             active={activeTab}
             onNavigate={(id) => {
               setShowAddPet(false);
-              if (id === "report") {
-                setShowReportModal(true);
-              } else {
-                setActiveTab(id);
-              }
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
             }}
           />
         </main>
@@ -304,179 +458,58 @@ function App() {
     );
   }
 
-  /* ============================
-     APP PRINCIPAL
-  ============================ */
+  /* APP PRINCIPAL */
   return (
     <div className="phone-frame">
       <main className="app">
+        <PawBackground />
 
         {/* INICIO */}
         {activeTab === "home" && (
-          <>
-            <header className="home-header">
-              <div>
-                <p className="home-greeting">Hola, {userName}</p>
-                <h1 className="home-title">Tu comunidad</h1>
-              </div>
-
-              <CircleIconButton
-                icon={bellIcon}
-                iconAlt="Notificaciones"
-                ariaLabel="Notificaciones"
-                onClick={openNotifications}
-              />
-            </header>
-
-            <section className="home-section">
-              <AlertNotification
-                title="Alerta cerca de ti"
-                description="Se reportó un perrito perdido a 800 m de tu ubicación, en el Parque de Usaquén"
-                onViewDetail={() => console.log("Ver detalle")}
-                onNotMyArea={() => console.log("No es mi zona")}
-              />
-            </section>
-
-            <section className="home-section">
-              <div className="home-section__header">
-                <h2 className="home-section__title">Cerca de ti</h2>
-                <PillButton
-                  icon={verTodoIcon}
-                  iconAlt="Ver todo"
-                  label="Ver todo"
-                  onClick={() => console.log("Ver todo: Cerca de ti")}
-                />
-              </div>
-
-              <div className="cards-container">
-                <PetCard status="Perdido" name="Nombre" location="Parque Usaquén · hoy" />
-                <PetCard status="Perdido" name="Nombre" location="Parque Usaquén · hoy" />
-              </div>
-            </section>
-
-            <section className="home-section">
-              <div className="home-section__header">
-                <h2 className="home-section__title">De la comunidad</h2>
-                <PillButton
-                  icon={verTodoIcon}
-                  iconAlt="Ver todo"
-                  label="Ver todo"
-                  onClick={() => console.log("Ver todo: De la comunidad")}
-                />
-              </div>
-
-              <ForumPost
-                userName="Usuario"
-                timeAgo="hace 2 horas"
-                category="Pregunta"
-                question="¿Alguien sabe qué puedo darle a mi perrita, tiene mucha comezón?"
-                likes={12}
-                replies={8}
-              />
-            </section>
-
-            <section className="home-section">
-              <div className="home-section__header">
-                <h2 className="home-section__title">En adopción</h2>
-                <PillButton
-                  icon={verTodoIcon}
-                  iconAlt="Ver todo"
-                  label="Ver todo"
-                  onClick={() => console.log("Ver todo: En adopción")}
-                />
-              </div>
-
-              <div className="cards-container">
-                <PetCard status="Adopción" name="Nombre" location="Parque Usaquén · hoy" />
-                <PetCard status="Adopción" name="Nombre" location="Parque Usaquén · hoy" />
-              </div>
-            </section>
-          </>
+          <HomePage
+            userName={userName}
+            nearPets={NEAR_PETS}
+            adoptionPets={ADOPTION_PETS}
+            foundPets={FOUND_PETS}
+            onNotifications={openNotifications}
+            onLost={() => setShowReportLost(true)}
+            onFound={() => setShowReportFound(true)}
+            onPetClick={setSelectedPet}
+            onSeeAllNear={() => setActiveTab("map")}
+            onSeeAllCommunity={() => setActiveTab("community")}
+            onSeeAllAdoption={() => setListPage("adoption")}
+            onSeeAllFound={() => setListPage("found")}
+          />
         )}
 
         {/* MAPA */}
         {activeTab === "map" && (
-          <>
-            <header className="page-header">
-              <CircleIconButton
-                icon={backIcon}
-                iconAlt="Volver"
-                ariaLabel="Volver"
-                onClick={goHome}
-              />
-              <h1 className="page-header__title">Mapa</h1>
-              <CircleIconButton
-                icon={bellIcon}
-                iconAlt="Notificaciones"
-                ariaLabel="Notificaciones"
-                onClick={openNotifications}
-              />
-            </header>
-
-            <MapFilterTabs
-              onChange={(filter) => console.log("Filtro seleccionado:", filter)}
-            />
-
-            <MapView />
-
-            <section className="home-section">
-              <div className="home-section__header">
-                <h2 className="home-section__title">Cerca de ti</h2>
-              </div>
-
-              <div className="vets-container">
-                <VetCard name="Toby · Perdido" info="Parque de Usaquén · 1.2 km" badge="HOY" />
-                <VetCard name="Lola · Perdido" info="Parque de Usaquén · 1.2 km" badge="HOY" />
-                <VetCard
-                  name="Veterinaria Laika"
-                  info="Abierto 24 horas · 1.2 km"
-                  onCall={() => handleCall("Veterinaria Laika")}
-                />
-                <VetCard
-                  name="Clínica Veterinaria San Roque"
-                  info="Cierra a las 8pm · 2.4 km"
-                  onCall={() => handleCall("Clínica Veterinaria San Roque")}
-                />
-              </div>
-            </section>
-          </>
+          <MapPage
+            onBack={goHome}
+            onNotifications={openNotifications}
+            onFilter={(filter) => {
+              if (filter === "Encontradas") setListPage("found");
+              else console.log("Filtro seleccionado:", filter);
+            }}
+            onCall={handleCall}
+          />
         )}
 
         {/* COMUNIDAD */}
         {activeTab === "community" && (
-          <>
-            <header className="page-header">
-              <CircleIconButton
-                icon={backIcon}
-                iconAlt="Volver"
-                ariaLabel="Volver"
-                onClick={goHome}
-              />
-              <h1 className="page-header__title">Comunidad</h1>
-              <CircleIconButton
-                icon={bellIcon}
-                iconAlt="Notificaciones"
-                ariaLabel="Notificaciones"
-                onClick={openNotifications}
-              />
-            </header>
-
-            <section className="placeholder-section">
-              <p>Sección de comunidad próximamente 🚧</p>
-            </section>
-          </>
+          <CommunityPage
+            onBack={goHome}
+            onNotifications={openNotifications}
+            onShare={() => console.log("Crear publicación")}
+            onPostClick={(post) => console.log("Ver publicación:", post)}
+          />
         )}
 
         {/* PERFIL */}
         {activeTab === "profile" && (
           <>
             <header className="page-header">
-              <CircleIconButton
-                icon={backIcon}
-                iconAlt="Volver"
-                ariaLabel="Volver"
-                onClick={goHome}
-              />
+              <CircleIconButton icon={backIcon} iconAlt="Volver" ariaLabel="Volver" onClick={goHome} />
               <h1 className="page-header__title">Mi perfil</h1>
 
               <button
@@ -497,7 +530,8 @@ function App() {
                 name="Angely Parra"
                 location="Engativá, Bogotá"
                 memberLabel="Miembro"
-                onEditPhoto={() => console.log("Editar foto")}
+                photoUrl={profilePhoto}
+                onEditPhoto={() => setProfilePhotoOpen(true)}
               />
             </section>
 
@@ -509,17 +543,17 @@ function App() {
               <MyPetsSection
                 pets={MY_PETS}
                 onEnroll={() => setShowAddPet(true)}
-                onPetClick={(pet) => console.log("Ver mascota:", pet)}
+                onPetClick={setSelectedPet}
               />
             </section>
 
             <AccountSection
               onOptionClick={(id) => {
-                if (id === "logout") {
-                  setView("login");
-                } else {
-                  console.log("Opción seleccionada:", id);
-                }
+                if (id === "logout") setConfirmAction("logout");
+                else if (id === "help") setShowHelp(true);
+                else if (id === "notifications") setShowNotifications(true);
+                else if (id === "edit") setShowChangeEmail(true);
+                else console.log("Opción seleccionada:", id);
               }}
             />
           </>
@@ -531,11 +565,9 @@ function App() {
           onClose={() => setShowReportModal(false)}
           onSelectOption={(optionId) => {
             setShowReportModal(false);
-            if (optionId === "lost") {
-              setShowReportLost(true);
-            } else if (optionId === "found") {
-              setShowReportFound(true);
-            }
+            if (optionId === "lost") setShowReportLost(true);
+            else if (optionId === "found") setShowReportFound(true);
+            else if (optionId === "adoption") console.log("Dar en adopción");
           }}
           onCommunityPost={() => {
             setShowReportModal(false);
@@ -543,17 +575,16 @@ function App() {
           }}
         />
 
+        {sharedModals}
+        {confirmModal}
+
         <NavBar
           active={activeTab}
           onNavigate={(id) => {
-            if (id === "report") {
-              setShowReportModal(true);
-            } else {
-              setActiveTab(id);
-            }
+            if (id === "report") setShowReportModal(true);
+            else setActiveTab(id);
           }}
         />
-
       </main>
     </div>
   );

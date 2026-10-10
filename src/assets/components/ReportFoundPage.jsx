@@ -3,6 +3,7 @@ import AppHeader from "./AppHeader.jsx";
 import ChipGroup from "./ChipGroup.jsx";
 import IconInputField from "./IconInputField.jsx";
 import TextInputField from "./TextInputField.jsx";
+import PhotoPickerModal from "./PhotoPickerModal.jsx";
 import backIcon from "../svg/Back.svg";
 import bellIcon from "../svg/bell.svg";
 import editIcon from "../svg/edit_icono.svg";
@@ -57,6 +58,7 @@ const MAX_PHOTOS = 3;
 
 function ReportFoundPage({ onBack, onNotifications, onSubmit }) {
   const [mainPhoto, setMainPhoto] = useState(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [species, setSpecies] = useState("Perro");
   const [place, setPlace] = useState("");
   const [breed, setBreed] = useState("");
@@ -67,12 +69,6 @@ function ReportFoundPage({ onBack, onNotifications, onSubmit }) {
   const [photos, setPhotos] = useState([]);
 
   const canSubmit = place.trim() !== "";
-
-  const pickMainPhoto = (e) => {
-    const file = e.target.files?.[0];
-    if (file) setMainPhoto(URL.createObjectURL(file));
-    e.target.value = "";
-  };
 
   const addPhoto = (e) => {
     const file = e.target.files?.[0];
@@ -110,14 +106,17 @@ function ReportFoundPage({ onBack, onNotifications, onSubmit }) {
           }
         }}
       >
-        {/* Foto principal */}
         <div className="found__photo-block">
           <div className="found__photo">
             {mainPhoto && <img src={mainPhoto} alt="" />}
-            <label className="found__photo-edit" aria-label="Agregar foto">
+            <button
+              type="button"
+              className="found__photo-edit"
+              aria-label="Agregar foto"
+              onClick={() => setPickerOpen(true)}
+            >
               <img src={editIcon} alt="" />
-              <input type="file" accept="image/*" onChange={pickMainPhoto} hidden />
-            </label>
+            </button>
           </div>
           <p className="found__photo-hint">Agrega una foto clara de la mascota</p>
         </div>
@@ -192,6 +191,12 @@ function ReportFoundPage({ onBack, onNotifications, onSubmit }) {
           Cancelar
         </button>
       </form>
+
+      <PhotoPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onFile={(file) => setMainPhoto(URL.createObjectURL(file))}
+      />
     </>
   );
 }

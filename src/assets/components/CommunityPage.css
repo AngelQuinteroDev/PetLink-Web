@@ -1,0 +1,38 @@
+.community {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+/* La franja de filtros trae su propio padding lateral */
+.community .map-filters {
+  margin: 0 -16px;
+}
+
+.community__list {
+  display: flex;
+
+  flex-direction: column;
+  align-items: center;
+
+  gap: 18px;
+
+  margin-top: 6px;
+}
+
+.community .forum-post {
+  box-shadow: 0 4px 4px 0 rgba(148, 132, 191, 0.42);
+}
+
+.community__empty {
+  margin: 20px 0;
+
+  color: var(--desctivado, #66557e);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}

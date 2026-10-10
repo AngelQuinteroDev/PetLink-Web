@@ -36,7 +36,8 @@ const MapIcon = ({ active }) => (
   </svg>
 );
 
-const ReportIcon = ({ active }) => (
+// Reportar: siempre morado (activo), sin importar la pestaña
+const ReportIcon = () => (
   <svg
     width="26"
     height="26"
@@ -44,7 +45,7 @@ const ReportIcon = ({ active }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle cx="12" cy="12" r="10" fill={active ? "#AE77FF" : "#66557E"} />
+    <circle cx="12" cy="12" r="10" fill="#AE77FF" />
     <path d="M12 7V17" stroke="white" strokeWidth="2" strokeLinecap="round" />
     <path d="M7 12H17" stroke="white" strokeWidth="2" strokeLinecap="round" />
   </svg>
@@ -109,7 +110,9 @@ function NavBar({ active = "home", onNavigate }) {
         return (
           <button
             key={item.id}
-            className={`nav-item ${isActive ? "active" : ""}`}
+            className={`nav-item ${isActive ? "active" : ""} ${
+              item.id === "report" ? "nav-item--always-active" : ""
+            }`}
             onClick={() => onNavigate?.(item.id)}
             type="button"
           >

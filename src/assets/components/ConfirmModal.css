@@ -1,0 +1,141 @@
+.confirm-modal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.4);
+
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+
+.confirm-modal__card {
+  position: relative;
+
+  display: flex;
+
+  width: 100%;
+  max-width: 360px;
+
+  padding: 18px 22px 22px;
+
+  flex-direction: column;
+  align-items: center;
+
+  border-radius: 30px;
+  background: #ffffff;
+
+  overflow: hidden;
+  box-sizing: border-box;
+
+  animation: confirm-modal-pop 0.2s ease-out;
+}
+
+@keyframes confirm-modal-pop {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* El contenido va por encima de las huellas */
+.confirm-modal__card > *:not(.paw-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+.confirm-modal__close {
+  position: absolute !important;
+  top: 12px;
+  right: 12px;
+
+  display: flex;
+
+  width: 38px;
+  height: 38px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e1d9ec;
+  border-radius: 50%;
+  background: #ede8ff;
+  box-shadow: 0 0 8px 2px rgba(189, 175, 239, 0.7);
+
+  cursor: pointer;
+}
+
+.confirm-modal__close:focus { outline: none; }
+.confirm-modal__close:active { transform: scale(0.92); }
+
+.confirm-modal__image {
+  display: block;
+
+  width: min(250px, 78%);
+  height: auto;
+
+  margin-top: 18px;
+}
+
+.confirm-modal__title {
+  margin: 14px 0 8px;
+
+  color: var(--titulos, #7519ff);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.confirm-modal__text {
+  margin: 0 0 16px;
+
+  color: var(--desctivado, #66557e);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.confirm-modal__confirm,
+.confirm-modal__cancel {
+  width: 100%;
+  height: 42px;
+
+  border-radius: 10px;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.confirm-modal__confirm {
+  border: none;
+  background: var(--activado, #ae77ff);
+  color: #ffffff;
+}
+
+.confirm-modal__cancel {
+  margin-top: 10px;
+
+  border: 1px solid var(--activado, #ae77ff);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--activado, #ae77ff);
+}
+
+.confirm-modal__confirm:focus,
+.confirm-modal__cancel:focus { outline: none; }
+
+.confirm-modal__confirm:active,
+.confirm-modal__cancel:active { transform: scale(0.98); }

@@ -1,0 +1,50 @@
+/* Franja de filtros a todo el ancho */
+.map-page__filters {
+  margin: 0 calc(var(--app-pad-x) * -1);
+  padding: 5px 0 4px 0;
+}
+
+.map-page__filters .map-filters {
+  padding: 10px var(--app-pad-x);
+}
+
+/* Mapa de borde a borde */
+.app .map-view {
+  margin: 0 calc(var(--app-pad-x) * -1);
+  padding: 0;
+}
+
+.app .map-view__canvas {
+  width: 100%;
+  max-width: none;
+
+  aspect-ratio: auto;
+  height: 277px;
+
+  border-radius: 0;
+}
+
+.map-page__nearby {
+  margin-top: 14px;
+}
+
+.map-page__title {
+  margin: 0 0 14px;
+
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: clamp(18px, 5vw, 22px);
+  font-weight: 700;
+}
+
+.map-page__list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 21px;
+}
+
+.map-page__list .vet-card {
+  max-width: none;
+}

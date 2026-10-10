@@ -2,6 +2,7 @@ import { useState } from "react";
 import AppHeader from "./AppHeader.jsx";
 import ChipGroup from "./ChipGroup.jsx";
 import TextInputField from "./TextInputField.jsx";
+import PhotoPickerModal from "./PhotoPickerModal.jsx";
 import backIcon from "../svg/Back.svg";
 import bellIcon from "../svg/bell.svg";
 import editIcon from "../svg/edit_icono.svg";
@@ -9,7 +10,6 @@ import dogIcon from "../svg/Inscribir/perro.svg";
 import catIcon from "../svg/Inscribir/gato.svg";
 import "./AddPetPage.css";
 
-// Corazón para "Otro" (no hay SVG exportado)
 const HeartIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -30,6 +30,8 @@ const SEX = ["Macho", "Hembra"];
 const SIZES = ["Pequeño", "Mediano", "Grande"];
 
 function AddPetPage({ onBack, onNotifications, onSave }) {
+  const [photo, setPhoto] = useState(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [form, setForm] = useState({
     species: "Perro",
     name: "",
@@ -57,12 +59,18 @@ function AddPetPage({ onBack, onNotifications, onSave }) {
         className="add-pet"
         onSubmit={(e) => {
           e.preventDefault();
-          onSave?.(form);
+          onSave?.({ ...form, photoUrl: photo });
         }}
       >
         <div className="add-pet__photo-block">
           <div className="add-pet__photo">
-            <button type="button" className="add-pet__photo-edit" aria-label="Agregar foto">
+            {photo && <img src={photo} alt="" />}
+            <button
+              type="button"
+              className="add-pet__photo-edit"
+              aria-label="Agregar foto"
+              onClick={() => setPickerOpen(true)}
+            >
               <img src={editIcon} alt="" />
             </button>
           </div>
@@ -105,6 +113,12 @@ function AddPetPage({ onBack, onNotifications, onSave }) {
           Cancelar
         </button>
       </form>
+
+      <PhotoPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onFile={(file) => setPhoto(URL.createObjectURL(file))}
+      />
     </>
   );
 }

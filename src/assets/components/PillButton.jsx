@@ -2,21 +2,24 @@ import "./PillButton.css";
 
 function PillButton({
   icon,
-  iconAlt = "",
   label = "Ver todo",
+  variant = "light", // "light" | "dark"
   onClick,
 }) {
   return (
     <button
       type="button"
-      className="pill-button"
+      className={`pill-button pill-button--${variant}`}
       onClick={onClick}
     >
       {icon && (
-        <img
-          src={icon}
-          alt={iconAlt}
+        <span
           className="pill-button__icon"
+          aria-hidden="true"
+          style={{
+            WebkitMaskImage: `url("${icon}")`,
+            maskImage: `url("${icon}")`,
+          }}
         />
       )}
       <span className="pill-button__label">{label}</span>

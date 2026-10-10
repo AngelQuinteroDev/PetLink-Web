@@ -19,8 +19,6 @@ import eliminarIcon from "../svg/Ajustes/Eliminar.svg";
 
 import "./SettingsPage.css";
 
-/* ===== Íconos que aún no tienen SVG exportado ===== */
-
 const InfoCircleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="12" r="9" stroke="var(--titulos, #7519FF)" strokeWidth="2" />
@@ -34,8 +32,6 @@ const ChevronIcon = () => (
     <path d="M1 1L6 5.03448L1 10" stroke="#66557E" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
-
-/* ===== Fila reutilizable ===== */
 
 function SettingsRow({ icon, label, sublabel, value, danger, right, onClick }) {
   const Wrapper = onClick ? "button" : "div";
@@ -71,7 +67,17 @@ function SettingsRow({ icon, label, sublabel, value, danger, right, onClick }) {
 
 const DISTANCES = ["500 m", "1 Km", "3 Km", "5 Km"];
 
-function SettingsPage({ onBack, onNotifications, onChangeEmail }) {
+function SettingsPage({
+  onBack,
+  onNotifications,
+  onChangeEmail,
+  onChangePassword,
+  onHelp,
+  city = "Bogotá",
+  onCityClick,
+  onDeactivate,
+  onDelete,
+}) {
   const [petAlerts, setPetAlerts] = useState(true);
   const [distance, setDistance] = useState("1 Km");
   const [postReplies, setPostReplies] = useState(true);
@@ -91,8 +97,8 @@ function SettingsPage({ onBack, onNotifications, onChangeEmail }) {
         <h2 className="settings-section__title">Cuenta</h2>
         <div className="settings-card">
           <SettingsRow icon={correoIcon} label="Correo electrónico" onClick={onChangeEmail} />
-          <SettingsRow icon={privacidadIcon} label="Cambiar contraseña" onClick={() => console.log("Contraseña")} />
-          <SettingsRow icon={ayudaIcon} label="Ayuda y soporte" onClick={() => console.log("Ayuda")} />
+          <SettingsRow icon={privacidadIcon} label="Cambiar contraseña" onClick={onChangePassword} />
+          <SettingsRow icon={ayudaIcon} label="Ayuda y soporte" onClick={onHelp} />
         </div>
       </section>
 
@@ -147,12 +153,7 @@ function SettingsPage({ onBack, onNotifications, onChangeEmail }) {
             value="Comunidad"
             onClick={() => console.log("Quién ve mi perfil")}
           />
-          <SettingsRow
-            icon={ciudadIcon}
-            label="Ciudad por defecto"
-            value="Bogotá"
-            onClick={() => console.log("Ciudad por defecto")}
-          />
+          <SettingsRow icon={ciudadIcon} label="Ciudad por defecto" value={city} onClick={onCityClick} />
           <SettingsRow
             icon={ubicacionExtraIcon}
             label="Ubicación exacta"
@@ -176,18 +177,8 @@ function SettingsPage({ onBack, onNotifications, onChangeEmail }) {
       <section className="settings-section">
         <h2 className="settings-section__title">Zona de riesgo</h2>
         <div className="settings-card">
-          <SettingsRow
-            icon={desCuentaIcon}
-            label="Desactivar cuenta temporalmente"
-            danger
-            onClick={() => console.log("Desactivar cuenta")}
-          />
-          <SettingsRow
-            icon={eliminarIcon}
-            label="Eliminar cuenta"
-            danger
-            onClick={() => console.log("Eliminar cuenta")}
-          />
+          <SettingsRow icon={desCuentaIcon} label="Desactivar cuenta temporalmente" danger onClick={onDeactivate} />
+          <SettingsRow icon={eliminarIcon} label="Eliminar cuenta" danger onClick={onDelete} />
         </div>
       </section>
     </>

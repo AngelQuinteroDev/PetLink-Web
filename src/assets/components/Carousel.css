@@ -1,0 +1,32 @@
+.carousel {
+  display: flex;
+
+  gap: 14px;
+
+  /* Toca los bordes de la pantalla */
+  margin: 0 calc(var(--app-pad-x) * -1);
+  padding: 4px var(--app-pad-x) 14px;
+
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--app-pad-x);
+
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel > * {
+  flex: 0 0 calc(50% - 22px);
+  min-width: 140px;
+
+  scroll-snap-align: start;
+}
+
+.carousel .pet-card {
+  width: 100%;
+  max-width: none;
+}

@@ -31,17 +31,35 @@
 .report-lost__row {
   display: grid;
 
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 
-  gap: 14px;
+  gap: 10px;
+}
+
+.report-lost__row .icon-input-field,
+.report-lost__row .icon-input-field__box {
+  min-width: 0;
 }
 
 .report-lost__row .icon-input-field__label {
-  font-size: 16px;
+  font-size: clamp(14px, 4.4vw, 16px);
+}
+
+.report-lost__row .icon-input-field__box {
+  padding: 0 8px;
+  gap: 6px;
 }
 
 .report-lost__row .icon-input-field__input {
+  width: 100%;
+  min-width: 0;
+
   font-size: 12px;
+}
+
+/* El ícono de calendario/reloj nativo sobra: ya hay uno propio */
+.report-lost__row input::-webkit-calendar-picker-indicator {
+  display: none;
 }
 
 /* Lugar */

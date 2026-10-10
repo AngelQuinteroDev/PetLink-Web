@@ -1,27 +1,20 @@
+import PawBackground from "./PawBackground.jsx";
 import pawIcon from "../svg/Report/huella.svg";
 import heartIcon from "../svg/Report/corazon.svg";
 import commentIcon from "../svg/Report/coment.svg";
+import useLockBodyScroll from "../../hooks/useLockBodyScroll.js";
+import starIcon from "../svg/Report/Star_R.svg";
 import "./ReportModal.css";
 
 const CloseIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M18 6L6 18M6 6L18 18"
-      stroke="var(--titulos, #7519FF)"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-    />
+    <path d="M18 6L6 18M6 6L18 18" stroke="var(--titulos, #7519FF)" strokeWidth="2.5" strokeLinecap="round" />
   </svg>
 );
 
 const ChevronIcon = () => (
   <svg width="8" height="14" viewBox="0 0 8 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M1 1L6 5.03448L1 10"
-      stroke="#66557E"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M1 1L6 5.03448L1 10" stroke="#66557E" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
@@ -40,17 +33,25 @@ const OPTIONS = [
     description: "Reporta una mascota perdida que encontraste en tu zona",
     theme: "found",
   },
+  {
+    id: "adoption",
+    icon: starIcon,
+    title: "Voy a dar en adopción",
+    description: "Publica la mascota que quieres dar en adopción",
+    theme: "adoption",
+  },
 ];
 
 function ReportModal({ open, onClose, onSelectOption, onCommunityPost }) {
+  useLockBodyScroll(open);
+  
   if (!open) return null;
 
   return (
     <div className="report-modal__overlay" onClick={onClose}>
-      <div
-        className="report-modal__sheet"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="report-modal__sheet" onClick={(e) => e.stopPropagation()}>
+        <PawBackground contained />
+
         <span className="report-modal__handle" />
 
         <div className="report-modal__header">
@@ -61,12 +62,7 @@ function ReportModal({ open, onClose, onSelectOption, onCommunityPost }) {
             </p>
           </div>
 
-          <button
-            type="button"
-            className="report-modal__close"
-            onClick={onClose}
-            aria-label="Cerrar"
-          >
+          <button type="button" className="report-modal__close" onClick={onClose} aria-label="Cerrar">
             <CloseIcon />
           </button>
         </div>
@@ -87,9 +83,7 @@ function ReportModal({ open, onClose, onSelectOption, onCommunityPost }) {
                 <span className={`report-modal__option-title report-modal__option-title--${option.theme}`}>
                   {option.title}
                 </span>
-                <span className="report-modal__option-description">
-                  {option.description}
-                </span>
+                <span className="report-modal__option-description">{option.description}</span>
               </span>
 
               <span className="report-modal__chevron">
@@ -99,15 +93,10 @@ function ReportModal({ open, onClose, onSelectOption, onCommunityPost }) {
           ))}
         </div>
 
-        <button
-          type="button"
-          className="report-modal__community"
-          onClick={onCommunityPost}
-        >
+        <button type="button" className="report-modal__community" onClick={onCommunityPost}>
           <img src={commentIcon} alt="" className="report-modal__community-icon" />
           Prefiero solo publicar en la comunidad
         </button>
-
       </div>
     </div>
   );
