@@ -1,0 +1,46 @@
+.paw-bg {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: -1;
+
+  width: 100%;
+  max-width: 480px;
+
+  transform: translateX(-50%);
+
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.paw-bg__paw {
+  position: absolute;
+
+  background-color: #66557e;
+  opacity: 0.22;
+
+  -webkit-mask-image: url("../../svg/Huella.svg");
+  mask-image: url("../../svg/Huella.svg");
+
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* Variante dentro de un contenedor (pop-ups) */
+.paw-bg--contained {
+  position: absolute;
+  inset: 0;
+
+  width: auto;
+  max-width: none;
+
+  transform: none;
+  z-index: 0;
+}
