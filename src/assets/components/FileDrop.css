@@ -1,0 +1,86 @@
+.file-drop-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-drop-field__label {
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.file-drop {
+  display: flex;
+
+  width: 100%;
+
+  padding: 18px 14px;
+
+  align-items: center;
+  gap: 14px;
+
+  border: 1.5px dashed var(--titulos, #7519ff);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.45);
+
+  text-align: left;
+  cursor: pointer;
+
+  box-sizing: border-box;
+}
+
+.file-drop:focus { outline: none; }
+.file-drop:active { transform: scale(0.99); }
+
+.file-drop__icon {
+  display: flex;
+
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #ede8ff;
+}
+
+.file-drop__icon img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.file-drop__text {
+  display: flex;
+
+  min-width: 0;
+
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file-drop__title {
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-drop__hint {
+  color: var(--desctivado, #66557e);
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+}

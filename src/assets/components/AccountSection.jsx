@@ -1,4 +1,5 @@
 import infoPersonalIcon from "../svg/Ajustes/info_personal.svg";
+import escudoIcon from "../svg/Ajustes/Escudo.svg";
 import notificacionIcon from "../svg/Ajustes/notificacion.svg";
 import privacidadIcon from "../svg/Ajustes/Privacidad.svg";
 import ayudaIcon from "../svg/Ajustes/Ayuda y soporte.svg";
@@ -7,42 +8,22 @@ import "./AccountSection.css";
 
 const ChevronIcon = () => (
   <svg width="8" height="11" viewBox="0 0 8 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M1 1L6 5.03448L1 10"
-      stroke="#66557E"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M1 1L6 5.03448L1 10" stroke="#66557E" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
 const OPTIONS = [
+  { id: "edit", icon: infoPersonalIcon, label: "Editar información personal" },
   {
-    id: "edit",
-    icon: infoPersonalIcon,
-    label: "Editar información personal",
+    id: "verification",
+    icon: escudoIcon,
+    label: "Solicitar verificación",
+    sublabel: "Para veterinarios y refugios",
   },
-  {
-    id: "notifications",
-    icon: notificacionIcon,
-    label: "Notificaciones",
-  },
-  {
-    id: "privacy",
-    icon: privacidadIcon,
-    label: "Privacidad",
-  },
-  {
-    id: "help",
-    icon: ayudaIcon,
-    label: "Ayuda y soporte",
-  },
-  {
-    id: "logout",
-    icon: cerrarSesionIcon,
-    label: "Cerrar sesión",
-    danger: true,
-  },
+  { id: "notifications", icon: notificacionIcon, label: "Notificaciones" },
+  { id: "privacy", icon: privacidadIcon, label: "Privacidad" },
+  { id: "help", icon: ayudaIcon, label: "Ayuda y soporte" },
+  { id: "logout", icon: cerrarSesionIcon, label: "Cerrar sesión", danger: true },
 ];
 
 function AccountSection({ onOptionClick }) {
@@ -63,7 +44,10 @@ function AccountSection({ onOptionClick }) {
                 <img src={option.icon} alt="" className="account__icon" />
               </span>
 
-              <span className="account__label">{option.label}</span>
+              <span className="account__text">
+                <span className="account__label">{option.label}</span>
+                {option.sublabel && <span className="account__sublabel">{option.sublabel}</span>}
+              </span>
             </span>
 
             <span className="account__chevron">

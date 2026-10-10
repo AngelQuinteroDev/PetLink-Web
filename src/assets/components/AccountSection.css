@@ -145,3 +145,18 @@
 
   width: 15px;
 }
+
+.account__text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.account__sublabel {
+  color: var(--desctivado, #66557e);
+
+  font-family: "Nata Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+}

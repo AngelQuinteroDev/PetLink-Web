@@ -10,6 +10,9 @@ import ProfileCard from "./assets/components/ProfileCard.jsx";
 import ProfileStats from "./assets/components/ProfileStats.jsx";
 import MyPetsSection from "./assets/components/MyPetsSection.jsx";
 import AccountSection from "./assets/components/AccountSection.jsx";
+import ManagementSection from "./assets/components/ManagementSection.jsx";
+import RequestsPage from "./assets/components/RequestsPage.jsx";
+import ReviewRequestPage from "./assets/components/ReviewRequestPage.jsx";
 import ReportModal from "./assets/components/ReportModal.jsx";
 import SettingsPage from "./assets/components/SettingsPage.jsx";
 import AddPetPage from "./assets/components/AddPetPage.jsx";
@@ -17,6 +20,8 @@ import ChangeEmailPage from "./assets/components/ChangeEmailPage.jsx";
 import ChangePasswordPage from "./assets/components/ChangePasswordPage.jsx";
 import ReportLostPage from "./assets/components/ReportLostPage.jsx";
 import ReportFoundPage from "./assets/components/ReportFoundPage.jsx";
+import ReportAdoptionPage from "./assets/components/ReportAdoptionPage.jsx";
+import VerificationPage from "./assets/components/VerificationPage.jsx";
 import CommunityPage from "./assets/components/CommunityPage.jsx";
 import PetListPage from "./assets/components/PetListPage.jsx";
 import HelpPage from "./assets/components/HelpPage.jsx";
@@ -73,6 +78,24 @@ const ADOPTION_PETS = makeList(6);
 const FOUND_PETS = makeList(6);
 const NEAR_PETS = makeList(6, "Perdido");
 
+const INITIAL_REQUESTS = [
+  { id: 1, type: "vet", status: "pending", name: "Nombre", location: "Engativá, Bogotá" },
+  { id: 2, type: "doctor", status: "pending", name: "Nombre", location: "Engativá, Bogotá" },
+  { id: 3, type: "refuge", status: "approved", name: "Nombre", location: "Engativá, Bogotá" },
+  { id: 4, type: "vet", status: "approved", name: "Nombre", location: "Engativá, Bogotá" },
+  { id: 5, type: "doctor", status: "rejected", name: "Nombre", location: "Engativá, Bogotá" },
+].map((r) => ({
+  ...r,
+  email: "contacto@correo.com",
+  address: "Cll 1 #2-3, Usaquén",
+  description:
+    "Texto con la descripción que la veterinaria escribió al enviar su solicitud: servicios, horarios y por qué quiere unirse a PetClue.",
+  documents: [
+    { id: 1, name: "Documento de registro" },
+    { id: 2, name: "Identificación del responsable" },
+  ],
+}));
+
 const CONFIRMS = {
   logout: {
     title: "¿Estás seguro que quieres cerrar sesión?",
@@ -106,8 +129,14 @@ function App() {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showReportLost, setShowReportLost] = useState(false);
   const [showReportFound, setShowReportFound] = useState(false);
+  const [showReportAdoption, setShowReportAdoption] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [listPage, setListPage] = useState(null);
+
+  const [requests, setRequests] = useState(INITIAL_REQUESTS);
+  const [requestsTab, setRequestsTab] = useState(null); // null | "pending" | "approved" | "rejected"
+  const [reviewing, setReviewing] = useState(null);
 
   const [selectedPet, setSelectedPet] = useState(null);
   const [profilePhotoOpen, setProfilePhotoOpen] = useState(false);
@@ -116,7 +145,7 @@ function App() {
   const [city, setCity] = useState("Bogotá");
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
 
-  const [confirmAction, setConfirmAction] = useState(null); // "logout" | "deactivate" | "delete" | null
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const handleLoginSuccess = (email) => {
     setUserEmail(email);
@@ -127,7 +156,15 @@ function App() {
   const goHome = () => setActiveTab("home");
   const openNotifications = () => setShowNotifications(true);
 
+  const decide = (request, status) => {
+    setRequests((list) => list.map((r) => (r.id === request.id ? { ...r, status } : r)));
+    setReviewing(null);
+  };
+
   const userName = userEmail.split("@")[0] || "usuario";
+  // Provisional: entra con un correo que empiece por "admin"
+  const isAdmin = userEmail.toLowerCase().startsWith("admin");
+  const countBy = (status) => requests.filter((r) => r.status === status).length;
 
   const sharedModals = (
     <>
@@ -188,6 +225,58 @@ function App() {
             active={activeTab}
             onNavigate={(id) => {
               setShowNotifications(false);
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* REVISAR SOLICITUD (ADMIN) */
+  if (reviewing) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <PawBackground />
+          <ReviewRequestPage
+            request={requests.find((r) => r.id === reviewing.id)}
+            onBack={() => setReviewing(null)}
+            onAccept={(r) => decide(r, "approved")}
+            onReject={(r) => decide(r, "rejected")}
+            onOpenDocument={(d) => console.log("Abrir documento:", d)}
+          />
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setReviewing(null);
+              setRequestsTab(null);
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* SOLICITUDES (ADMIN) */
+  if (requestsTab) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <PawBackground />
+          <RequestsPage
+            requests={requests}
+            initialTab={requestsTab}
+            onBack={() => setRequestsTab(null)}
+            onReview={setReviewing}
+          />
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setRequestsTab(null);
               if (id === "report") setShowReportModal(true);
               else setActiveTab(id);
             }}
@@ -308,6 +397,68 @@ function App() {
             active={activeTab}
             onNavigate={(id) => {
               setShowReportFound(false);
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* DAR EN ADOPCIÓN */
+  if (showReportAdoption) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <PawBackground />
+          <ReportAdoptionPage
+            onBack={() => setShowReportAdoption(false)}
+            onNotifications={() => {
+              setShowReportAdoption(false);
+              setShowNotifications(true);
+            }}
+            onSubmit={(report) => {
+              console.log("Mascota en adopción:", report);
+              setShowReportAdoption(false);
+              setShowVerification(true);
+            }}
+          />
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setShowReportAdoption(false);
+              if (id === "report") setShowReportModal(true);
+              else setActiveTab(id);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  /* SOLICITAR VERIFICACIÓN */
+  if (showVerification) {
+    return (
+      <div className="phone-frame">
+        <main className="app">
+          <PawBackground />
+          <VerificationPage
+            onBack={() => setShowVerification(false)}
+            onNotifications={() => {
+              setShowVerification(false);
+              setShowNotifications(true);
+            }}
+            onSubmit={(request) => {
+              console.log("Solicitud de verificación:", request);
+              setShowVerification(false);
+              setActiveTab("profile");
+            }}
+          />
+          <NavBar
+            active={activeTab}
+            onNavigate={(id) => {
+              setShowVerification(false);
               if (id === "report") setShowReportModal(true);
               else setActiveTab(id);
             }}
@@ -464,7 +615,6 @@ function App() {
       <main className="app">
         <PawBackground />
 
-        {/* INICIO */}
         {activeTab === "home" && (
           <HomePage
             userName={userName}
@@ -482,7 +632,6 @@ function App() {
           />
         )}
 
-        {/* MAPA */}
         {activeTab === "map" && (
           <MapPage
             onBack={goHome}
@@ -495,7 +644,6 @@ function App() {
           />
         )}
 
-        {/* COMUNIDAD */}
         {activeTab === "community" && (
           <CommunityPage
             onBack={goHome}
@@ -505,7 +653,6 @@ function App() {
           />
         )}
 
-        {/* PERFIL */}
         {activeTab === "profile" && (
           <>
             <header className="page-header">
@@ -529,23 +676,42 @@ function App() {
               <ProfileCard
                 name="Angely Parra"
                 location="Engativá, Bogotá"
-                memberLabel="Miembro"
+                memberLabel={isAdmin ? "Administrador" : "Miembro"}
                 photoUrl={profilePhoto}
                 onEditPhoto={() => setProfilePhotoOpen(true)}
               />
             </section>
 
             <section className="home-section">
-              <ProfileStats pets={MY_PETS.length} posts={14} activeReports={0} />
+              {isAdmin ? (
+                <ProfileStats
+                  pets={countBy("pending")}
+                  posts={countBy("approved")}
+                  activeReports={countBy("rejected")}
+                  labels={["Pendientes", "Aprobadas", "Rechazadas"]}
+                />
+              ) : (
+                <ProfileStats pets={MY_PETS.length} posts={14} activeReports={0} />
+              )}
             </section>
 
-            <section className="home-section">
-              <MyPetsSection
-                pets={MY_PETS}
-                onEnroll={() => setShowAddPet(true)}
-                onPetClick={setSelectedPet}
+            {isAdmin ? (
+              <ManagementSection
+                onOptionClick={(id) => {
+                  if (id === "pending") setRequestsTab("pending");
+                  else if (id === "history") setRequestsTab("approved");
+                  else console.log("Gestión:", id);
+                }}
               />
-            </section>
+            ) : (
+              <section className="home-section">
+                <MyPetsSection
+                  pets={MY_PETS}
+                  onEnroll={() => setShowAddPet(true)}
+                  onPetClick={setSelectedPet}
+                />
+              </section>
+            )}
 
             <AccountSection
               onOptionClick={(id) => {
@@ -553,13 +719,13 @@ function App() {
                 else if (id === "help") setShowHelp(true);
                 else if (id === "notifications") setShowNotifications(true);
                 else if (id === "edit") setShowChangeEmail(true);
+                else if (id === "verification") setShowVerification(true);
                 else console.log("Opción seleccionada:", id);
               }}
             />
           </>
         )}
 
-        {/* MODAL DE REPORTAR */}
         <ReportModal
           open={showReportModal}
           onClose={() => setShowReportModal(false)}
@@ -567,7 +733,7 @@ function App() {
             setShowReportModal(false);
             if (optionId === "lost") setShowReportLost(true);
             else if (optionId === "found") setShowReportFound(true);
-            else if (optionId === "adoption") console.log("Dar en adopción");
+            else if (optionId === "adoption") setShowReportAdoption(true);
           }}
           onCommunityPost={() => {
             setShowReportModal(false);

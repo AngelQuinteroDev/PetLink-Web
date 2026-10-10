@@ -13,21 +13,20 @@ function ProfileStats({
   pets = 0,
   posts = 0,
   activeReports = 0,
+  labels = ["Mascotas", "Publicaciones", "Reportes activos"],
 }) {
   return (
     <article className="profile-stats">
       <div className="profile-stats__inner">
-
-        <StatItem value={pets} label="Mascotas" />
-
-        <span className="profile-stats__divider" />
-
-        <StatItem value={posts} label="Publicaciones" />
+        <StatItem value={pets} label={labels[0]} />
 
         <span className="profile-stats__divider" />
 
-        <StatItem value={activeReports} label="Reportes activos" />
+        <StatItem value={posts} label={labels[1]} />
 
+        <span className="profile-stats__divider" />
+
+        <StatItem value={activeReports} label={labels[2]} />
       </div>
     </article>
   );

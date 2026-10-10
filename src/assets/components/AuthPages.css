@@ -14,7 +14,7 @@
   flex-direction: column;
   align-items: center;
 
-  background: transparent; /* el color va en la capa fija */
+  background: transparent;
 
   box-sizing: border-box;
 }
@@ -56,16 +56,13 @@
   flex-direction: column;
   align-items: center;
 
-  gap: 0;
-
   margin: 0 auto 6px;
 }
 
-/* Corazón con perro y gato */
 .auth-logo-stack__mark {
   display: block;
 
-  width: min(230px, 100%);
+  width: min(230px, 65%);
   height: auto;
 }
 
@@ -75,7 +72,7 @@
   width: min(270px, 78%);
   height: auto;
 
-  margin-top: 8px;
+  margin-top: -8px;
 }
 
 .auth-title {
@@ -194,7 +191,7 @@
 .auth-check {
   display: flex;
 
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 
   color: var(--desctivado, #66557e);
@@ -232,6 +229,14 @@
 }
 
 .auth-link:focus { outline: none; }
+
+/* Enlaces morados dentro del texto de términos */
+.auth-link--soft {
+  color: var(--titulos, #7519ff);
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
 
 /* ===== Botón principal ===== */
 

@@ -1,0 +1,56 @@
+.verification__field-icon {
+  width: 18px;
+  height: 18px;
+
+  object-fit: contain;
+
+  pointer-events: none;
+}
+
+.verification__submit-card {
+  display: flex;
+
+  padding: 14px 16px 16px;
+
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.18);
+
+  box-sizing: border-box;
+}
+
+.verification__submit-text {
+  margin: 0;
+
+  color: #000000;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.verification__submit {
+  width: 80%;
+  height: 38px;
+
+  border: none;
+  border-radius: 20px;
+  background: var(--titulos, #7519ff);
+
+  color: #ffffff;
+
+  font-family: "Kodchasan", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.verification__submit:focus { outline: none; }
+.verification__submit:active:not(:disabled) { transform: scale(0.98); }
+.verification__submit:disabled { opacity: 0.6; cursor: not-allowed; }

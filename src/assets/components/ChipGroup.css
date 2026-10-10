@@ -87,3 +87,64 @@
 
   pointer-events: none;
 }
+
+.chip-group--tray .chip-group__chip {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.chip-group--solid .chip-group__chip.is-active {
+  border-color: var(--titulos, #7519ff);
+  background: var(--titulos, #7519ff);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+/* El ícono (morado) se vuelve blanco sobre el fondo activo */
+.chip-group--solid .chip-group__chip.is-active .chip-group__icon-img {
+  filter: brightness(0) invert(1);
+}
+
+/* ===== Variante sólida (Tipo de solicitud) ===== */
+.chip-group--solid {
+  gap: 10px;
+}
+
+.chip-group--solid .chip-group__chip {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 145px;
+  height: 46px;
+
+  gap: 8px;
+  padding: 0 8px;
+
+  border: 2px solid transparent;   /* borde de 2px del Figma */
+  border-radius: 10px;             /* var(--CURVATURA, 10px) */
+
+  line-height: 1.15;
+  white-space: normal;
+  text-align: center;
+}
+
+.chip-group--solid .chip-group__chip.is-active {
+  border-color: transparent;
+  background: var(--titulos, #7519ff);   /* #7519FF */
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.chip-group--solid .chip-group__icon {
+  flex-shrink: 0;
+}
+
+.chip-group--solid .chip-group__icon-img {
+  width: 16px;
+  height: 16px;
+}
+
+/* El ícono morado pasa a blanco sobre el fondo activo */
+.chip-group--solid .chip-group__chip.is-active .chip-group__icon-img {
+  filter: brightness(0) invert(1);
+}

@@ -2,7 +2,7 @@ import "./ChipGroup.css";
 
 function ChipGroup({ options, value, onChange, variant = "tray" }) {
   return (
-    <div className={`chip-group chip-group--${variant}`}>
+    <div className={`chip-group chip-group--${variant.split(" ").join(" chip-group--")}`}>
       {options.map((opt) => {
         const id = typeof opt === "string" ? opt : opt.id;
         const label = typeof opt === "string" ? opt : opt.label;

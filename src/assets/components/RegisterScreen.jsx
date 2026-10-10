@@ -2,6 +2,9 @@ import { useState } from "react";
 import AuthField from "./AuthField.jsx";
 import AuthLogo from "./AuthLogo.jsx";
 import CircleIconButton from "./CircleIconButton.jsx";
+import PermissionsModal from "./PermissionsModal.jsx";
+import SuccessToast from "./SuccessToast.jsx";
+import LegalModal from "./LegalModal.jsx";
 import backIcon from "../svg/Back.svg";
 import "./AuthPages.css";
 
@@ -33,11 +36,27 @@ function RegisterScreen({ onBack, onSwitchToLogin, onRegisterSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [accepted, setAccepted] = useState(false);
+  const [permOpen, setPermOpen] = useState(false);
+  const [created, setCreated] = useState(false);
+  const [legal, setLegal] = useState(null); // "terms" | "privacy" | null
 
   const canSubmit = name.trim() !== "" && email.trim() !== "" && password.length >= 6 && accepted;
 
+  const finish = () => {
+    setPermOpen(false);
+    setCreated(true);
+  };
+
+  const afterToast = () => {
+    setCreated(false);
+    if (onRegisterSuccess) onRegisterSuccess({ name, email });
+    else onSwitchToLogin?.();
+  };
+
   return (
     <div className="auth-page">
+      <SuccessToast open={created} message="¡Cuenta creada exitosamente!" onDone={afterToast} />
+
       <div className="auth-page__back">
         <CircleIconButton icon={backIcon} iconAlt="Volver" ariaLabel="Volver" onClick={onBack} />
       </div>
@@ -51,9 +70,7 @@ function RegisterScreen({ onBack, onSwitchToLogin, onRegisterSuccess }) {
         className="auth-card"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!canSubmit) return;
-          if (onRegisterSuccess) onRegisterSuccess({ name, email });
-          else onSwitchToLogin?.();
+          if (canSubmit) setPermOpen(true);
         }}
       >
         <AuthField
@@ -85,10 +102,25 @@ function RegisterScreen({ onBack, onSwitchToLogin, onRegisterSuccess }) {
           onChange={setPassword}
         />
 
-        <label className="auth-check">
-          <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
-          Acepto los Términos de uso y la Política de privacidad de PetLink.
-        </label>
+        <div className="auth-check">
+          <input
+            id="accept-terms"
+            type="checkbox"
+            checked={accepted}
+            onChange={(e) => setAccepted(e.target.checked)}
+          />
+          <span>
+            Acepto los{" "}
+            <button type="button" className="auth-link auth-link--soft" onClick={() => setLegal("terms")}>
+              Términos de uso
+            </button>{" "}
+            y la{" "}
+            <button type="button" className="auth-link auth-link--soft" onClick={() => setLegal("privacy")}>
+              Política de privacidad
+            </button>{" "}
+            de PetClue.
+          </span>
+        </div>
 
         <button type="submit" className="auth-submit" disabled={!canSubmit}>
           Crear cuenta
@@ -101,6 +133,9 @@ function RegisterScreen({ onBack, onSwitchToLogin, onRegisterSuccess }) {
           </button>
         </p>
       </form>
+
+      <PermissionsModal open={permOpen} onClose={() => setPermOpen(false)} onConfirm={finish} />
+      <LegalModal type={legal} onClose={() => setLegal(null)} />
     </div>
   );
 }

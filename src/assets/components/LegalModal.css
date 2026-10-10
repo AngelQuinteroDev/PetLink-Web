@@ -1,0 +1,120 @@
+.legal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 450;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+  overscroll-behavior: contain;
+}
+
+.legal__sheet {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  width: 100%;
+  max-width: 393px;
+  max-height: 80vh;
+  padding: 12px 20px 22px;
+
+  border-radius: 30px;
+  background: #fff;
+
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: legal-pop 0.2s ease-out;
+}
+
+@keyframes legal-pop {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.legal__sheet > *:not(.paw-bg) { position: relative; z-index: 1; }
+
+.legal__handle {
+  align-self: center;
+  width: 80px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: #ddd6fb;
+}
+
+.legal__header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+.legal__title {
+  margin: 0;
+  color: var(--titulos, #7519ff);
+  font-family: "Kodchasan", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.legal__close {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e1d9ec;
+  border-radius: 50%;
+  background: #ede8ff;
+  box-shadow: 0 0 8px 2px rgba(189, 175, 239, 0.7);
+  cursor: pointer;
+}
+
+.legal__close:focus { outline: none; }
+
+.legal__body {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 4px 4px 0;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.legal__heading {
+  margin: 12px 0 4px;
+  color: #000;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.legal__text {
+  margin: 0;
+  color: var(--desctivado, #66557e);
+  font-family: "Nata Sans", sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.legal__ok {
+  height: 44px;
+
+  border: none;
+  border-radius: 10px;
+  background: var(--activado, #ae77ff);
+
+  color: #fff;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.legal__ok:focus { outline: none; }
+.legal__ok:active { transform: scale(0.98); }
