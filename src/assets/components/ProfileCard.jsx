@@ -1,3 +1,4 @@
+import AvatarPlaceholder from "./AvatarPlaceholder.jsx";
 import editIcon from "../svg/edit_icono.svg";
 import pawIcon from "../svg/Huella.svg";
 import "./ProfileCard.css";
@@ -12,13 +13,9 @@ function ProfileCard({
   return (
     <article className="profile-card">
       <div className="profile-card__inner">
-
-        {/* Foto */}
         <div className="profile-card__photo">
           <div className="profile-card__avatar">
-            {photoUrl && (
-              <img src={photoUrl} alt={name} />
-            )}
+            {photoUrl ? <img src={photoUrl} alt={name} /> : <AvatarPlaceholder />}
           </div>
 
           <button
@@ -31,7 +28,6 @@ function ProfileCard({
           </button>
         </div>
 
-        {/* Info */}
         <div className="profile-card__info">
           <h2 className="profile-card__name">{name}</h2>
           <p className="profile-card__location">{location}</p>
@@ -41,7 +37,6 @@ function ProfileCard({
             {memberLabel}
           </span>
         </div>
-
       </div>
     </article>
   );

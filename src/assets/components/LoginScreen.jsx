@@ -19,8 +19,8 @@ const LockIcon = () => (
   </svg>
 );
 
-function LoginScreen({ onSwitchToRegister, onLoginSuccess }) {
-  const [email, setEmail] = useState("");
+function LoginScreen({ onSwitchToRegister, onLoginSuccess, initialEmail = "" }) {
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
 

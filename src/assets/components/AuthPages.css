@@ -273,3 +273,55 @@
   font-weight: 600;
   text-align: center;
 }
+
+/* ===== Tablets (≥ 600px) ===== */
+@media (min-width: 600px) {
+  .auth-page {
+    max-width: none;
+    justify-content: center;
+    padding: 40px 48px;
+  }
+
+  .auth-page::before { max-width: none; width: 100%; }
+
+  .auth-logo-stack__mark { width: 260px; }
+  .auth-logo-stack__text { width: 300px; margin-top: -10px; }
+
+  .auth-title { font-size: 30px; margin-top: 8px; }
+  .auth-subtitle { font-size: 16px; margin-bottom: 26px; }
+
+  .auth-card {
+    max-width: 520px;
+    padding: 32px 36px 26px;
+    gap: 20px;
+    border-radius: 22px;
+  }
+
+  .auth-field { gap: 8px; }
+  .auth-field__label { font-size: 20px; }
+
+  .auth-field__box { height: 54px; padding: 0 16px; gap: 12px; border-radius: 12px; }
+  .auth-field__input { font-size: 16px; }
+  .auth-field__icon svg { width: 22px; height: 22px; }
+
+  .auth-check { font-size: 14px; gap: 10px; }
+  .auth-check input { width: 20px; height: 20px; }
+
+  .auth-link { font-size: 14px; }
+
+  .auth-submit {
+    height: 56px;
+    margin: 6px 40px 0;
+    border-radius: 12px;
+    font-size: 19px;
+  }
+
+  .auth-switch { font-size: 14px; }
+}
+
+/* ===== Pantallas grandes (≥ 1000px) ===== */
+@media (min-width: 1000px) {
+  .auth-card { max-width: 560px; }
+  .auth-logo-stack__mark { width: 300px; }
+  .auth-logo-stack__text { width: 340px; }
+}

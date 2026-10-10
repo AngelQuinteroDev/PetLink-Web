@@ -1,3 +1,4 @@
+import AvatarPlaceholder from "./AvatarPlaceholder.jsx";
 import "./PetPicker.css";
 
 const PlusIcon = () => (
@@ -18,7 +19,7 @@ function PetPicker({ pets = [], value, onChange, onNotListed }) {
           onClick={() => onChange?.(pet.id)}
         >
           <span className="pet-picker__avatar">
-            {pet.photoUrl && <img src={pet.photoUrl} alt={pet.name} />}
+            {pet.photoUrl ? <img src={pet.photoUrl} alt={pet.name} /> : <AvatarPlaceholder />}
           </span>
           <span className="pet-picker__name">{pet.name}</span>
         </button>

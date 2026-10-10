@@ -1,5 +1,6 @@
 import PawBackground from "./PawBackground.jsx";
 import useLockBodyScroll from "../../hooks/useLockBodyScroll.js";
+import { LEGAL_DOCS } from "./legalDocs.js";
 import "./LegalModal.css";
 
 const CloseIcon = () => (
@@ -8,78 +9,41 @@ const CloseIcon = () => (
   </svg>
 );
 
-const DOCS = {
-  terms: {
-    title: "Términos de uso",
-    sections: [
-      {
-        heading: "1. Uso de la aplicación",
-        text: "PetClue es una plataforma comunitaria para reportar, buscar y ayudar a mascotas. Te comprometes a usarla de forma responsable y con información veraz.",
-      },
-      {
-        heading: "2. Tu cuenta",
-        text: "Eres responsable de mantener la confidencialidad de tus credenciales y de la actividad realizada desde tu cuenta.",
-      },
-      {
-        heading: "3. Contenido publicado",
-        text: "Las publicaciones, fotos y reportes deben ser reales y respetuosos. PetClue puede retirar contenido que incumpla estas normas.",
-      },
-      {
-        heading: "4. Verificación",
-        text: "Las cuentas de veterinarios, médicos y refugios pasan por un proceso de revisión antes de mostrar su etiqueta.",
-      },
-    ],
-  },
-  privacy: {
-    title: "Política de privacidad",
-    sections: [
-      {
-        heading: "1. Datos que recopilamos",
-        text: "Nombre, correo electrónico, información de tus mascotas y, si lo autorizas, tu ubicación.",
-      },
-      {
-        heading: "2. Finalidad",
-        text: "Usamos tus datos para crear tu cuenta, publicar alertas, mostrar mascotas cercanas y enviarte notificaciones que hayas activado.",
-      },
-      {
-        heading: "3. Tus derechos",
-        text: "Puedes conocer, actualizar, rectificar y solicitar la eliminación de tus datos desde Ajustes en cualquier momento.",
-      },
-      {
-        heading: "4. Ubicación",
-        text: "El acceso a tu ubicación es opcional. También puedes elegir tu ciudad manualmente.",
-      },
-    ],
-  },
-};
-
 function LegalModal({ type, onClose }) {
   useLockBodyScroll(Boolean(type));
 
-  const doc = DOCS[type];
+  const doc = LEGAL_DOCS[type];
   if (!doc) return null;
 
   return (
     <div className="legal__overlay" onClick={onClose}>
-      <div className="legal__sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+      <div className="legal__sheet" role="dialog" aria-modal="true" aria-label={doc.title} onClick={(e) => e.stopPropagation()}>
         <PawBackground contained />
 
         <span className="legal__handle" />
 
         <div className="legal__header">
-          <h2 className="legal__title">{doc.title}</h2>
+          <div>
+            <h2 className="legal__title">{doc.title}</h2>
+            <p className="legal__updated">Última actualización: {doc.updated}</p>
+          </div>
+
           <button type="button" className="legal__close" onClick={onClose} aria-label="Cerrar">
             <CloseIcon />
           </button>
         </div>
 
         <div className="legal__body">
-          {doc.sections.map((s) => (
-            <section key={s.heading}>
-              <h3 className="legal__heading">{s.heading}</h3>
-              <p className="legal__text">{s.text}</p>
-            </section>
-          ))}
+          {doc.blocks.map((b, i) => {
+            if (b.h) return <h3 key={i} className="legal__heading">{b.h}</h3>;
+            if (b.ul)
+              return (
+                <ul key={i} className="legal__list">
+                  {b.ul.map((li, j) => <li key={j}>{li}</li>)}
+                </ul>
+              );
+            return <p key={i} className="legal__text">{b.p}</p>;
+          })}
         </div>
 
         <button type="button" className="legal__ok" onClick={onClose}>

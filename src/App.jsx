@@ -120,6 +120,7 @@ const CONFIRMS = {
 function App() {
   const [view, setView] = useState("login");
   const [userEmail, setUserEmail] = useState("");
+  const [newAccountEmail, setNewAccountEmail] = useState("");
   const [activeTab, setActiveTab] = useState("home");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -135,7 +136,7 @@ function App() {
   const [listPage, setListPage] = useState(null);
 
   const [requests, setRequests] = useState(INITIAL_REQUESTS);
-  const [requestsTab, setRequestsTab] = useState(null); // null | "pending" | "approved" | "rejected"
+  const [requestsTab, setRequestsTab] = useState(null);
   const [reviewing, setReviewing] = useState(null);
 
   const [selectedPet, setSelectedPet] = useState(null);
@@ -162,7 +163,6 @@ function App() {
   };
 
   const userName = userEmail.split("@")[0] || "usuario";
-  // Provisional: entra con un correo que empiece por "admin"
   const isAdmin = userEmail.toLowerCase().startsWith("admin");
   const countBy = (status) => requests.filter((r) => r.status === status).length;
 
@@ -195,10 +195,11 @@ function App() {
     />
   );
 
+  /* LOGIN / REGISTRO */
   if (view === "login") {
     return (
       <LoginScreen
-        onBack={() => console.log("Volver")}
+        initialEmail={newAccountEmail}
         onSwitchToRegister={() => setView("register")}
         onLoginSuccess={handleLoginSuccess}
       />
@@ -210,6 +211,10 @@ function App() {
       <RegisterScreen
         onBack={() => setView("login")}
         onSwitchToLogin={() => setView("login")}
+        onRegisterSuccess={({ email }) => {
+          setNewAccountEmail(email);
+          setView("login");
+        }}
       />
     );
   }

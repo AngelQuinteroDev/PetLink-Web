@@ -1,10 +1,11 @@
+import AvatarPlaceholder from "./AvatarPlaceholder.jsx";
 import "./ShareBar.css";
 
 function ShareBar({ avatarUrl, text = "¿Qué quieres compartir con la comunidad?", onClick }) {
   return (
     <button type="button" className="share-bar" onClick={onClick}>
       <span className="share-bar__avatar">
-        {avatarUrl && <img src={avatarUrl} alt="" />}
+        {avatarUrl ? <img src={avatarUrl} alt="" /> : <AvatarPlaceholder />}
       </span>
 
       <span className="share-bar__text">{text}</span>

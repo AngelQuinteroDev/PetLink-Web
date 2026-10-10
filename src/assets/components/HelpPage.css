@@ -1,0 +1,104 @@
+.help { display: flex; flex-direction: column; gap: 12px; }
+
+.help .search-bar { background: #fff; }
+
+.help__title {
+  margin: 10px 0 0;
+  color: #000;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.help__title--second { margin-top: 18px; }
+
+.help__sub {
+  margin: -8px 0 0;
+  color: var(--desctivado, #66557e);
+  font-family: "Kodchasan", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.help__card {
+  padding: 4px 18px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.help__card--form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px 18px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.18);
+}
+
+.help__empty {
+  margin: 14px 0;
+  text-align: center;
+  color: var(--desctivado, #66557e);
+  font-family: "Kodchasan", sans-serif;
+  font-size: 13px;
+}
+
+.help__form { display: flex; flex-direction: column; gap: 16px; }
+
+.help__field { display: flex; flex-direction: column; gap: 8px; }
+
+.help__label {
+  color: #000;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.help__textarea,
+.help__input {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: #ede8ff;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.2);
+
+  font-family: "Nata Sans", sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.help__textarea { padding: 10px 12px; resize: none; min-height: 72px; }
+.help__input { height: 34px; padding: 0 12px; }
+
+.help__textarea:focus,
+.help__input:focus { outline: 2px solid var(--activado, #ae77ff); }
+
+.help__card--form .file-drop-field__label { font-size: 15px; }
+
+.help__sent {
+  margin: 0;
+  text-align: center;
+  color: var(--titulos, #7519ff);
+  font-family: "Kodchasan", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.help__submit {
+  height: 46px;
+  margin: 0 12px;
+
+  border: none;
+  border-radius: 10px;
+  background: var(--activado, #ae77ff);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+
+  color: #fff;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.help__submit:focus { outline: none; }
+.help__submit:active:not(:disabled) { transform: scale(0.98); }
+.help__submit:disabled { opacity: 0.6; cursor: not-allowed; }

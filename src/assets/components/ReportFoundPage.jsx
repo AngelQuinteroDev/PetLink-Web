@@ -4,6 +4,7 @@ import ChipGroup from "./ChipGroup.jsx";
 import IconInputField from "./IconInputField.jsx";
 import TextInputField from "./TextInputField.jsx";
 import PhotoPickerModal from "./PhotoPickerModal.jsx";
+import AvatarPlaceholder from "./AvatarPlaceholder.jsx";
 import backIcon from "../svg/Back.svg";
 import bellIcon from "../svg/bell.svg";
 import editIcon from "../svg/edit_icono.svg";
@@ -108,7 +109,9 @@ function ReportFoundPage({ onBack, onNotifications, onSubmit }) {
       >
         <div className="found__photo-block">
           <div className="found__photo">
-            {mainPhoto && <img src={mainPhoto} alt="" />}
+            <div className="found__photo-circle">
+              {mainPhoto ? <img src={mainPhoto} alt="" /> : <AvatarPlaceholder />}
+            </div>
             <button
               type="button"
               className="found__photo-edit"

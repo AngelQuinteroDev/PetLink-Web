@@ -1,10 +1,12 @@
-/* Franja de filtros a todo el ancho */
+/* Franja de filtros: llega a los bordes, contenido alineado con el header */
 .map-page__filters {
   margin: 0 calc(var(--app-pad-x) * -1);
   padding: 5px 0 4px 0;
 }
 
 .map-page__filters .map-filters {
+  max-width: 720px;
+  margin: 0 auto;
   padding: 10px var(--app-pad-x);
 }
 

@@ -3,6 +3,7 @@ import AppHeader from "./AppHeader.jsx";
 import ChipGroup from "./ChipGroup.jsx";
 import TextInputField from "./TextInputField.jsx";
 import PhotoPickerModal from "./PhotoPickerModal.jsx";
+import AvatarPlaceholder from "./AvatarPlaceholder.jsx";
 import backIcon from "../svg/Back.svg";
 import bellIcon from "../svg/bell.svg";
 import editIcon from "../svg/edit_icono.svg";
@@ -64,7 +65,9 @@ function AddPetPage({ onBack, onNotifications, onSave }) {
       >
         <div className="add-pet__photo-block">
           <div className="add-pet__photo">
-            {photo && <img src={photo} alt="" />}
+            <div className="add-pet__photo-circle">
+              {photo ? <img src={photo} alt="" /> : <AvatarPlaceholder />}
+            </div>
             <button
               type="button"
               className="add-pet__photo-edit"
