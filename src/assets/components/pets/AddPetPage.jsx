@@ -2,7 +2,7 @@ import { useState } from "react";
 import AppHeader from "../shared/AppHeader.jsx";
 import ChipGroup from "../shared/ChipGroup.jsx";
 import TextInputField from "../shared/TextInputField.jsx";
-import PhotoPickerModal from "./PhotoPickerModal.jsx";
+import PhotoPickerModal from "../shared/PhotoPickerModal.jsx";
 import AvatarPlaceholder from "./AvatarPlaceholder.jsx";
 import backIcon from "../../svg/Back.svg";
 import bellIcon from "../../svg/bell.svg";

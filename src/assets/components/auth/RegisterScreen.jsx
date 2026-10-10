@@ -1,11 +1,13 @@
 import { useState } from "react";
 import AuthField from "./AuthField.jsx";
 import AuthLogo from "./AuthLogo.jsx";
-import CircleIconButton from "../shared/CircleIconButton.jsx";
 import PermissionsModal from "../shared/PermissionsModal.jsx";
-import SuccessToast from "../shared/SuccessToast.jsx";
 import LegalModal from "../shared/LegalModal.jsx";
+import CircleIconButton from "../shared/CircleIconButton.jsx";
+import SuccessToast from "../shared/SuccessToast.jsx";
 import backIcon from "../../svg/Back.svg";
+import { useAuth } from "../../../context/AuthContext";
+import { updateSettings } from "../../../lib/api";
 import "./AuthPages.css";
 
 const stroke = { stroke: "#66557E", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", fill: "none" };
@@ -16,14 +18,12 @@ const UserIcon = () => (
     <path d="M4 21C4 16.5 7.5 14 12 14C16.5 14 20 16.5 20 21" {...stroke} />
   </svg>
 );
-
 const MailIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24">
     <rect x="3" y="5" width="18" height="14" rx="2" {...stroke} />
     <path d="M3 7L12 13L21 7" {...stroke} />
   </svg>
 );
-
 const LockIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24">
     <rect x="5" y="11" width="14" height="9" rx="2" {...stroke} />
@@ -32,24 +32,49 @@ const LockIcon = () => (
 );
 
 function RegisterScreen({ onBack, onSwitchToLogin, onRegisterSuccess }) {
+  const { signUp, signOut } = useAuth();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [permOpen, setPermOpen] = useState(false);
   const [created, setCreated] = useState(false);
-  const [legal, setLegal] = useState(null); // "terms" | "privacy" | null
+  const [legal, setLegal] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const canSubmit = name.trim() !== "" && email.trim() !== "" && password.length >= 6 && accepted;
 
-  const finish = () => {
+  const finish = async ({ location }) => {
+    if (loading) return;
+    setLoading(true);
+    setError("");
+
+    const err = await signUp(name.trim(), email.trim(), password);
+    if (err) {
+      setLoading(false);
+      setPermOpen(false);
+      setError(err);
+      return;
+    }
+
+    // Solo funciona si hay sesión (sin confirmación de correo)
+    try {
+      await updateSettings({ geolocationConsent: Boolean(location) });
+    } catch {
+      /* se podrá guardar después del primer inicio de sesión */
+    }
+
+    setLoading(false);
     setPermOpen(false);
     setCreated(true);
   };
 
-  const afterToast = () => {
+  const afterToast = async () => {
     setCreated(false);
-    if (onRegisterSuccess) onRegisterSuccess({ name, email });
+    await signOut();
+    if (onRegisterSuccess) onRegisterSuccess({ name: name.trim(), email: email.trim() });
     else onSwitchToLogin?.();
   };
 
@@ -62,75 +87,37 @@ function RegisterScreen({ onBack, onSwitchToLogin, onRegisterSuccess }) {
       </div>
 
       <AuthLogo />
-
       <h1 className="auth-title">Crea tu cuenta</h1>
       <p className="auth-subtitle">¡Únete a nuestra comunidad!</p>
 
-      <form
-        className="auth-card"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (canSubmit) setPermOpen(true);
-        }}
-      >
-        <AuthField
-          label="Nombre"
-          icon={<UserIcon />}
-          placeholder="¿Cómo te llamas?"
-          autoComplete="name"
-          value={name}
-          onChange={setName}
-        />
-
-        <AuthField
-          label="Correo electrónico"
-          icon={<MailIcon />}
-          type="email"
-          placeholder="nombre@correo.com"
-          autoComplete="email"
-          value={email}
-          onChange={setEmail}
-        />
-
-        <AuthField
-          label="Contraseña"
-          icon={<LockIcon />}
-          type="password"
-          placeholder="Password"
-          autoComplete="new-password"
-          value={password}
-          onChange={setPassword}
-        />
+      <form className="auth-card" onSubmit={(e) => { e.preventDefault(); if (canSubmit) setPermOpen(true); }}>
+        <AuthField label="Nombre" icon={<UserIcon />} placeholder="¿Cómo te llamas?"
+          autoComplete="name" value={name} onChange={setName} />
+        <AuthField label="Correo electrónico" icon={<MailIcon />} type="email"
+          placeholder="nombre@correo.com" autoComplete="email" value={email} onChange={setEmail} />
+        <AuthField label="Contraseña" icon={<LockIcon />} type="password"
+          placeholder="Password" autoComplete="new-password" value={password} onChange={setPassword} />
 
         <div className="auth-check">
-          <input
-            id="accept-terms"
-            type="checkbox"
-            checked={accepted}
-            onChange={(e) => setAccepted(e.target.checked)}
-          />
+          <input id="accept-terms" type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
           <span>
             Acepto los{" "}
-            <button type="button" className="auth-link auth-link--soft" onClick={() => setLegal("terms")}>
-              Términos de uso
-            </button>{" "}
+            <button type="button" className="auth-link auth-link--soft" onClick={() => setLegal("terms")}>Términos de uso</button>{" "}
             y la{" "}
-            <button type="button" className="auth-link auth-link--soft" onClick={() => setLegal("privacy")}>
-              Política de privacidad
-            </button>{" "}
+            <button type="button" className="auth-link auth-link--soft" onClick={() => setLegal("privacy")}>Política de privacidad</button>{" "}
             de PetClue.
           </span>
         </div>
 
-        <button type="submit" className="auth-submit" disabled={!canSubmit}>
-          Crear cuenta
+        {error && <p className="auth-error" role="alert">{error}</p>}
+
+        <button type="submit" className="auth-submit" disabled={!canSubmit || loading}>
+          {loading ? "Creando..." : "Crear cuenta"}
         </button>
 
         <p className="auth-switch">
           ¿Ya tienes cuenta?{" "}
-          <button type="button" className="auth-link" onClick={onSwitchToLogin}>
-            Inicia sesión
-          </button>
+          <button type="button" className="auth-link" onClick={onSwitchToLogin}>Inicia sesión</button>
         </p>
       </form>
 

@@ -1,35 +1,36 @@
 import { useState } from "react";
+import { useAuth } from "./context/AuthContext";
 import LoginScreen from "./assets/components/auth/LoginScreen.jsx";
 import RegisterScreen from "./assets/components/auth/RegisterScreen.jsx";
 import NavBar from "./assets/components/shared/NavBar.jsx";
+import CircleIconButton from "./assets/components/shared/CircleIconButton.jsx";
+import PawBackground from "./assets/components/shared/PawBackground.jsx";
+import ConfirmModal from "./assets/components/shared/ConfirmModal.jsx";
+import PhotoPickerModal from "./assets/components/shared/PhotoPickerModal.jsx";
 import HomePage from "./assets/components/home/HomePage.jsx";
 import MapPage from "./assets/components/map/MapPage.jsx";
-import CircleIconButton from "./assets/components/shared/CircleIconButton.jsx";
+import CommunityPage from "./assets/components/community/CommunityPage.jsx";
 import NotificationsPage from "./assets/components/notifications/NotificationsPage.jsx";
+import HelpPage from "./assets/components/help/HelpPage.jsx";
+import PetListPage from "./assets/components/pets/PetListPage.jsx";
+import PetDetailModal from "./assets/components/pets/PetDetailModal.jsx";
+import AddPetPage from "./assets/components/pets/AddPetPage.jsx";
+import MyPetsSection from "./assets/components/profile/MyPetsSection.jsx";
 import ProfileCard from "./assets/components/profile/ProfileCard.jsx";
 import ProfileStats from "./assets/components/profile/ProfileStats.jsx";
-import MyPetsSection from "./assets/components/profile/MyPetsSection.jsx";
 import AccountSection from "./assets/components/profile/AccountSection.jsx";
 import ManagementSection from "./assets/components/profile/ManagementSection.jsx";
-import RequestsPage from "./assets/components/requests/RequestsPage.jsx";
-import ReviewRequestPage from "./assets/components/requests/ReviewRequestPage.jsx";
-import ReportModal from "./assets/components/reports/ReportModal.jsx";
 import SettingsPage from "./assets/components/profile/SettingsPage.jsx";
-import AddPetPage from "./assets/components/pets/AddPetPage.jsx";
 import ChangeEmailPage from "./assets/components/profile/ChangeEmailPage.jsx";
 import ChangePasswordPage from "./assets/components/profile/ChangePasswordPage.jsx";
+import CityPickerModal from "./assets/components/map/CityPickerModal.jsx";
+import VerificationPage from "./assets/components/auth/VerificationPage.jsx";
+import ReportModal from "./assets/components/reports/ReportModal.jsx";
 import ReportLostPage from "./assets/components/reports/ReportLostPage.jsx";
 import ReportFoundPage from "./assets/components/reports/ReportFoundPage.jsx";
 import ReportAdoptionPage from "./assets/components/reports/ReportAdoptionPage.jsx";
-import VerificationPage from "./assets/components/auth/VerificationPage.jsx";
-import CommunityPage from "./assets/components/community/CommunityPage.jsx";
-import PetListPage from "./assets/components/pets/PetListPage.jsx";
-import HelpPage from "./assets/components/help/HelpPage.jsx";
-import PetDetailModal from "./assets/components/pets/PetDetailModal.jsx";
-import PhotoPickerModal from "./assets/components/pets/PhotoPickerModal.jsx";
-import CityPickerModal from "./assets/components/map/CityPickerModal.jsx";
-import ConfirmModal from "./assets/components/shared/ConfirmModal.jsx";
-import PawBackground from "./assets/components/shared/PawBackground.jsx";
+import RequestsPage from "./assets/components/requests/RequestsPage.jsx";
+import ReviewRequestPage from "./assets/components/requests/ReviewRequestPage.jsx";
 import backIcon from "./assets/svg/Back.svg";
 import "./App.css";
 
@@ -118,9 +119,11 @@ const CONFIRMS = {
 };
 
 function App() {
-  const [view, setView] = useState("login");
-  const [userEmail, setUserEmail] = useState("");
+  const { user, profile, loading, signOut } = useAuth();
+
+  const [authView, setAuthView] = useState("login"); // "login" | "register"
   const [newAccountEmail, setNewAccountEmail] = useState("");
+
   const [activeTab, setActiveTab] = useState("home");
   const [showNotifications, setShowNotifications] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
@@ -148,11 +151,6 @@ function App() {
 
   const [confirmAction, setConfirmAction] = useState(null);
 
-  const handleLoginSuccess = (email) => {
-    setUserEmail(email);
-    setView("app");
-  };
-
   const handleCall = (name) => console.log(`Llamando a: ${name}`);
   const goHome = () => setActiveTab("home");
   const openNotifications = () => setShowNotifications(true);
@@ -162,8 +160,9 @@ function App() {
     setReviewing(null);
   };
 
-  const userName = userEmail.split("@")[0] || "usuario";
-  const isAdmin = userEmail.toLowerCase().startsWith("admin");
+  const userEmail = user?.email ?? "";
+  const userName = profile?.name ?? userEmail.split("@")[0] ?? "usuario";
+  const isAdmin = profile?.role === "admin";
   const countBy = (status) => requests.filter((r) => r.status === status).length;
 
   const sharedModals = (
@@ -186,35 +185,40 @@ function App() {
       open={Boolean(confirmAction)}
       {...(CONFIRMS[confirmAction] ?? {})}
       onClose={() => setConfirmAction(null)}
-      onConfirm={() => {
+      onConfirm={async () => {
         setConfirmAction(null);
         setShowSettings(false);
         setActiveTab("home");
-        setView("login");
+        setAuthView("login");
+        await signOut();
       }}
     />
   );
 
-  /* LOGIN / REGISTRO */
-  if (view === "login") {
+  /* CARGANDO (solo si ya hay usuario, para no desmontar el registro) */
+  if (loading && user && authView !== "register") {
     return (
-      <LoginScreen
-        initialEmail={newAccountEmail}
-        onSwitchToRegister={() => setView("register")}
-        onLoginSuccess={handleLoginSuccess}
-      />
+      <div className="phone-frame">
+        <p style={{ padding: 24, fontFamily: "Kodchasan, sans-serif", color: "#66557e" }}>Cargando…</p>
+      </div>
     );
   }
 
-  if (view === "register") {
-    return (
+  /* SIN SESIÓN: LOGIN / REGISTRO */
+  if (!user || authView === "register") {
+    return authView === "register" ? (
       <RegisterScreen
-        onBack={() => setView("login")}
-        onSwitchToLogin={() => setView("login")}
+        onBack={() => setAuthView("login")}
+        onSwitchToLogin={() => setAuthView("login")}
         onRegisterSuccess={({ email }) => {
           setNewAccountEmail(email);
-          setView("login");
+          setAuthView("login");
         }}
+      />
+    ) : (
+      <LoginScreen
+        initialEmail={newAccountEmail}
+        onSwitchToRegister={() => setAuthView("register")}
       />
     );
   }
@@ -510,7 +514,7 @@ function App() {
         <main className="app">
           <PawBackground />
           <ChangeEmailPage
-            currentEmail={userEmail || "pepito.perez@gmail.com"}
+            currentEmail={userEmail}
             verified
             onBack={() => {
               setShowChangeEmail(false);
@@ -679,7 +683,7 @@ function App() {
 
             <section className="home-section">
               <ProfileCard
-                name="Angely Parra"
+                name={userName}
                 location="Engativá, Bogotá"
                 memberLabel={isAdmin ? "Administrador" : "Miembro"}
                 photoUrl={profilePhoto}

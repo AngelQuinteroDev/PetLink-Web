@@ -3,7 +3,7 @@ import AppHeader from "../shared/AppHeader.jsx";
 import ChipGroup from "../shared/ChipGroup.jsx";
 import IconInputField from "../shared/IconInputField.jsx";
 import TextInputField from "../shared/TextInputField.jsx";
-import PhotoPickerModal from "../pets/PhotoPickerModal.jsx";
+import PhotoPickerModal from "../shared/PhotoPickerModal.jsx";
 import AvatarPlaceholder from "../pets/AvatarPlaceholder.jsx";
 import backIcon from "../../svg/Back.svg";
 import bellIcon from "../../svg/bell.svg";

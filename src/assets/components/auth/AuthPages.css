@@ -324,4 +324,5 @@
   .auth-card { max-width: 560px; }
   .auth-logo-stack__mark { width: 300px; }
   .auth-logo-stack__text { width: 340px; }
+  .auth-error { margin: 0; color: #c0392b; font-family: "Nata Sans", sans-serif; font-size: 12px; font-weight: 600; text-align: center; }
 }
