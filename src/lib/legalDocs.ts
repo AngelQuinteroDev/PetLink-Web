@@ -9,6 +9,13 @@ export type LegalDoc = {
   blocks: LegalBlock[];
 };
 
+/**
+ * Versión vigente de Términos de uso y Política de Privacidad.
+ * Debe coincidir con el campo `updated` de ambos documentos y se registra
+ * en `private_profiles.terms_version` al crear la cuenta (Ley 1581).
+ */
+export const LEGAL_VERSION = "2026-10-10";
+
 export const LEGAL_DOCS: { terms: LegalDoc; privacy: LegalDoc } = {
   terms: {
     title: "Términos y Condiciones de Uso",

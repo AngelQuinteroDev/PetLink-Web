@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { LEGAL_VERSION } from "../lib/legalDocs";
 import type { Profile } from "../lib/types";
 
 interface AuthContextValue {
@@ -80,7 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: {
+        data: {
+          name,
+          terms_accepted: true,
+          terms_version: LEGAL_VERSION,
+        },
+      },
     });
     return error ? translateAuthError(error.message) : null;
   }, []);
