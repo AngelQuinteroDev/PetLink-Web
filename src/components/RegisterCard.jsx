@@ -50,9 +50,10 @@ function RegisterCard({ onSwitchToLogin, onSubmit }) {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                revealable
               />
               <p className="register-card__password-hint">
-                Mínimo 12 caracteres, con mayúscula, minúscula, número y símbolo.
+                Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.
               </p>
               </div>
 

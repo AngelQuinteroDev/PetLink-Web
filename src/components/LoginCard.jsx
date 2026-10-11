@@ -35,6 +35,7 @@ function LoginCard({ onSwitchToRegister, onForgotPassword, onSubmit }) {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                revealable
               />
             </div>
 
