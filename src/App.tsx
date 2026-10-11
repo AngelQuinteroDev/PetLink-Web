@@ -20,6 +20,8 @@ import AyudaPage from "./pages/AyudaPage";
 import AdminPage from "./pages/AdminPage";
 import VetApplicationPage from "./pages/VetApplicationPage";
 import MyClinicPage from "./pages/MyClinicPage";
+import RequestResetPage from "./pages/RequestResetPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 function FullLoading() {
   return (
@@ -71,6 +73,15 @@ export default function App() {
               </PublicArea>
             }
           />
+          <Route
+            path="/recuperar"
+            element={
+              <PublicArea>
+                <RequestResetPage />
+              </PublicArea>
+            }
+          />
+          <Route path="/restablecer" element={<ResetPasswordPage />} />
           <Route
             element={
               <ProtectedArea>

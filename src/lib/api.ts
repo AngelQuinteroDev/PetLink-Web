@@ -356,7 +356,7 @@ export async function changeEmail(input: {
     email: input.currentEmail,
     password: input.currentPassword,
   });
-  if (reauth.error) return "Tu contrase�a actual no es correcta.";
+  if (reauth.error) return "Tu contraseña actual no es correcta.";
   const { error } = await supabase.auth.updateUser({ email: input.newEmail });
   return error ? error.message : null;
 }
@@ -370,7 +370,7 @@ export async function changePassword(input: {
     email: input.email,
     password: input.currentPassword,
   });
-  if (reauth.error) return "Tu contrase�a actual no es correcta.";
+  if (reauth.error) return "Tu contraseña actual no es correcta.";
   const { error } = await supabase.auth.updateUser({ password: input.newPassword });
   if (error) return error.message;
   await supabase.auth.signOut({ scope: "others" });
@@ -489,6 +489,19 @@ export async function resolveCommentReports(
   if (error) throw error;
 }
 
+export async function moderateCommentAndResolve(
+  commentId: string,
+  hidden: boolean,
+  status: "resolved" | "dismissed" = "resolved"
+): Promise<void> {
+  const { error } = await supabase.rpc("moderate_comment_and_resolve", {
+    p_comment_id: commentId,
+    p_hidden: hidden,
+    p_status: status,
+  });
+  if (error) throw error;
+}
+
 // ---------------------------------------------------------------
 // Verificación profesional (vet / fundación) y mi clínica
 // ---------------------------------------------------------------
@@ -504,12 +517,39 @@ export async function uploadVetDocument(file: File): Promise<string> {
 }
 
 export async function getVetDocumentUrl(pathOrUrl: string): Promise<string | null> {
-  if (/^https?:\/\//.test(pathOrUrl)) return pathOrUrl;
+  const bucketPath = extractVetDocumentPath(pathOrUrl);
+  if (!bucketPath) return null;
   const { data, error } = await supabase.storage
     .from("vet-documents")
-    .createSignedUrl(pathOrUrl, 3600);
+    .createSignedUrl(bucketPath, 3600);
   if (error) return null;
   return data.signedUrl;
+}
+
+/** Extrae la ruta interna de `vet-documents`; rechaza URLs externas o rutas sospechosas. */
+function extractVetDocumentPath(input: string): string | null {
+  const value = (input ?? "").trim();
+  if (!value) return null;
+  const marker = "/vet-documents/";
+  const idx = value.indexOf(marker);
+  const candidate = idx >= 0 ? value.slice(idx + marker.length) : value;
+  if (candidate.includes("://") || candidate.startsWith("//")) return null;
+  const clean = candidate.replace(/^\/+/, "").split("?")[0];
+  if (clean.includes("..")) return null;
+  if (!/^[A-Za-z0-9._-]+\/[^/]+$/.test(clean)) return null;
+  return clean;
+}
+
+export async function requestPasswordReset(email: string): Promise<string | null> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/restablecer`,
+  });
+  return error ? error.message : null;
+}
+
+export async function setNewPassword(newPassword: string): Promise<string | null> {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  return error ? error.message : null;
 }
 
 export async function myVetApplication(): Promise<VetApplication | null> {

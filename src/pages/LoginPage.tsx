@@ -35,6 +35,7 @@ export default function LoginPage() {
 
       <LoginCard
         onSwitchToRegister={() => navigate("/registro")}
+        onForgotPassword={() => navigate("/recuperar")}
         onSubmit={(data: { email: string; password: string }) => void handleSubmit(data)}
       />
 

@@ -17,6 +17,8 @@ function PetCard({
           <img
             src={photoUrl}
             alt={name}
+            loading="lazy"
+            decoding="async"
             style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
           />
         ) : (

@@ -112,7 +112,7 @@ export default function CommunityPage() {
     if (!openPost) return;
     const scroll = setTimeout(() => {
       document
-        .querySelector(`[data-post-id="${openPost}"]`)
+        .querySelector(`[data-post-id="${CSS.escape(openPost)}"]`)
         ?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 150);
     return () => clearTimeout(scroll);
@@ -291,7 +291,14 @@ export default function CommunityPage() {
               onClick={() => void openComments(item.id)}
             />
             {item.image_url && (
-              <img className="forum-post__image" src={item.image_url} alt="" style={{ marginTop: 8 }} />
+              <img
+                className="forum-post__image"
+                src={item.image_url}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                style={{ marginTop: 8 }}
+              />
             )}
             {item.type === "alert" && item.report_id && (
               <Link className="feed-alert-link" to={`/mapa?report=${item.report_id}`}>

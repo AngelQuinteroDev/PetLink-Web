@@ -17,7 +17,7 @@ import {
   listCommentReports,
   listPendingClinics,
   listPendingVetApplications,
-  moderateComment,
+  moderateCommentAndResolve,
   moderatePost,
   resolveCommentReports,
   reviewVetApplication,
@@ -227,7 +227,13 @@ export default function AdminPage() {
               </div>
               <p className="admin-item__body">{p.content}</p>
               {p.image_url && (
-                <img className="admin-item__image" src={p.image_url} alt="Adjunto de la publicación" />
+                <img
+                  className="admin-item__image"
+                  src={p.image_url}
+                  alt="Adjunto de la publicación"
+                  loading="lazy"
+                  decoding="async"
+                />
               )}
               <div className="admin-item__actions">
                 <button
@@ -433,8 +439,7 @@ export default function AdminPage() {
                     void run(
                       r.id,
                       async () => {
-                        await moderateComment(r.comment_id, true);
-                        await resolveCommentReports(r.comment_id, "resolved");
+                        await moderateCommentAndResolve(r.comment_id, true, "resolved");
                       },
                       () => setReports((prev) => prev.filter((x) => x.id !== r.id)),
                       "No pudimos ocultar el comentario."

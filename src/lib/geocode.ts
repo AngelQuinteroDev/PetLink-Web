@@ -23,6 +23,26 @@ async function throttle(): Promise<void> {
   lastCallAt = Date.now();
 }
 
+const TIMEOUT_MS = 6000;
+
+/** fetch con timeout y manejo de error: nunca lanza, devuelve null si falla. */
+async function fetchJson(url: string): Promise<unknown | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as unknown;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Busca un lugar por texto (ej. "Parque de Usaquén") y devuelve su punto. */
 export async function searchPlace(query: string): Promise<GeoPoint | null> {
   if (!query.trim()) return null;
@@ -33,18 +53,12 @@ export async function searchPlace(query: string): Promise<GeoPoint | null> {
     limit: "1",
     "accept-language": "es",
   });
-  try {
-    const res = await fetch(`${SEARCH_ENDPOINT}?${params.toString()}`, {
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as NominatimSearchItem[];
-    const first = data[0];
-    if (!first) return null;
-    return { lat: parseFloat(first.lat), lon: parseFloat(first.lon) };
-  } catch {
-    return null;
-  }
+  const data = (await fetchJson(`${SEARCH_ENDPOINT}?${params.toString()}`)) as
+    | NominatimSearchItem[]
+    | null;
+  const first = data?.[0];
+  if (!first) return null;
+  return { lat: parseFloat(first.lat), lon: parseFloat(first.lon) };
 }
 
 /**
@@ -62,18 +76,11 @@ export async function reverseGeocode(point: GeoPoint): Promise<string | null> {
     "accept-language": "es",
   });
 
-  try {
-    const res = await fetch(`${ENDPOINT}?${params.toString()}`, {
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as NominatimResponse;
-    if (data.name && data.name.trim()) return data.name.trim();
-    if (data.display_name) {
-      return data.display_name.split(",").slice(0, 2).join(",").trim();
-    }
-    return null;
-  } catch {
-    return null;
+  const data = (await fetchJson(`${ENDPOINT}?${params.toString()}`)) as NominatimResponse | null;
+  if (!data) return null;
+  if (data.name && data.name.trim()) return data.name.trim();
+  if (data.display_name) {
+    return data.display_name.split(",").slice(0, 2).join(",").trim();
   }
+  return null;
 }

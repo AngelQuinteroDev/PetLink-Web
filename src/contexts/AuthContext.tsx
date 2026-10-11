@@ -44,6 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("id", userId)
         .maybeSingle();
       setProfile((data as Profile | null) ?? null);
+    } catch {
+      setProfile(null);
     } finally {
       setProfileLoading(false);
     }
@@ -110,7 +112,7 @@ function translateAuthError(message: string): string {
   if (message.includes("Email not confirmed"))
     return "Confirma tu correo antes de iniciar sesión.";
   if (message.includes("already registered"))
-    return "Este correo ya está registrado. Inicia sesión.";
+    return "No pudimos completar el registro. Revisa tu correo o intenta iniciar sesión.";
   if (message.includes("Password should be"))
     return "La contraseña debe tener al menos 6 caracteres.";
   return message;

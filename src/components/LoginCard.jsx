@@ -5,7 +5,7 @@ import RememberForgotRow from "./RememberForgotRow.jsx";
 import PrimaryButton from "./PrimaryButton.jsx";
 import "./LoginCard.css";
 
-function LoginCard({ onSwitchToRegister, onSubmit }) {
+function LoginCard({ onSwitchToRegister, onForgotPassword, onSubmit }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -41,7 +41,7 @@ function LoginCard({ onSwitchToRegister, onSubmit }) {
             <RememberForgotRow
               remember={remember}
               onToggleRemember={() => setRemember(!remember)}
-              onForgotPassword={() => console.log("Ir a recuperar contraseña")}
+              onForgotPassword={() => onForgotPassword?.()}
             />
           </div>
 

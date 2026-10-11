@@ -194,7 +194,13 @@ export default function MapPage() {
                       }
                     >
                       {r.pet_photo_url ? (
-                        <img className="map-row__thumb" src={r.pet_photo_url} alt="" />
+                        <img
+                          className="map-row__thumb"
+                          src={r.pet_photo_url}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                        />
                       ) : (
                         <span className="map-row__thumb" aria-hidden="true" />
                       )}

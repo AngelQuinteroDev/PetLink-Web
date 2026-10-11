@@ -22,7 +22,7 @@ function ForumPost({
 
         <div className="forum-post__avatar">
           {avatarUrl && (
-            <img src={avatarUrl} alt={userName} />
+            <img src={avatarUrl} alt={userName} loading="lazy" decoding="async" />
           )}
         </div>
 
