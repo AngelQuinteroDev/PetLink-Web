@@ -1,0 +1,129 @@
+.legal-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+.legal-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.legal-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 999px;
+  background: var(--pc-surface-strong);
+  color: var(--pc-primary-strong);
+  font-family: var(--pc-font-display);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 9px 16px;
+  cursor: pointer;
+  box-shadow: var(--pc-shadow);
+  text-decoration: none;
+}
+
+.legal-page__tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.legal-page__tab {
+  border: none;
+  border-radius: 999px;
+  background: #e6e0f0;
+  color: var(--pc-muted);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 18px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.legal-page__tab.active {
+  background: var(--pc-primary-strong);
+  color: var(--pc-on-primary);
+}
+
+.legal-page__card {
+  background: var(--pc-surface-strong);
+  border-radius: var(--pc-radius-lg);
+  box-shadow: var(--pc-shadow);
+  padding: 24px 22px 30px;
+}
+
+.legal-page__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 0 4px;
+  color: var(--pc-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.legal-page__footer a {
+  color: var(--pc-primary-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.legal-page__footer a:hover {
+  text-decoration: underline;
+}
+
+/* Contenido de los documentos (compartido con el modal) */
+
+.legal-doc__title {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.legal-doc__updated {
+  margin: 0 0 16px;
+  color: var(--pc-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.legal-doc h2 {
+  margin: 22px 0 6px;
+  font-size: 16px;
+}
+
+.legal-doc p {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--pc-text);
+}
+
+.legal-doc ul {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.legal-doc li {
+  margin-bottom: 4px;
+}
+
+@media (max-width: 480px) {
+  .legal-page__card {
+    padding: 18px 16px 24px;
+  }
+
+  .legal-doc__title {
+    font-size: 19px;
+  }
+}

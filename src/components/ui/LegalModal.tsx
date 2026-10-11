@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { LEGAL_DOCS } from "../../lib/legalDocs";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
+import LegalDocContent from "./LegalDocContent";
 import "./LegalModal.css";
 
 type Doc = "terms" | "privacy";
@@ -65,22 +66,8 @@ export default function LegalModal({ initial = "terms", onClose }: Props) {
           </button>
         </header>
 
-        <div className="legal-modal__scroll">
-          <h2 className="legal-modal__title">{current.title}</h2>
-          <p className="legal-modal__updated">Última actualización: {current.updated}</p>
-
-          {current.blocks.map((block, i) => {
-            if ("h" in block) return <h3 key={i}>{block.h}</h3>;
-            if ("ul" in block)
-              return (
-                <ul key={i}>
-                  {block.ul.map((item, j) => (
-                    <li key={j}>{item}</li>
-                  ))}
-                </ul>
-              );
-            return <p key={i}>{block.p}</p>;
-          })}
+        <div className="legal-modal__scroll legal-doc">
+          <LegalDocContent doc={current} />
         </div>
       </div>
     </div>

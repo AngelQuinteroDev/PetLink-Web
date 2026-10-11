@@ -23,6 +23,7 @@ import VetApplicationPage from "./pages/VetApplicationPage";
 import MyClinicPage from "./pages/MyClinicPage";
 import RequestResetPage from "./pages/RequestResetPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import LegalPage from "./pages/LegalPage";
 
 function FullLoading() {
   return (
@@ -83,6 +84,8 @@ export default function App() {
             }
           />
           <Route path="/restablecer" element={<ResetPasswordPage />} />
+          <Route path="/terminos" element={<LegalPage doc="terms" />} />
+          <Route path="/privacidad" element={<LegalPage doc="privacy" />} />
           <Route
             element={
               <ProtectedArea>

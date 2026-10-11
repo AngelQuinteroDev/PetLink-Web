@@ -14,12 +14,12 @@ export type LegalDoc = {
  * Debe coincidir con el campo `updated` de ambos documentos y se registra
  * en `private_profiles.terms_version` al crear la cuenta (Ley 1581).
  */
-export const LEGAL_VERSION = "2026-10-10";
+export const LEGAL_VERSION = "2026-10-11";
 
 export const LEGAL_DOCS: { terms: LegalDoc; privacy: LegalDoc } = {
   terms: {
     title: "Términos y Condiciones de Uso",
-    updated: "10 de octubre de 2026",
+    updated: "11 de octubre de 2026",
     blocks: [
       { h: "1. Aceptación de los términos" },
       { p: "Bienvenido(a) a PetClue, una aplicación digital orientada al bienestar animal que busca facilitar el cuidado de las mascotas, el acceso a información de interés, la localización de servicios veterinarios y la colaboración entre personas que comparten un interés por la protección animal." },
@@ -28,8 +28,7 @@ export const LEGAL_DOCS: { terms: LegalDoc; privacy: LegalDoc } = {
 
       { h: "2. Identificación de PetClue" },
       { p: "PetClue es un proyecto digital orientado a la creación de una comunidad para el cuidado y bienestar de los animales de compañía." },
-      { ul: ["Responsable de la plataforma: [Nombre completo del responsable o razón social].", "Correo electrónico de contacto: [Correo electrónico oficial].", "Domicilio: [Ciudad y país]."] },
-      { p: "Mientras se completan los datos anteriores, estos campos se consideran pendientes de definición para la versión definitiva del documento." },
+      { ul: ["Responsable de la plataforma: PetClue.", "Correo electrónico de contacto: soporte@petclue.co.", "Domicilio: Bogotá D.C., Colombia."] },
 
       { h: "3. Descripción de los servicios" },
       { p: "PetClue ofrece funcionalidades que permiten a sus usuarios interactuar con información y recursos relacionados con el bienestar animal. Entre ellas se encuentran:" },
@@ -129,14 +128,13 @@ export const LEGAL_DOCS: { terms: LegalDoc; privacy: LegalDoc } = {
 
       { h: "20. Contacto" },
       { p: "Para realizar consultas relacionadas con estos términos, reportar un uso indebido o solicitar información sobre la plataforma, el usuario podrá comunicarse a través de:" },
-      { ul: ["Correo electrónico: [Correo oficial de PetClue].", "Responsable de la plataforma: [Nombre o razón social].", "Dirección: [Domicilio, si corresponde]."] },
-      { p: "La información de contacto deberá completarse antes de publicar la versión definitiva de este documento." },
+      { ul: ["Correo electrónico: soporte@petclue.co.", "Sección de ayuda: «Ayuda y soporte» dentro de la aplicación.", "Domicilio: Bogotá D.C., Colombia."] },
     ],
   },
 
   privacy: {
     title: "Política de Privacidad y Tratamiento de Datos Personales",
-    updated: "10 de octubre de 2026",
+    updated: "11 de octubre de 2026",
     blocks: [
       { h: "1. Introducción" },
       { p: "PetClue reconoce la importancia de proteger la privacidad de sus usuarios y de tratar de manera responsable la información personal que se recopila mediante la plataforma. Esta Política de Privacidad tiene como finalidad informar a los usuarios sobre los datos personales que pueden ser recolectados, las finalidades de su tratamiento, las condiciones de almacenamiento y consulta, las medidas generales de protección y los mecanismos disponibles para ejercer sus derechos." },
@@ -144,8 +142,7 @@ export const LEGAL_DOCS: { terms: LegalDoc; privacy: LegalDoc } = {
 
       { h: "2. Identificación del responsable del tratamiento" },
       { p: "El responsable del tratamiento será la persona natural o jurídica que determine las finalidades y los medios para su tratamiento." },
-      { ul: ["Nombre o razón social: [Nombre completo del responsable].", "Identificación: [Documento de identidad o NIT, según corresponda].", "Domicilio: [Ciudad y país].", "Correo electrónico para consultas y reclamaciones: [Correo oficial].", "Canal de atención: [Formulario, dirección electrónica o mecanismo habilitado]."] },
-      { p: "Estos datos deberán completarse con la información real del responsable antes de poner la aplicación en funcionamiento." },
+      { ul: ["Nombre o razón social: Ángel Gabriel Quintero Morales (PetClue).", "Identificación: persona natural; documento de identidad disponible a solicitud a través de los canales de contacto.", "Domicilio: Bogotá D.C., Colombia.", "Correo electrónico para consultas y reclamaciones: soporte@petclue.co.", "Canal de atención: correo electrónico y sección «Ayuda y soporte» de la aplicación."] },
 
       { h: "3. Datos personales que puede recopilar PetClue" },
       { p: "De acuerdo con las funcionalidades que utilice cada persona, PetClue podrá tratar las siguientes categorías de información:" },
@@ -260,7 +257,7 @@ export const LEGAL_DOCS: { terms: LegalDoc; privacy: LegalDoc } = {
 
       { h: "19. Contacto y responsable de privacidad" },
       { p: "Para consultas, reclamaciones o solicitudes relacionadas con el tratamiento de datos personales, el titular podrá comunicarse a través de:" },
-      { ul: ["Responsable del tratamiento: [Nombre o razón social].", "Correo electrónico: [Correo oficial para protección de datos].", "Dirección: [Domicilio, si corresponde].", "Canal adicional: [Formulario o mecanismo habilitado]."] },
+      { ul: ["Responsable del tratamiento: Ángel Gabriel Quintero Morales (PetClue).", "Correo electrónico: soporte@petclue.co.", "Dirección: Bogotá D.C., Colombia.", "Canal de atención: sección «Ayuda y soporte» de la aplicación."] },
       { p: "PetClue atenderá las solicitudes conforme a la legislación colombiana y mantendrá disponibles los canales de contacto para el ejercicio de los derechos de los titulares." },
 
       { h: "20. Marco normativo" },
