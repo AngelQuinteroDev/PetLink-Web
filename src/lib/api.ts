@@ -152,9 +152,12 @@ export async function markNotificationRead(id: string): Promise<void> {
 }
 
 export async function myPets(): Promise<Pet[]> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) return [];
   const { data, error } = await supabase
     .from("pets")
     .select("*, species:species(id, name)")
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as unknown as Pet[];
