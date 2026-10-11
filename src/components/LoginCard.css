@@ -77,6 +77,45 @@
   margin-top: 2px;
 }
 
+.register-card__terms--error {
+  color: #c02626;
+}
+
+.register-card__terms--error input {
+  outline: 2px solid #c02626;
+  outline-offset: 1px;
+}
+
+.register-card__terms-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #ae77ff;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.register-card__terms-link:hover {
+  color: #7519ff;
+}
+
+.register-card__terms-link:focus-visible {
+  outline: 2px solid #7519ff;
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+
+.register-card__terms-error {
+  margin: 6px 6px 0;
+  color: #c02626;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .login-card__signup-link {
   background: none;
   border: none;
