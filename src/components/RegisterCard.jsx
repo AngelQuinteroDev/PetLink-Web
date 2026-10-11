@@ -43,14 +43,17 @@ function RegisterCard({ onSwitchToLogin, onSubmit }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                <FormField
-                  label="Contraseña"
-                  icon={<Lock size={16} />}
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+              <FormField
+                label="Contraseña"
+                icon={<Lock size={16} />}
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <p className="register-card__password-hint">
+                Mínimo 12 caracteres, con mayúscula, minúscula, número y símbolo.
+              </p>
               </div>
 
               <label

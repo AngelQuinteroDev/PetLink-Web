@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { isWeakPasswordError, PASSWORD_POLICY_HINT } from "./authErrors";
 import type {
   CommentReport,
   CommentRow,
@@ -460,7 +461,7 @@ export async function changePassword(input: {
   });
   if (reauth.error) return "Tu contraseña actual no es correcta.";
   const { error } = await supabase.auth.updateUser({ password: input.newPassword });
-  if (error) return error.message;
+  if (error) return isWeakPasswordError(error) ? PASSWORD_POLICY_HINT : error.message;
   await supabase.auth.signOut({ scope: "others" });
   return null;
 }
@@ -689,7 +690,8 @@ export async function requestPasswordReset(email: string): Promise<string | null
 
 export async function setNewPassword(newPassword: string): Promise<string | null> {
   const { error } = await supabase.auth.updateUser({ password: newPassword });
-  return error ? error.message : null;
+  if (!error) return null;
+  return isWeakPasswordError(error) ? PASSWORD_POLICY_HINT : error.message;
 }
 
 export async function myVetApplication(): Promise<VetApplication | null> {
