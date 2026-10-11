@@ -499,6 +499,34 @@
   font-weight: 600;
 }
 
+/* ---------- Formulario de mascota: eliminar ---------- */
+
+.pet-form__danger {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pc-border);
+}
+
+.pet-form__delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid #e0554f;
+  border-radius: 999px;
+  background: transparent;
+  color: #e0554f;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.pet-form__delete:hover {
+  background: #ffecec;
+}
+
 .profile-settings {
   display: flex;
   flex-direction: column;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Camera } from "lucide-react";
 import LocationField from "../components/report/LocationField";
@@ -49,6 +49,7 @@ export default function FoundPetReportPage() {
   const [point, setPoint] = useState<GeoPoint | null>(null);
 
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function FoundPetReportPage() {
   const speciesOptions = species.map((s) => ({ value: s.id, label: s.name }));
 
   async function submit() {
+    if (busyRef.current) return;
     setError(null);
     let finalPoint = point;
     if (!finalPoint && placeText.trim()) {
@@ -78,6 +80,7 @@ export default function FoundPetReportPage() {
       return;
     }
 
+    busyRef.current = true;
     setBusy(true);
     try {
       const files = mainPhoto ? [mainPhoto, ...extraPhotos] : extraPhotos;
@@ -103,6 +106,7 @@ export default function FoundPetReportPage() {
     } catch (err) {
       console.error("createAlert (found) falló:", err);
       setError("No pudimos publicar la alerta. Intenta de nuevo.");
+      busyRef.current = false;
       setBusy(false);
     }
   }
@@ -230,7 +234,7 @@ export default function FoundPetReportPage() {
         )}
 
         <div className="pc-form-actions" style={{ display: "flex", gap: 10 }}>
-          <PrimaryButton onClick={() => void submit()} type="button">
+          <PrimaryButton onClick={() => void submit()} type="button" disabled={busy}>
             {busy ? "Publicando…" : "Publicar alerta"}
           </PrimaryButton>
           <button type="button" className="pc-outline-btn" onClick={() => navigate(-1)}>

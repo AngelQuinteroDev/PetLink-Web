@@ -158,6 +158,7 @@ export async function myPets(): Promise<Pet[]> {
     .from("pets")
     .select("*, species:species(id, name)")
     .eq("user_id", userId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as unknown as Pet[];
@@ -236,6 +237,18 @@ export async function updatePet(
   if (error) throw error;
 }
 
+/** Soft delete: la mascota deja de mostrarse al usuario pero se conserva en la BD. */
+export async function deletePet(id: string): Promise<void> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) throw new Error("No hay sesión activa.");
+  const { error } = await supabase
+    .from("pets")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
 export async function getMyPet(id: string): Promise<Pet | null> {
   const userId = (await supabase.auth.getUser()).data.user?.id;
   if (!userId) return null;
@@ -244,6 +257,7 @@ export async function getMyPet(id: string): Promise<Pet | null> {
     .select("*, species:species(id, name)")
     .eq("id", id)
     .eq("user_id", userId)
+    .is("deleted_at", null)
     .maybeSingle();
   if (error) throw error;
   return (data as unknown as Pet | null) ?? null;
