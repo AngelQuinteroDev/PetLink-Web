@@ -12,6 +12,7 @@ import type {
   Pet,
   PlaceNear,
   PrivateProfile,
+  ReportMatch,
   ReportNear,
   Species,
   VetApplication,
@@ -586,6 +587,58 @@ export async function moderateCommentAndResolve(
     p_hidden: hidden,
     p_status: status,
   });
+  if (error) throw error;
+}
+
+// ---------------------------------------------------------------
+// Coincidencias "¡La encontré!" (report_matches)
+// ---------------------------------------------------------------
+
+export async function createReportMatch(input: {
+  reportId: string;
+  message?: string | null;
+  contact?: string | null;
+}): Promise<void> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) throw new Error("No hay sesión activa.");
+  const { error } = await supabase.from("report_matches").insert({
+    report_id: input.reportId,
+    finder_id: userId,
+    message: input.message?.trim() || null,
+    contact: input.contact?.trim() || null,
+  });
+  if (error) throw error;
+}
+
+export async function listReportMatches(reportId: string): Promise<ReportMatch[]> {
+  const { data, error } = await supabase
+    .from("report_matches")
+    .select(
+      "id, report_id, finder_id, message, contact, status, created_at, resolved_at, finder:profiles!report_matches_finder_id_fkey(name)"
+    )
+    .eq("report_id", reportId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data as unknown as ReportMatch[];
+}
+
+export async function resolveReportMatch(
+  matchId: string,
+  status: "confirmed" | "dismissed"
+): Promise<void> {
+  const { error } = await supabase.from("report_matches").update({ status }).eq("id", matchId);
+  if (error) throw error;
+}
+
+/** Cierra el reporte del dueño ("Ya la recuperé"); la alerta desaparece y la mascota vuelve a activa. */
+export async function resolveMyReport(reportId: string): Promise<void> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) throw new Error("No hay sesión activa.");
+  const { error } = await supabase
+    .from("reports")
+    .update({ status: "resolved" })
+    .eq("id", reportId)
+    .eq("user_id", userId);
   if (error) throw error;
 }
 

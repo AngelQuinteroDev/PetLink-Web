@@ -3,15 +3,26 @@ import { useNavigate } from "react-router-dom";
 import { Camera } from "lucide-react";
 import LocationField from "../components/report/LocationField";
 import PhotoGridField from "../components/report/PhotoGridField";
+import PetCard from "../components/PetCard.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
+import ConfirmModal from "../components/ui/ConfirmModal";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
+import { LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
-import { createAlert, getPostByReportId, listSpecies, uploadPhotos } from "../lib/api";
+import {
+  createAlert,
+  createReportMatch,
+  getPostByReportId,
+  listSpecies,
+  reportsNear,
+  uploadPhotos,
+} from "../lib/api";
 import { approximatePoint } from "../lib/geo";
+import { dayLabel } from "../lib/format";
 import { searchPlace } from "../lib/geocode";
 import { usePrefs } from "../hooks/usePrefs";
-import type { GeoPoint, PetSex, PetSize, Species } from "../lib/types";
+import type { GeoPoint, PetSex, PetSize, ReportNear, Species } from "../lib/types";
 import "../components/report/report.css";
 
 const MAX_EXTRA_PHOTOS = 3;
@@ -30,7 +41,7 @@ const SIZE_OPTIONS: { value: PetSize; label: string }[] = [
 
 export default function FoundPetReportPage() {
   const navigate = useNavigate();
-  const { point: userPoint, loading: locLoading } = useUserLocation();
+  const { point: userPoint, radius, loading: locLoading } = useUserLocation();
   const { prefs } = usePrefs();
 
   const [species, setSpecies] = useState<Species[]>([]);
@@ -52,6 +63,17 @@ export default function FoundPetReportPage() {
   const busyRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Paso previo: alertas de mascotas perdidas cerca para hacer match directo
+  const [step, setStep] = useState<"select" | "form">("select");
+  const [nearLost, setNearLost] = useState<ReportNear[]>([]);
+  const [loadingNear, setLoadingNear] = useState(true);
+  const [selected, setSelected] = useState<ReportNear | null>(null);
+  const [matchMessage, setMatchMessage] = useState("");
+  const [matchContact, setMatchContact] = useState("");
+  const [matchBusy, setMatchBusy] = useState(false);
+  const [matchError, setMatchError] = useState<string | null>(null);
+  const [matchSent, setMatchSent] = useState(false);
+
   useEffect(() => {
     void listSpecies()
       .then(setSpecies)
@@ -59,10 +81,60 @@ export default function FoundPetReportPage() {
   }, []);
 
   useEffect(() => {
+    if (locLoading) return;
+    let active = true;
+    void (async () => {
+      try {
+        const near = await reportsNear(userPoint, radius, 30);
+        if (active) setNearLost(near.filter((r) => r.type === "lost"));
+      } catch {
+        if (active) setNearLost([]);
+      } finally {
+        if (active) setLoadingNear(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [locLoading, userPoint, radius]);
+
+  useEffect(() => {
+    if (!loadingNear && nearLost.length === 0) setStep("form");
+  }, [loadingNear, nearLost]);
+
+  useEffect(() => {
     if (!locLoading && !point && userPoint) setPoint(userPoint);
   }, [locLoading, point, userPoint]);
 
   const speciesOptions = species.map((s) => ({ value: s.id, label: s.name }));
+
+  async function sendMatch() {
+    if (!selected || matchBusy) return;
+    setMatchBusy(true);
+    setMatchError(null);
+    try {
+      await createReportMatch({
+        reportId: selected.id,
+        message: matchMessage,
+        contact: matchContact,
+      });
+      setMatchSent(true);
+    } catch (err) {
+      const message =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message: unknown }).message)
+          : "";
+      if (message.includes("duplicate")) {
+        setMatchError("Ya avisaste al dueño sobre esta mascota.");
+      } else if (message.includes("muchas coincidencias")) {
+        setMatchError("Este reporte ya tiene muchas coincidencias recientes.");
+      } else {
+        setMatchError("No pudimos enviar tu aviso. Intenta de nuevo.");
+      }
+    } finally {
+      setMatchBusy(false);
+    }
+  }
 
   async function submit() {
     if (busyRef.current) return;
@@ -121,6 +193,48 @@ export default function FoundPetReportPage() {
         <span style={{ width: 42 }} />
       </div>
 
+      {step === "select" && (
+        <div className="match-select">
+          <h2 className="pc-section-title">¿Es alguna de estas mascotas perdidas?</h2>
+          <p className="pc-muted match-select__hint">
+            Revisa las alertas activas cerca de ti. Si reconoces a la mascota que
+            encontraste, avisa al dueño sin crear una publicación nueva.
+          </p>
+
+          {loadingNear && <LoadingState label="Buscando alertas cerca…" />}
+
+          {!loadingNear && (
+            <>
+              <div className="pc-cards-grid">
+                {nearLost.map((r) => (
+                  <PetCard
+                    key={r.id}
+                    status="Perdido"
+                    name={r.pet_name ?? r.species_name ?? "Mascota"}
+                    location={`${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`}
+                    photoUrl={r.pet_photo_url ?? undefined}
+                    onClick={() => {
+                      setSelected(r);
+                      setMatchMessage("");
+                      setMatchContact("");
+                      setMatchSent(false);
+                      setMatchError(null);
+                    }}
+                  />
+                ))}
+              </div>
+
+              <div className="match-select__actions">
+                <button type="button" className="pc-outline-btn" onClick={() => setStep("form")}>
+                  No es ninguna — publicar alerta de mascota encontrada
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {step === "form" && (
       <div className="pc-form-card">
         <div className="pc-field">
           <span className="pc-field-label">Agrega una foto clara de la mascota</span>
@@ -242,6 +356,72 @@ export default function FoundPetReportPage() {
           </button>
         </div>
       </div>
+      )}
+
+      {selected && (
+        <ConfirmModal
+          title={
+            matchSent
+              ? "Aviso enviado"
+              : `¿Encontraste a ${selected.pet_name ?? "esta mascota"}?`
+          }
+          confirmLabel={matchSent ? "Entendido" : matchBusy ? "Enviando…" : "Avisar al dueño"}
+          onClose={() => {
+            setSelected(null);
+            if (matchSent) navigate("/");
+          }}
+          onConfirm={() => {
+            if (matchSent) {
+              setSelected(null);
+              navigate("/");
+              return;
+            }
+            void sendMatch();
+          }}
+        >
+          {matchSent ? (
+            <>
+              <p>
+                Avisamos al dueño de la alerta. La alerta sigue activa hasta que el dueño
+                confirme que la recuperó.
+              </p>
+              <p>Si dejaste un contacto, el dueño podrá usarlo para comunicarse contigo.</p>
+            </>
+          ) : (
+            <>
+              <div className="pc-field">
+                <label className="pc-field-label" htmlFor="match-message">
+                  ¿Dónde y cómo la encontraste? (opcional)
+                </label>
+                <textarea
+                  id="match-message"
+                  className="pc-textarea"
+                  placeholder="Ej: La encontré en el parque, lleva collar rojo…"
+                  value={matchMessage}
+                  onChange={(e) => setMatchMessage(e.target.value)}
+                />
+              </div>
+              <div className="pc-field">
+                <label className="pc-field-label" htmlFor="match-contact">
+                  Tu contacto (opcional, solo lo ve el dueño)
+                </label>
+                <input
+                  id="match-contact"
+                  className="pc-input"
+                  placeholder="Teléfono o correo"
+                  value={matchContact}
+                  onChange={(e) => setMatchContact(e.target.value)}
+                />
+              </div>
+              {matchError && (
+                <p className="pc-error-text" role="alert">
+                  {matchError}
+                </p>
+              )}
+            </>
+          )}
+        </ConfirmModal>
+      )}
     </div>
   );
 }
