@@ -8,7 +8,9 @@ import PrimaryButton from "../components/PrimaryButton.jsx";
 import { LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { createAlert, getPostByReportId, myPets, uploadPhotos } from "../lib/api";
+import { approximatePoint } from "../lib/geo";
 import { searchPlace } from "../lib/geocode";
+import { usePrefs } from "../hooks/usePrefs";
 import type { GeoPoint, Pet } from "../lib/types";
 import "../components/report/report.css";
 
@@ -25,6 +27,7 @@ function nowTime(): string {
 export default function MiPetReportPage() {
   const navigate = useNavigate();
   const { point: userPoint, loading: locLoading } = useUserLocation();
+  const { prefs } = usePrefs();
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [petsLoading, setPetsLoading] = useState(true);
@@ -81,7 +84,7 @@ export default function MiPetReportPage() {
         petId: petId || null,
         type: "lost",
         description: description || "Mascota perdida",
-        point: finalPoint,
+        point: prefs.exactLocation ? finalPoint : approximatePoint(finalPoint),
         photos: photoUrls,
         lostAt,
       });

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, CalendarDays, Heart, MapPin, MessageCircle } from "lucide-react";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
+import { usePrefs } from "../hooks/usePrefs";
 import {
   getCommentById,
   getPostByReportId,
@@ -22,6 +23,7 @@ const TYPE_ICONS: Record<string, typeof Bell> = {
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const { prefs } = usePrefs();
   const [items, setItems] = useState<NotificationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +101,10 @@ export default function NotificationsPage() {
     }
   }
 
+  const visible = items
+    .filter((n) => prefs.postReplies || n.type !== "post_reply")
+    .filter((n) => prefs.reportUpdates || n.type !== "geo_alert");
+
   return (
     <div>
       <div className="pc-page-header">
@@ -117,7 +123,7 @@ export default function NotificationsPage() {
       {loading && <LoadingState label="Cargando notificaciones…" />}
       {!loading && error && <ErrorState message={error} onRetry={() => void load()} />}
 
-      {!loading && !error && items.length === 0 && (
+      {!loading && !error && visible.length === 0 && (
         <EmptyState
           icon={<Bell size={40} strokeWidth={1.6} />}
           title="Todo tranquilo por aquí"
@@ -126,7 +132,7 @@ export default function NotificationsPage() {
       )}
 
       <div className="notif-list">
-        {items.map((n) => {
+        {visible.map((n) => {
           const Icon = TYPE_ICONS[n.type] ?? Bell;
           return (
             <button

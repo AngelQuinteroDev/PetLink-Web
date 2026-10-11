@@ -4,12 +4,15 @@ import { Bell, Heart, Map as MapIcon, MessageCircle } from "lucide-react";
 import AlertNotification from "../components/AlertNotification.jsx";
 import PetCard from "../components/PetCard.jsx";
 import ForumPost from "../components/ForumPost.jsx";
+import QuickActions from "../components/QuickActions";
+import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
+import { usePrefs } from "../hooks/usePrefs";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { getFeed, reportsNear } from "../lib/api";
 import { hasGeoDecision } from "../lib/geo";
-import { dayLabel, distanceLabel, timeAgo } from "../lib/format";
+import { ageFromBirthDate, dayLabel, distanceLabel, timeAgo } from "../lib/format";
 import { supabase } from "../lib/supabase";
 import type { FeedItem, GeoPoint, Pet, ReportNear } from "../lib/types";
 import "../styles/pages.css";
@@ -24,6 +27,9 @@ export default function HomePage() {
   const [adoption, setAdoption] = useState<Pet[]>([]);
   const [alertDismissed, setAlertDismissed] = useState(false);
   const [showAllAdoption, setShowAllAdoption] = useState(false);
+  const [showAllFound, setShowAllFound] = useState(false);
+  const [detail, setDetail] = useState<PetDetailData | null>(null);
+  const { prefs } = usePrefs();
   const { point, radius, consent, loading: locLoading, requestConsent } = useUserLocation();
   const askedRef = useRef(false);
 
@@ -64,15 +70,43 @@ export default function HomePage() {
   }, [locLoading, consent, requestConsent]);
 
   const geoAlert = reports.find((r) => r.type === "lost");
-  const found = reports.filter((r) => r.type === "found").slice(0, 4);
-  const lost = reports.filter((r) => r.type === "lost").slice(0, 4);
+  const found = reports.filter((r) => r.type === "found");
+  const lost = reports.filter((r) => r.type === "lost");
+
+  function reportDetail(r: ReportNear): PetDetailData {
+    return {
+      name: r.pet_name ?? r.species_name ?? "Mascota",
+      photoUrl: r.pet_photo_url,
+      location: `${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`,
+      status: r.type === "lost" ? "Perdido" : "Encontrado",
+      species: r.species_name,
+      marks: r.description || null,
+      postId: r.post_id,
+    };
+  }
+
+  function petDetail(p: Pet): PetDetailData {
+    return {
+      name: p.name,
+      photoUrl: p.photo_url,
+      location: `${p.species?.name ?? "Mascota"} · ${dayLabel(p.created_at).toLowerCase()}`,
+      status: p.species?.name ?? "Mascota",
+      species: p.species?.name,
+      breed: p.breed,
+      age: ageFromBirthDate(p.birth_date),
+      sex: p.sex,
+      size: p.size,
+      color: p.color,
+      marks: p.description,
+    };
+  }
 
   return (
     <div className="home">
       <header className="home__header">
         <div>
           <p className="home__greeting">Hola, {profile?.name ?? "amigo"}</p>
-          <h1 className="pc-title home__title">Bienvenido de vuelta</h1>
+          <h1 className="pc-title home__title">Tu comunidad</h1>
         </div>
         <button
           type="button"
@@ -84,12 +118,17 @@ export default function HomePage() {
         </button>
       </header>
 
+      <QuickActions
+        onLost={() => navigate("/reportar/mi-mascota")}
+        onFound={() => navigate("/reportar/encontrada")}
+      />
+
       {loading && <LoadingState label="Cargando tu comunidad…" />}
       {!loading && error && <ErrorState message={error} onRetry={() => void load(point, radius)} />}
 
       {!loading && !error && (
         <>
-          {geoAlert && !alertDismissed && (
+          {prefs.petAlerts && geoAlert && !alertDismissed && (
             <AlertNotification
               description={
                 `${
@@ -133,9 +172,7 @@ export default function HomePage() {
                     name={r.pet_name ?? r.species_name ?? "Mascota"}
                     location={`${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`}
                     photoUrl={r.pet_photo_url ?? undefined}
-                    onClick={() =>
-                      r.post_id ? navigate(`/comunidad?post=${r.post_id}`) : navigate("/mapa")
-                    }
+                    onClick={() => setDetail(reportDetail(r))}
                   />
                 ))}
               </div>
@@ -200,10 +237,11 @@ export default function HomePage() {
                 {(showAllAdoption ? adoption : adoption.slice(0, 4)).map((p) => (
                   <PetCard
                     key={p.id}
-                    status="Adopción"
+                    status={p.species?.name ?? "Mascota"}
                     name={p.name}
-                    location={`${p.species?.name ?? "Mascota"} · ${dayLabel(p.created_at).toLowerCase()}`}
+                    location={`${p.breed || p.species?.name || "Mascota"} · ${dayLabel(p.created_at).toLowerCase()}`}
                     photoUrl={p.photo_url ?? undefined}
+                    onClick={() => setDetail(petDetail(p))}
                   />
                 ))}
               </div>
@@ -213,44 +251,65 @@ export default function HomePage() {
           <section className="home__section">
             <div className="home__section-header">
               <h2 className="pc-section-title">Encontrados</h2>
+              {found.length > 4 && (
+                <button
+                  type="button"
+                  className="pc-pill-btn"
+                  onClick={() => setShowAllFound((v) => !v)}
+                >
+                  <Heart size={15} /> {showAllFound ? "Ver menos" : "Ver todo"}
+                </button>
+              )}
             </div>
-            <div className="pc-cards-grid">
-              {found.map((r) => (
-                <PetCard
-                  key={r.id}
-                  status="Encontrado"
-                  name={r.pet_name ?? r.species_name ?? "Mascota"}
-                  location={`${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`}
-                  photoUrl={r.pet_photo_url ?? undefined}
-                  onClick={() =>
-                    r.post_id ? navigate(`/comunidad?post=${r.post_id}`) : navigate("/mapa")
-                  }
-                />
-              ))}
-            </div>
+            {found.length === 0 ? (
+              <EmptyState
+                title="Aún no hay mascotas encontradas"
+                body="Cuando alguien reporte una mascota encontrada cerca, aparecerá aquí."
+              />
+            ) : (
+              <div className="pc-cards-grid">
+                {(showAllFound ? found : found.slice(0, 4)).map((r) => (
+                  <PetCard
+                    key={r.id}
+                    status="Encontrado"
+                    name={r.pet_name ?? r.species_name ?? "Mascota"}
+                    location={`${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`}
+                    photoUrl={r.pet_photo_url ?? undefined}
+                    onClick={() => setDetail(reportDetail(r))}
+                  />
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="home__section">
             <div className="home__section-header">
               <h2 className="pc-section-title">Pérdidos</h2>
             </div>
-            <div className="pc-cards-grid">
-              {lost.map((r) => (
-                <PetCard
-                  key={r.id}
-                  status="Perdido"
-                  name={r.pet_name ?? r.species_name ?? "Mascota"}
-                  location={`${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`}
-                  photoUrl={r.pet_photo_url ?? undefined}
-                  onClick={() =>
-                    r.post_id ? navigate(`/comunidad?post=${r.post_id}`) : navigate("/mapa")
-                  }
-                />
-              ))}
-            </div>
+            {lost.length === 0 ? (
+              <EmptyState
+                title="Sin mascotas perdidas cerca"
+                body="Si alguien reporta una mascota perdida en tu zona, la verás aquí."
+              />
+            ) : (
+              <div className="pc-cards-grid">
+                {lost.slice(0, 4).map((r) => (
+                  <PetCard
+                    key={r.id}
+                    status="Perdido"
+                    name={r.pet_name ?? r.species_name ?? "Mascota"}
+                    location={`${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`}
+                    photoUrl={r.pet_photo_url ?? undefined}
+                    onClick={() => setDetail(reportDetail(r))}
+                  />
+                ))}
+              </div>
+            )}
           </section>
         </>
       )}
+
+      <PetDetailModal data={detail} onClose={() => setDetail(null)} />
     </div>
   );
 }

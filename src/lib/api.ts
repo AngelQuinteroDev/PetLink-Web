@@ -202,6 +202,76 @@ export async function createPet(input: {
   if (error) throw error;
 }
 
+export async function updatePet(
+  id: string,
+  input: {
+    name: string;
+    speciesId: string | null;
+    description: string | null;
+    birthDate: string | null;
+    photoUrl: string | null;
+    sex?: "male" | "female" | "unknown" | null;
+    breed?: string | null;
+    color?: string | null;
+    size?: "small" | "medium" | "large" | null;
+  }
+): Promise<void> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) throw new Error("No hay sesión activa.");
+  const { error } = await supabase
+    .from("pets")
+    .update({
+      name: input.name,
+      species_id: input.speciesId,
+      description: input.description,
+      birth_date: input.birthDate,
+      photo_url: input.photoUrl,
+      sex: input.sex ?? null,
+      breed: input.breed ?? null,
+      color: input.color ?? null,
+      size: input.size ?? null,
+    })
+    .eq("id", id)
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
+export async function getMyPet(id: string): Promise<Pet | null> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) return null;
+  const { data, error } = await supabase
+    .from("pets")
+    .select("*, species:species(id, name)")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as unknown as Pet | null) ?? null;
+}
+
+export async function getMyStats(): Promise<{ posts: number; activeReports: number }> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) return { posts: 0, activeReports: 0 };
+  const [posts, reports] = await Promise.all([
+    supabase.from("posts").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    supabase
+      .from("reports")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "open"),
+  ]);
+  if (posts.error) throw posts.error;
+  if (reports.error) throw reports.error;
+  return { posts: posts.count ?? 0, activeReports: reports.count ?? 0 };
+}
+
+export async function updateProfileName(name: string): Promise<void> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) throw new Error("No hay sesión activa.");
+  const { error } = await supabase.from("profiles").update({ name }).eq("id", userId);
+  if (error) throw error;
+}
+
 export async function getPrivateProfile(): Promise<PrivateProfile | null> {
   const { data, error } = await supabase
     .from("private_profiles")

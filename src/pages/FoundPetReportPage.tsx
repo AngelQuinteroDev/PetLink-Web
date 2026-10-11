@@ -8,7 +8,9 @@ import ChipGroup from "../components/ui/ChipGroup";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { createAlert, getPostByReportId, listSpecies, uploadPhotos } from "../lib/api";
+import { approximatePoint } from "../lib/geo";
 import { searchPlace } from "../lib/geocode";
+import { usePrefs } from "../hooks/usePrefs";
 import type { GeoPoint, PetSex, PetSize, Species } from "../lib/types";
 import "../components/report/report.css";
 
@@ -29,6 +31,7 @@ const SIZE_OPTIONS: { value: PetSize; label: string }[] = [
 export default function FoundPetReportPage() {
   const navigate = useNavigate();
   const { point: userPoint, loading: locLoading } = useUserLocation();
+  const { prefs } = usePrefs();
 
   const [species, setSpecies] = useState<Species[]>([]);
   const [speciesId, setSpeciesId] = useState<string | null>(null);
@@ -87,7 +90,7 @@ export default function FoundPetReportPage() {
         petId: null,
         type: "found",
         description,
-        point: finalPoint,
+        point: prefs.exactLocation ? finalPoint : approximatePoint(finalPoint),
         speciesId,
         sex,
         breed: breed.trim() || null,

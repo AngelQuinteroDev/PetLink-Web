@@ -1,29 +1,55 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, LogOut, PawPrint, Plus, ShieldCheck } from "lucide-react";
+import {
+  HelpCircle,
+  Lock,
+  LogOut,
+  PawPrint,
+  Plus,
+  Settings as SettingsIcon,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import PetCard from "../components/PetCard.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
+import ProfileStats from "../components/ProfileStats";
+import SettingsRow from "../components/ui/SettingsRow";
+import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
+import EditProfileModal from "../components/ui/EditProfileModal";
+import ConfirmModal from "../components/ui/ConfirmModal";
 import { EmptyState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
-import { useUserLocation } from "../hooks/useUserLocation";
-import { myPets } from "../lib/api";
-import { dayLabel } from "../lib/format";
+import { usePrefs } from "../hooks/usePrefs";
+import { getMyStats, myPets, updateProfileName } from "../lib/api";
+import { ageFromBirthDate } from "../lib/format";
 import type { Pet } from "../lib/types";
 import "../styles/pages.css";
+import "../styles/settings.css";
+
+const ROLE_LABELS: Record<string, string> = {
+  owner: "Miembro",
+  vet: "Veterinario",
+  foundation: "Refugio",
+  admin: "Administrador",
+};
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { profile, signOut } = useAuth();
-  const { radius, consent, requestConsent, saveRadius } = useUserLocation();
+  const { profile, signOut, refreshProfile } = useAuth();
+  const { prefs, setPref } = usePrefs();
   const [pets, setPets] = useState<Pet[]>([]);
-  const [radiusInput, setRadiusInput] = useState(5000);
+  const [stats, setStats] = useState({ posts: 0, activeReports: 0 });
   const [loading, setLoading] = useState(true);
-  const [saved, setSaved] = useState(false);
+  const [detail, setDetail] = useState<PetDetailData | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setPets(await myPets());
+      const [myPetsList, myStats] = await Promise.all([myPets(), getMyStats()]);
+      setPets(myPetsList);
+      setStats(myStats);
     } finally {
       setLoading(false);
     }
@@ -33,20 +59,42 @@ export default function ProfilePage() {
     void load();
   }, [load]);
 
-  useEffect(() => {
-    setRadiusInput(radius);
-  }, [radius]);
+  function petDetail(p: Pet): PetDetailData {
+    return {
+      name: p.name,
+      photoUrl: p.photo_url,
+      location: `${p.breed || p.species?.name || "Mascota"}`,
+      status: p.species?.name ?? "Mascota",
+      species: p.species?.name,
+      breed: p.breed,
+      age: ageFromBirthDate(p.birth_date),
+      sex: p.sex,
+      size: p.size,
+      color: p.color,
+      marks: p.description,
+    };
+  }
 
-  async function saveSettings() {
-    await saveRadius(radiusInput);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  async function saveProfile(name: string, city: string) {
+    await updateProfileName(name);
+    setPref("city", city);
+    await refreshProfile();
   }
 
   return (
     <div>
       <div className="pc-page-header">
-        <h1 className="pc-title">Perfil</h1>
+        <h1 className="pc-title" style={{ textAlign: "left" }}>
+          Mi perfil
+        </h1>
+        <button
+          type="button"
+          className="pc-icon-btn"
+          onClick={() => navigate("/ajustes")}
+          aria-label="Ajustes"
+        >
+          <SettingsIcon size={18} />
+        </button>
       </div>
 
       <div className="profile-card">
@@ -55,15 +103,24 @@ export default function ProfilePage() {
         </span>
         <div>
           <p className="profile-card__name">{profile?.name ?? "…"}</p>
-          <span className="pc-badge pc-badge--question">{profile?.role ?? "owner"}</span>
+          <p className="profile-card__city">{prefs.city}</p>
+          <span className="pc-badge pc-badge--question">
+            {ROLE_LABELS[profile?.role ?? "owner"] ?? profile?.role}
+          </span>
         </div>
       </div>
+
+      <ProfileStats
+        pets={pets.length}
+        posts={stats.posts}
+        activeReports={stats.activeReports}
+      />
 
       <section className="home__section">
         <div className="home__section-header">
           <h2 className="pc-section-title">Mis mascotas</h2>
           <button type="button" className="pc-pill-btn" onClick={() => navigate("/mascotas/nueva")}>
-            <Plus size={15} /> Inscribir mascota
+            <Plus size={15} /> Inscribir
           </button>
         </div>
 
@@ -86,114 +143,91 @@ export default function ProfilePage() {
           {pets.map((p) => (
             <PetCard
               key={p.id}
-              status={
-                p.status === "for_adoption"
-                  ? "Adopción"
-                  : p.status === "lost"
-                    ? "Perdido"
-                    : p.status === "adopted"
-                      ? "Rescatado"
-                      : "Encontrado"
-              }
+              status={p.species?.name ?? "Mascota"}
               name={p.name}
-              location={`${p.species?.name ?? "Mascota"} · ${dayLabel(p.created_at).toLowerCase()}`}
+              location={p.breed || p.species?.name || "Mascota"}
               photoUrl={p.photo_url ?? undefined}
+              onClick={() => setDetail(petDetail(p))}
+              onEdit={() => navigate(`/mascotas/${p.id}/editar`)}
             />
           ))}
         </div>
       </section>
 
       <section className="home__section">
-        <h2 className="pc-section-title" style={{ marginBottom: 12 }}>Cuenta</h2>
-        <div className="account-list">
-          <button
-            type="button"
-            className="account-row"
-            onClick={() => navigate("/configuracion/correo")}
-          >
-            <span>Correo electrónico</span>
-            <ChevronRight size={18} />
-          </button>
-          <button
-            type="button"
-            className="account-row"
-            onClick={() => navigate("/configuracion/contrasena")}
-          >
-            <span>Contraseña</span>
-            <ChevronRight size={18} />
-          </button>
+        <h2 className="pc-section-title" style={{ marginBottom: 12 }}>
+          Cuenta
+        </h2>
+        <div className="settings-card">
+          <SettingsRow
+            icon={<UserRound size={17} />}
+            label="Editar información personal"
+            onClick={() => setEditOpen(true)}
+          />
           {profile?.role === "vet" || profile?.role === "foundation" ? (
-            <button type="button" className="account-row" onClick={() => navigate("/mi-clinica")}>
-              <span>Mi clínica</span>
-              <ChevronRight size={18} />
-            </button>
-          ) : (
-            <button type="button" className="account-row" onClick={() => navigate("/verificacion")}>
-              <span>Solicitar ser veterinario o refugio</span>
-              <ChevronRight size={18} />
-            </button>
-          )}
-          <button type="button" className="account-row" onClick={() => navigate("/ayuda")}>
-            <span>Ayuda y soporte</span>
-            <ChevronRight size={18} />
-          </button>
-          {profile?.role === "admin" && (
-            <button type="button" className="account-row" onClick={() => navigate("/admin")}>
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <ShieldCheck size={16} /> Administración
-              </span>
-              <ChevronRight size={18} />
-            </button>
-          )}
-        </div>
-      </section>
-
-      <section className="home__section">
-        <h2 className="pc-section-title" style={{ marginBottom: 12 }}>Preferencias</h2>
-        <div className="pc-form-card profile-settings">
-          <div className="profile-settings__row">
-            <label className="pc-field-label" htmlFor="radius" style={{ margin: 0, flex: 1 }}>
-              Radio de alertas (metros)
-            </label>
-            <input
-              id="radius"
-              className="pc-input"
-              type="number"
-              min={500}
-              max={20000}
-              step={500}
-              value={radiusInput}
-              onChange={(e) => setRadiusInput(Number(e.target.value))}
+            <SettingsRow
+              icon={<ShieldCheck size={17} />}
+              label="Mi clínica"
+              onClick={() => navigate("/mi-clinica")}
             />
-            <PrimaryButton onClick={() => void saveSettings()} type="button">
-              Guardar
-            </PrimaryButton>
-          </div>
-          {saved && <p className="pc-muted" style={{ margin: 0 }}>Preferencias guardadas.</p>}
-
-          <div className="profile-settings__row">
-            <span className="pc-field-label" style={{ margin: 0, flex: 1 }}>
-              Ubicación para alertas cercanas
-            </span>
-            <button
-              type="button"
-              className="pc-outline-btn"
-              onClick={() => void requestConsent()}
-            >
-              {consent ? "Actualizar ubicación" : "Dar permiso de ubicación"}
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="pc-outline-btn"
-            style={{ alignSelf: "flex-start" }}
-            onClick={() => void signOut()}
-          >
-            <LogOut size={14} style={{ verticalAlign: "middle" }} /> Cerrar sesión
-          </button>
+          ) : (
+            <SettingsRow
+              icon={<ShieldCheck size={17} />}
+              label="Solicitar verificación"
+              sublabel="Para veterinarios y refugios"
+              onClick={() => navigate("/verificacion")}
+            />
+          )}
+          <SettingsRow
+            icon={<Lock size={17} />}
+            label="Privacidad"
+            onClick={() => navigate("/ajustes")}
+          />
+          <SettingsRow
+            icon={<HelpCircle size={17} />}
+            label="Ayuda y soporte"
+            onClick={() => navigate("/ayuda")}
+          />
+          {profile?.role === "admin" && (
+            <SettingsRow
+              icon={<ShieldCheck size={17} />}
+              label="Administración"
+              onClick={() => navigate("/admin")}
+            />
+          )}
+          <SettingsRow
+            icon={<LogOut size={17} />}
+            label="Cerrar sesión"
+            danger
+            onClick={() => setLogoutOpen(true)}
+          />
         </div>
       </section>
+
+      <PetDetailModal data={detail} onClose={() => setDetail(null)} />
+
+      {editOpen && (
+        <EditProfileModal
+          initialName={profile?.name ?? ""}
+          initialCity={prefs.city}
+          onSave={saveProfile}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
+
+      {logoutOpen && (
+        <ConfirmModal
+          title="Cerrar sesión"
+          confirmLabel="Cerrar sesión"
+          onClose={() => setLogoutOpen(false)}
+          onConfirm={() => {
+            setLogoutOpen(false);
+            void signOut();
+          }}
+        >
+          <p>¿Estás seguro de que quieres cerrar sesión en PetClue?</p>
+        </ConfirmModal>
+      )}
     </div>
   );
 }

@@ -7,7 +7,7 @@ const statusStyles = {
 
 function StatusTag({ status = "Sin estado" }) {
   const statusClass =
-    statusStyles[status] || "status-default";
+    statusStyles[status] || "status-species";
 
   return (
     <span className={`status-tag ${statusClass}`}>

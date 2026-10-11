@@ -17,6 +17,7 @@ import PetFormPage from "./pages/PetFormPage";
 import ChangeEmailPage from "./pages/ChangeEmailPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import AyudaPage from "./pages/AyudaPage";
+import SettingsPage from "./pages/SettingsPage";
 import AdminPage from "./pages/AdminPage";
 import VetApplicationPage from "./pages/VetApplicationPage";
 import MyClinicPage from "./pages/MyClinicPage";
@@ -98,6 +99,8 @@ export default function App() {
             <Route path="/notificaciones" element={<NotificationsPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
             <Route path="/mascotas/nueva" element={<PetFormPage />} />
+            <Route path="/mascotas/:id/editar" element={<PetFormPage />} />
+            <Route path="/ajustes" element={<SettingsPage />} />
             <Route path="/configuracion/correo" element={<ChangeEmailPage />} />
             <Route path="/configuracion/contrasena" element={<ChangePasswordPage />} />
             <Route path="/ayuda" element={<AyudaPage />} />

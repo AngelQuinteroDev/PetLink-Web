@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Camera } from "lucide-react";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
-import { createPet, listSpecies, uploadPhoto } from "../lib/api";
+import { createPet, getMyPet, listSpecies, updatePet, uploadPhoto } from "../lib/api";
 import { ageFromBirthDate } from "../lib/format";
 import type { PetSex, PetSize, Species } from "../lib/types";
 import "../components/report/report.css";
@@ -23,8 +23,11 @@ const SIZE_OPTIONS: { value: PetSize; label: string }[] = [
 
 export default function PetFormPage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const editing = Boolean(id);
   const [species, setSpecies] = useState<Species[]>([]);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [speciesId, setSpeciesId] = useState<string | null>(null);
   const [sex, setSex] = useState<PetSex | null>(null);
@@ -36,12 +39,42 @@ export default function PetFormPage() {
   const [markings, setMarkings] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     void listSpecies()
       .then(setSpecies)
       .catch(() => setSpecies([]));
   }, []);
+
+  useEffect(() => {
+    if (!id) return;
+    let active = true;
+    void (async () => {
+      try {
+        const pet = await getMyPet(id);
+        if (!active) return;
+        if (!pet) {
+          setLoadError("No encontramos esa mascota en tu perfil.");
+          return;
+        }
+        setName(pet.name);
+        setSpeciesId(pet.species_id);
+        setSex(pet.sex);
+        setBreed(pet.breed ?? "");
+        setBirthDate(pet.birth_date ?? "");
+        setColor(pet.color ?? "");
+        setSize(pet.size);
+        setMarkings(pet.description ?? "");
+        setExistingPhotoUrl(pet.photo_url);
+      } catch {
+        if (active) setLoadError("No pudimos cargar la información de tu mascota.");
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   async function submit() {
     if (name.trim().length < 2) {
@@ -55,9 +88,9 @@ export default function PetFormPage() {
     setBusy(true);
     setError(null);
     try {
-      let photoUrl: string | null = null;
+      let photoUrl: string | null = existingPhotoUrl;
       if (photo) photoUrl = await uploadPhoto(photo, "pet-photos");
-      await createPet({
+      const payload = {
         name: name.trim(),
         speciesId,
         description: markings.trim() || null,
@@ -67,11 +100,20 @@ export default function PetFormPage() {
         breed: breed.trim() || null,
         color: color.trim() || null,
         size,
-      });
+      };
+      if (editing && id) {
+        await updatePet(id, payload);
+      } else {
+        await createPet(payload);
+      }
       navigate("/perfil");
     } catch (err) {
-      console.error("createPet falló:", err);
-      setError("No pudimos inscribir a tu mascota. Intenta de nuevo.");
+      console.error("guardar mascota falló:", err);
+      setError(
+        editing
+          ? "No pudimos guardar los cambios. Intenta de nuevo."
+          : "No pudimos inscribir a tu mascota. Intenta de nuevo."
+      );
       setBusy(false);
     }
   }
@@ -82,20 +124,29 @@ export default function PetFormPage() {
         <button type="button" className="pc-back-btn" onClick={() => navigate(-1)} aria-label="Volver">
           ‹
         </button>
-        <h1 className="pc-title">Inscribir mascota</h1>
+        <h1 className="pc-title">{editing ? "Editar mascota" : "Inscribir mascota"}</h1>
         <span style={{ width: 42 }} />
       </div>
+
+      {loadError && (
+        <p className="pc-error-text" role="alert" style={{ marginBottom: 12 }}>
+          {loadError}
+        </p>
+      )}
 
       <div className="pc-form-card">
         <div className="pc-field">
           <span className="pc-field-label">Agrega una foto clara de tu mascota</span>
           <button
             type="button"
-            className={photo ? "found-main-photo__preview" : "found-main-photo__empty"}
+            className={photo || existingPhotoUrl ? "found-main-photo__preview" : "found-main-photo__empty"}
             onClick={() => setPickerOpen(true)}
           >
-            {photo ? (
-              <img src={URL.createObjectURL(photo)} alt="Vista previa de tu mascota" />
+            {photo || existingPhotoUrl ? (
+              <img
+                src={photo ? URL.createObjectURL(photo) : (existingPhotoUrl as string)}
+                alt="Vista previa de tu mascota"
+              />
             ) : (
               <>
                 <Camera size={26} />
@@ -214,7 +265,7 @@ export default function PetFormPage() {
 
         <div className="pc-form-actions" style={{ display: "flex", gap: 10 }}>
           <PrimaryButton onClick={() => void submit()} type="button">
-            {busy ? "Guardando…" : "Guardar mascota"}
+            {busy ? "Guardando…" : editing ? "Guardar cambios" : "Guardar mascota"}
           </PrimaryButton>
           <button type="button" className="pc-outline-btn" onClick={() => navigate(-1)}>
             Cancelar

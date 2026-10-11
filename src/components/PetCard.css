@@ -3,6 +3,8 @@
 ======================================== */
 
 .pet-card {
+  position: relative;
+
   display: flex;
 
   width: 100%;
@@ -23,6 +25,40 @@
   box-sizing: border-box;
 
   cursor: pointer;
+}
+
+.pet-card:focus-visible {
+  outline: 2px solid var(--pc-primary-strong);
+  outline-offset: 2px;
+}
+
+/* Botón de edición (lápiz) sobre la foto */
+.pet-card__edit {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+
+  display: flex;
+  width: 30px;
+  height: 30px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--pc-primary-strong);
+
+  box-shadow: 0 2px 6px rgba(20, 16, 28, 0.18);
+
+  cursor: pointer;
+}
+
+.pet-card__edit:hover {
+  background: #ffffff;
 }
 
 
@@ -133,6 +169,11 @@
 /* Rescatado */
 .status-rescued {
   background: #b7f0c0;
+}
+
+/* Especie (PERRO, GATO…) */
+.status-species {
+  background: #fed3ff;
 }
 
 /* Estado desconocido */

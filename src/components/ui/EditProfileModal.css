@@ -1,0 +1,45 @@
+.edit-profile__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(20, 16, 28, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.edit-profile {
+  width: 100%;
+  max-width: 480px;
+  background: var(--pc-surface-strong);
+  border-radius: var(--pc-radius-lg);
+  padding: 20px;
+  box-shadow: 0 18px 50px rgba(20, 16, 28, 0.28);
+}
+
+.edit-profile__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.edit-profile__cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.edit-profile__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.edit-profile .pc-field {
+  margin-bottom: 14px;
+}

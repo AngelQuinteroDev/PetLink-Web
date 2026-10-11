@@ -114,6 +114,21 @@
   flex-shrink: 0;
 }
 
+.pc-icon-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: var(--pc-surface-strong);
+  color: var(--pc-primary-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--pc-shadow);
+  flex-shrink: 0;
+}
+
 /* ---------- Mapa ---------- */
 
 .map-filters {
@@ -472,7 +487,16 @@
 
 .profile-card__name {
   margin: 0;
+  font-family: var(--pc-font-display);
+  font-weight: 700;
   font-size: 18px;
+}
+
+.profile-card__city {
+  margin: 2px 0 6px;
+  color: var(--pc-muted);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .profile-settings {

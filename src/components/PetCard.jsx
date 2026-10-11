@@ -1,17 +1,44 @@
+import { Pencil } from "lucide-react";
 import StatusTag from "./StatusTag.jsx";
 import "./PetCard.css";
 
+/**
+ * @param {{
+ *   status?: string;
+ *   name?: string;
+ *   location?: string;
+ *   photoUrl?: string;
+ *   onClick?: () => void;
+ *   onEdit?: (() => void) | null;
+ * }} props
+ */
 function PetCard({
   status = "Perdido",
   name = "Nombre",
   location = "Ubicación · hoy",
   photoUrl = "",
   onClick = () => {},
+  onEdit = null,
 }) {
-  return (
-    <article className="pet-card" onClick={onClick}>
+  const interactive = Boolean(onClick);
 
-      {/* Placeholder de la fotografía */}
+  return (
+    <article
+      className="pet-card"
+      onClick={onClick}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onKeyDown={
+        interactive
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+    >
       <div className="pet-card__photo">
         {photoUrl ? (
           <img
@@ -26,24 +53,27 @@ function PetCard({
         )}
       </div>
 
-      {/* Información de la mascota */}
-      <div className="pet-card__info">
+      {onEdit && (
+        <button
+          type="button"
+          className="pet-card__edit"
+          aria-label={`Editar ${name}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onEdit();
+          }}
+        >
+          <Pencil size={14} />
+        </button>
+      )}
 
-        {/* Estado de la publicación */}
+      <div className="pet-card__info">
         <StatusTag status={status} />
 
-        {/* Nombre */}
-        <h2 className="pet-card__name">
-          {name}
-        </h2>
+        <h2 className="pet-card__name">{name}</h2>
 
-        {/* Ubicación */}
-        <p className="pet-card__location">
-          {location}
-        </p>
-
+        <p className="pet-card__location">{location}</p>
       </div>
-
     </article>
   );
 }

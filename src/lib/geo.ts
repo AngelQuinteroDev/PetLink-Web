@@ -15,6 +15,14 @@ export function setGeoConsent(consent: boolean): void {
   localStorage.setItem(CONSENT_KEY, consent ? "yes" : "no");
 }
 
+/** Redondea un punto a ~1 km para publicar solo la zona aproximada. */
+export function approximatePoint(point: GeoPoint): GeoPoint {
+  return {
+    lat: Math.round(point.lat * 100) / 100,
+    lon: Math.round(point.lon * 100) / 100,
+  };
+}
+
 export function getUserPoint(): Promise<GeoPoint> {
   if (!hasGeoConsent() || !("geolocation" in navigator)) {
     return Promise.resolve(DEFAULT_CENTER);
