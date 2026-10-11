@@ -293,19 +293,66 @@ export default function AdminPage() {
                   </p>
                 </div>
               </div>
-              {v.support_document_url ? (
-                <button
-                  type="button"
-                  className="admin-item__doc"
-                  disabled={docBusy === v.support_document_url}
-                  onClick={() => void openDocument(v.support_document_url as string)}
-                >
-                  <ExternalLink size={14} />{" "}
-                  {docBusy === v.support_document_url ? "Abriendo…" : "Ver documento de soporte"}
-                </button>
-              ) : (
-                <p className="pc-muted admin-item__meta">Sin documento adjunto</p>
-              )}
+              <div className="admin-item__details">
+                {v.full_name && (
+                  <p className="admin-item__meta">
+                    {v.target_role === "foundation" ? "Organización" : "Solicitante"}:{" "}
+                    <strong>{v.full_name}</strong>
+                  </p>
+                )}
+                {v.contact_email && (
+                  <p className="admin-item__meta">Correo: {v.contact_email}</p>
+                )}
+                {v.professional_license && (
+                  <p className="admin-item__meta">
+                    {v.target_role === "foundation" ? "Registro" : "Tarjeta profesional"}:{" "}
+                    {v.professional_license}
+                  </p>
+                )}
+                {v.degree && (
+                  <p className="admin-item__meta">
+                    {v.target_role === "foundation" ? "Ubicación" : "Título"}: {v.degree}
+                  </p>
+                )}
+                {v.specialty && (
+                  <p className="admin-item__meta">Especialidad: {v.specialty}</p>
+                )}
+              </div>
+              <div className="admin-item__docs">
+                {(v.license_document_url ?? v.support_document_url) && (
+                  <button
+                    type="button"
+                    className="admin-item__doc"
+                    disabled={docBusy === (v.license_document_url ?? v.support_document_url)}
+                    onClick={() =>
+                      void openDocument(
+                        (v.license_document_url ?? v.support_document_url) as string
+                      )
+                    }
+                  >
+                    <ExternalLink size={14} />{" "}
+                    {docBusy === (v.license_document_url ?? v.support_document_url)
+                      ? "Abriendo…"
+                      : v.target_role === "foundation"
+                        ? "Ver documento de registro"
+                        : "Ver tarjeta profesional"}
+                  </button>
+                )}
+                {v.id_document_url && (
+                  <button
+                    type="button"
+                    className="admin-item__doc"
+                    disabled={docBusy === v.id_document_url}
+                    onClick={() => void openDocument(v.id_document_url as string)}
+                  >
+                    <ExternalLink size={14} />{" "}
+                    {docBusy === v.id_document_url ? "Abriendo…" : "Ver documento de identidad"}
+                  </button>
+                )}
+                {!v.license_document_url && !v.support_document_url && !v.id_document_url && (
+                  <p className="pc-muted admin-item__meta">Sin documentos adjuntos</p>
+                )}
+              </div>
               <div className="admin-item__actions">
                 <button
                   type="button"

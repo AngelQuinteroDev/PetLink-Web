@@ -710,10 +710,26 @@ export async function myVetApplication(): Promise<VetApplication | null> {
 
 export async function submitVetApplication(
   role: "vet" | "foundation",
-  documentPath: string
+  input: {
+    documentPath: string;
+    idDocumentPath: string | null;
+    fullName: string | null;
+    contactEmail: string | null;
+    professionalLicense: string | null;
+    degree: string | null;
+    specialty: string | null;
+  }
 ): Promise<void> {
   const rpc = role === "foundation" ? "apply_as_foundation" : "apply_as_vet";
-  const { error } = await supabase.rpc(rpc, { p_document_url: documentPath });
+  const { error } = await supabase.rpc(rpc, {
+    p_document_url: input.documentPath,
+    p_full_name: input.fullName,
+    p_contact_email: input.contactEmail,
+    p_professional_license: input.professionalLicense,
+    p_degree: input.degree,
+    p_specialty: input.specialty,
+    p_id_document_url: input.idDocumentPath,
+  });
   if (error) throw error;
 }
 

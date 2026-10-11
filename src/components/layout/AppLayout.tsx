@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Bell, LogOut } from "lucide-react";
 import NavBar from "../NavBar.jsx";
 import PawHeartLogo from "../PawHeartLogo.jsx";
+import LogoutConfirm from "../ui/LogoutConfirm";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
 import "./AppLayout.css";
@@ -36,8 +37,9 @@ const SIDEBAR_ITEMS: { id: string; label: string; path: string; adminOnly?: bool
 export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const [unread, setUnread] = useState(0);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const active = ROUTE_TO_NAV[location.pathname] ?? "home";
 
@@ -113,7 +115,7 @@ export default function AppLayout() {
           <button
             type="button"
             className="pc-sidebar__logout"
-            onClick={() => void signOut()}
+            onClick={() => setLogoutOpen(true)}
           >
             <LogOut size={16} /> Salir
           </button>
@@ -144,6 +146,8 @@ export default function AppLayout() {
           />
         </div>
       </div>
+
+      {logoutOpen && <LogoutConfirm onClose={() => setLogoutOpen(false)} />}
     </div>
   );
 }

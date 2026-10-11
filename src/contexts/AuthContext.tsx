@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -35,14 +36,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
+  const loadedForRef = useRef<string | null>(null);
 
   const loadProfile = useCallback(async (userId: string | null) => {
-    setProfileLoading(true);
     if (!userId) {
       setProfile(null);
       setProfileLoading(false);
+      loadedForRef.current = null;
       return;
     }
+    // Evita el parpadeo/remontaje cuando el perfil del mismo usuario ya está
+    // cargado (p. ej. re-autenticación al cambiar contraseña o correo).
+    const alreadyLoaded = loadedForRef.current === userId;
+    if (!alreadyLoaded) setProfileLoading(true);
     try {
       const { data } = await supabase
         .from("profiles")
@@ -50,8 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("id", userId)
         .maybeSingle();
       setProfile((data as Profile | null) ?? null);
+      loadedForRef.current = userId;
     } catch {
-      setProfile(null);
+      if (!alreadyLoaded) setProfile(null);
     } finally {
       setProfileLoading(false);
     }

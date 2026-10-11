@@ -17,6 +17,8 @@ const ROLE_OPTIONS: { value: ProRole; label: string }[] = [
   { value: "foundation", label: "Refugio o fundación" },
 ];
 
+const MAX_DOC_MB = 10;
+
 function translateApplyError(message: string): string {
   if (message.includes("pending application")) return "Ya tienes una solicitud en revisión.";
   if (message.includes("professional role")) return "Tu cuenta ya tiene un rol profesional.";
@@ -25,12 +27,18 @@ function translateApplyError(message: string): string {
 
 export default function VetApplicationPage() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [app, setApp] = useState<VetApplication | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [role, setRole] = useState<ProRole>("vet");
-  const [file, setFile] = useState<File | null>(null);
+  const [fullName, setFullName] = useState(profile?.name ?? "");
+  const [contactEmail, setContactEmail] = useState(user?.email ?? "");
+  const [license, setLicense] = useState("");
+  const [degree, setDegree] = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [licenseFile, setLicenseFile] = useState<File | null>(null);
+  const [idFile, setIdFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -51,21 +59,58 @@ export default function VetApplicationPage() {
   }, [load]);
 
   const isProfessional = profile?.role === "vet" || profile?.role === "foundation";
+  const isVet = role === "vet";
 
   async function submit() {
-    if (!file) {
-      setError("Adjunta tu documento de soporte (PDF o imagen).");
+    if (fullName.trim().length < 3) {
+      setError(isVet ? "Escribe tu nombre completo." : "Escribe el nombre de la organización.");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setError("El documento no puede superar los 10 MB.");
+    if (!/.+@.+\..+/.test(contactEmail.trim())) {
+      setError("Escribe un correo de contacto válido.");
+      return;
+    }
+    if (license.trim().length < 3) {
+      setError(
+        isVet
+          ? "Escribe tu número de tarjeta profesional."
+          : "Escribe el número de registro de la organización."
+      );
+      return;
+    }
+    if (!licenseFile) {
+      setError(
+        isVet
+          ? "Adjunta tu tarjeta profesional (PDF o imagen)."
+          : "Adjunta el documento de registro (PDF o imagen)."
+      );
+      return;
+    }
+    if (!idFile) {
+      setError("Adjunta tu documento de identidad (PDF o imagen).");
+      return;
+    }
+    if (
+      licenseFile.size > MAX_DOC_MB * 1024 * 1024 ||
+      idFile.size > MAX_DOC_MB * 1024 * 1024
+    ) {
+      setError(`Cada documento no puede superar los ${MAX_DOC_MB} MB.`);
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      const path = await uploadVetDocument(file);
-      await submitVetApplication(role, path);
+      const licensePath = await uploadVetDocument(licenseFile);
+      const idPath = await uploadVetDocument(idFile);
+      await submitVetApplication(role, {
+        documentPath: licensePath,
+        idDocumentPath: idPath,
+        fullName: fullName.trim(),
+        contactEmail: contactEmail.trim(),
+        professionalLicense: license.trim(),
+        degree: degree.trim() || null,
+        specialty: specialty.trim() || null,
+      });
       setSent(true);
       await load();
     } catch (err) {
@@ -117,7 +162,7 @@ export default function VetApplicationPage() {
             </div>
           </div>
           <p className="pc-muted pro-hint">
-            El equipo de PetClue revisará tu documento. Te avisaremos cuando esté aprobada; si es
+            El equipo de PetClue revisará tus documentos. Te avisaremos cuando esté aprobada; si es
             rechazada podrás volver a intentarlo.
           </p>
         </div>
@@ -134,7 +179,7 @@ export default function VetApplicationPage() {
             <p className="pc-muted pro-hint" style={{ marginTop: 0 }}>
               Tu solicitud anterior fue rechazada el{" "}
               {new Date(app.created_at).toLocaleDateString("es-CO")}. Puedes intentarlo de nuevo
-              con un documento válido.
+              con documentos válidos.
             </p>
           )}
 
@@ -144,21 +189,102 @@ export default function VetApplicationPage() {
           </div>
 
           <div className="pc-field">
+            <label className="pc-field-label" htmlFor="vet-name">
+              {isVet ? "Nombre completo" : "Nombre de la organización"}
+            </label>
+            <input
+              id="vet-name"
+              className="pc-input"
+              placeholder={isVet ? "Ej: Ángel Gabriel Quintero" : "Ej: Fundación Huellitas"}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+          </div>
+
+          <div className="pc-field">
+            <label className="pc-field-label" htmlFor="vet-email">
+              Correo de contacto
+            </label>
+            <input
+              id="vet-email"
+              className="pc-input"
+              type="email"
+              placeholder="nombre@correo.com"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="pc-field">
+            <label className="pc-field-label" htmlFor="vet-license">
+              {isVet ? "Número de tarjeta profesional" : "Número de registro (NIT o similar)"}
+            </label>
+            <input
+              id="vet-license"
+              className="pc-input"
+              placeholder={isVet ? "Ej: 0000" : "Ej: 900.123.456-7"}
+              value={license}
+              onChange={(e) => setLicense(e.target.value)}
+            />
+          </div>
+
+          <div className="pc-field">
+            <label className="pc-field-label" htmlFor="vet-degree">
+              {isVet ? "Título y universidad" : "Ciudad y país de la organización"}
+            </label>
+            <input
+              id="vet-degree"
+              className="pc-input"
+              placeholder={
+                isVet ? "Médico veterinario · Universidad Nacional" : "Ej: Bogotá, Colombia"
+              }
+              value={degree}
+              onChange={(e) => setDegree(e.target.value)}
+            />
+          </div>
+
+          <div className="pc-field">
+            <label className="pc-field-label" htmlFor="vet-specialty">
+              Especialidad (opcional)
+            </label>
+            <input
+              id="vet-specialty"
+              className="pc-input"
+              placeholder="Ej: Cardiología"
+              value={specialty}
+              onChange={(e) => setSpecialty(e.target.value)}
+            />
+          </div>
+
+          <div className="pc-field">
             <label className="pc-field-label" htmlFor="vet-doc">
-              Documento de soporte
+              {isVet ? "Tarjeta profesional" : "Documento de registro"}
             </label>
             <input
               id="vet-doc"
               className="pc-input"
               type="file"
               accept=".pdf,image/*"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => setLicenseFile(e.target.files?.[0] ?? null)}
             />
-            <p className="pc-muted pro-hint">
-              Tarjeta profesional (veterinarios) o registro de la fundación, en PDF o imagen.
-              Queda en un archivo privado: solo lo verá el equipo de moderación.
-            </p>
           </div>
+
+          <div className="pc-field">
+            <label className="pc-field-label" htmlFor="vet-id-doc">
+              Documento de identidad
+            </label>
+            <input
+              id="vet-id-doc"
+              className="pc-input"
+              type="file"
+              accept=".pdf,image/*"
+              onChange={(e) => setIdFile(e.target.files?.[0] ?? null)}
+            />
+          </div>
+
+          <p className="pc-muted pro-hint">
+            Los documentos quedan en un archivo privado: solo los verá el equipo de moderación.
+          </p>
 
           {error && (
             <p className="pc-error-text" role="alert">
@@ -167,7 +293,7 @@ export default function VetApplicationPage() {
           )}
 
           <div className="pc-form-actions">
-            <PrimaryButton onClick={() => void submit()} type="button">
+            <PrimaryButton onClick={() => void submit()} type="button" disabled={busy}>
               <FileUp size={15} style={{ verticalAlign: "-2px", marginRight: 6 }} />
               {busy ? "Enviando…" : "Enviar solicitud"}
             </PrimaryButton>

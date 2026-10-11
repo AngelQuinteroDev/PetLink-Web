@@ -62,10 +62,18 @@ export interface ReportNear {
   type: "lost" | "found";
   status: string;
   description: string;
+  pet_id: string | null;
   pet_name: string | null;
   species_name: string | null;
   pet_photo_url: string | null;
   photos: string[];
+  breed: string | null;
+  sex: string | null;
+  size: string | null;
+  color: string | null;
+  age_estimate: string | null;
+  pet_birth_date: string | null;
+  owner_name: string | null;
   lost_at: string | null;
   post_id: string | null;
   distance_m: number;
@@ -152,6 +160,13 @@ export interface VetApplication {
   support_document_url: string | null;
   status: string;
   target_role: string | null;
+  full_name: string | null;
+  contact_email: string | null;
+  professional_license: string | null;
+  degree: string | null;
+  specialty: string | null;
+  license_document_url: string | null;
+  id_document_url: string | null;
   created_at: string;
   applicant?: { name: string } | null;
 }

@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import { useAuth } from "../contexts/AuthContext";
 import { changePassword } from "../lib/api";
+import { PASSWORD_POLICY_HINT } from "../lib/authErrors";
 import "../styles/pages.css";
 
 export default function ChangePasswordPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -16,12 +17,13 @@ export default function ChangePasswordPage() {
   const [done, setDone] = useState(false);
 
   async function submit() {
+    if (busy) return;
     if (!current) {
       setError("Ingresa tu contraseña actual.");
       return;
     }
-    if (next.length < 6) {
-      setError("La nueva contraseña debe tener al menos 6 caracteres.");
+    if (next.length < 8) {
+      setError(PASSWORD_POLICY_HINT);
       return;
     }
     if (next !== confirm) {
@@ -35,15 +37,18 @@ export default function ChangePasswordPage() {
       currentPassword: current,
       newPassword: next,
     });
-    setBusy(false);
     if (err) {
       setError(err);
+      setBusy(false);
       return;
     }
     setDone(true);
     setCurrent("");
     setNext("");
     setConfirm("");
+    // Muestra la confirmación y luego cierra TODAS las sesiones (incluida esta)
+    await new Promise((resolve) => setTimeout(resolve, 1600));
+    await signOut();
   }
 
   return (
@@ -83,6 +88,7 @@ export default function ChangePasswordPage() {
             value={next}
             onChange={(e) => setNext(e.target.value)}
           />
+          <p className="pc-muted location-help">{PASSWORD_POLICY_HINT}</p>
         </div>
 
         <div className="pc-field">
@@ -106,18 +112,19 @@ export default function ChangePasswordPage() {
         )}
         {done && (
           <p className="auth-page__notice" role="status">
-            ¡Contraseña actualizada! Cerramos sesión en tus otros dispositivos por seguridad.
+            ¡Contraseña cambiada correctamente! Por seguridad cerramos la sesión en todos tus
+            dispositivos, incluida esta.
           </p>
         )}
 
         <p className="pc-muted location-help">
-          Después de cambiar tu contraseña, cerraremos sesión en tus otros dispositivos por
-          seguridad.
+          Después de cambiarla, cerraremos la sesión en todos tus dispositivos (incluida esta) y
+          deberás iniciar sesión con la nueva contraseña.
         </p>
 
         <div className="pc-form-actions">
-          <PrimaryButton onClick={() => void submit()} type="button">
-            {busy ? "Guardando…" : "Guardar cambios"}
+          <PrimaryButton onClick={() => void submit()} type="button" disabled={busy}>
+            {busy ? (done ? "Cerrando sesión…" : "Guardando…") : "Guardar cambios"}
           </PrimaryButton>
         </div>
       </div>

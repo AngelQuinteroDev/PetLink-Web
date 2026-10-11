@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
+import { X } from "lucide-react";
+import catDog from "../../assets/Recursos/CatDog.png";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 import "./ConfirmModal.css";
 
@@ -41,18 +43,30 @@ export default function ConfirmModal({
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          type="button"
+          className="confirm-modal__close"
+          onClick={onClose}
+          aria-label="Cerrar"
+        >
+          <X size={16} />
+        </button>
+
+        <img src={catDog} alt="" className="confirm-modal__image" />
+
         <h2 className="confirm-modal__title">{title}</h2>
         <div className="confirm-modal__body">{children}</div>
+
         <div className="confirm-modal__actions">
-          <button type="button" className="pc-outline-btn" onClick={onClose}>
-            {cancelLabel}
-          </button>
           <button
             type="button"
             className={`confirm-modal__confirm ${danger ? "confirm-modal__confirm--danger" : ""}`}
             onClick={onConfirm}
           >
             {confirmLabel}
+          </button>
+          <button type="button" className="confirm-modal__cancel" onClick={onClose}>
+            {cancelLabel}
           </button>
         </div>
       </div>

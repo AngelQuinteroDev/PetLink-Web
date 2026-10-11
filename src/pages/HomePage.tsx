@@ -81,7 +81,13 @@ export default function HomePage() {
       location: `${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`,
       status: r.type === "lost" ? "Perdido" : "Encontrado",
       species: r.species_name,
+      breed: r.breed,
+      sex: r.sex,
+      size: r.size,
+      color: r.color,
+      age: r.pet_birth_date ? ageFromBirthDate(r.pet_birth_date) : r.age_estimate,
       marks: r.description || null,
+      ownerName: r.owner_name,
       postId: r.post_id,
     };
   }

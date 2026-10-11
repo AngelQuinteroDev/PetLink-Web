@@ -15,12 +15,11 @@ import PrimaryButton from "../components/PrimaryButton.jsx";
 import ProfileStats from "../components/ProfileStats";
 import SettingsRow from "../components/ui/SettingsRow";
 import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
-import EditProfileModal from "../components/ui/EditProfileModal";
-import ConfirmModal from "../components/ui/ConfirmModal";
+import LogoutConfirm from "../components/ui/LogoutConfirm";
 import { EmptyState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
 import { usePrefs } from "../hooks/usePrefs";
-import { getMyStats, myPets, updateProfileName } from "../lib/api";
+import { getMyStats, myPets } from "../lib/api";
 import { ageFromBirthDate } from "../lib/format";
 import type { Pet } from "../lib/types";
 import "../styles/pages.css";
@@ -35,13 +34,12 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { profile, signOut, refreshProfile } = useAuth();
-  const { prefs, setPref } = usePrefs();
+  const { profile } = useAuth();
+  const { prefs } = usePrefs();
   const [pets, setPets] = useState<Pet[]>([]);
   const [stats, setStats] = useState({ posts: 0, activeReports: 0 });
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<PetDetailData | null>(null);
-  const [editOpen, setEditOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const load = useCallback(async () => {
@@ -73,12 +71,6 @@ export default function ProfilePage() {
       color: p.color,
       marks: p.description,
     };
-  }
-
-  async function saveProfile(name: string, city: string) {
-    await updateProfileName(name);
-    setPref("city", city);
-    await refreshProfile();
   }
 
   return (
@@ -162,7 +154,7 @@ export default function ProfilePage() {
           <SettingsRow
             icon={<UserRound size={17} />}
             label="Editar información personal"
-            onClick={() => setEditOpen(true)}
+            onClick={() => navigate("/ajustes")}
           />
           {profile?.role === "vet" || profile?.role === "foundation" ? (
             <SettingsRow
@@ -206,28 +198,7 @@ export default function ProfilePage() {
 
       <PetDetailModal data={detail} onClose={() => setDetail(null)} />
 
-      {editOpen && (
-        <EditProfileModal
-          initialName={profile?.name ?? ""}
-          initialCity={prefs.city}
-          onSave={saveProfile}
-          onClose={() => setEditOpen(false)}
-        />
-      )}
-
-      {logoutOpen && (
-        <ConfirmModal
-          title="Cerrar sesión"
-          confirmLabel="Cerrar sesión"
-          onClose={() => setLogoutOpen(false)}
-          onConfirm={() => {
-            setLogoutOpen(false);
-            void signOut();
-          }}
-        >
-          <p>¿Estás seguro de que quieres cerrar sesión en PetClue?</p>
-        </ConfirmModal>
-      )}
+      {logoutOpen && <LogoutConfirm onClose={() => setLogoutOpen(false)} />}
     </div>
   );
 }
