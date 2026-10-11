@@ -7,7 +7,8 @@ import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailMo
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { getReportById, placesNear, reportsNear } from "../lib/api";
-import { ageFromBirthDate, distanceLabel, dayLabel } from "../lib/format";
+import { distanceLabel, dayLabel } from "../lib/format";
+import { reportToDetailData } from "../lib/petDetail";
 import { DEFAULT_CENTER, type GeoPoint, type PlaceNear, type ReportNear } from "../lib/types";
 import "../styles/pages.css";
 
@@ -45,24 +46,6 @@ export default function MapPage() {
   const [detail, setDetail] = useState<PetDetailData | null>(null);
   const deepLinkHandled = useRef(false);
   const { point, radius, loading: locLoading } = useUserLocation();
-
-  function reportDetail(r: ReportNear): PetDetailData {
-    return {
-      name: r.pet_name ?? r.species_name ?? "Mascota",
-      photoUrl: r.pet_photo_url,
-      location: `${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`,
-      status: r.type === "lost" ? "Perdido" : "Encontrado",
-      species: r.species_name,
-      breed: r.breed,
-      sex: r.sex,
-      size: r.size,
-      color: r.color,
-      age: r.pet_birth_date ? ageFromBirthDate(r.pet_birth_date) : r.age_estimate,
-      marks: r.description || null,
-      ownerName: r.owner_name,
-      postId: r.post_id,
-    };
-  }
 
   const load = useCallback(
     async (origin: GeoPoint, radiusM: number) => {
@@ -206,7 +189,7 @@ export default function MapPage() {
                       type="button"
                       data-report-id={r.id}
                       className={`map-row ${highlightId === r.id ? "flash-highlight" : ""}`}
-                      onClick={() => setDetail(reportDetail(r))}
+                      onClick={() => setDetail(reportToDetailData(r))}
                     >
                       {r.pet_photo_url ? (
                         <img

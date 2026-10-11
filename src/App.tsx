@@ -24,6 +24,7 @@ import MyClinicPage from "./pages/MyClinicPage";
 import RequestResetPage from "./pages/RequestResetPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import LegalPage from "./pages/LegalPage";
+import PetListPage from "./pages/PetListPage";
 
 function FullLoading() {
   return (
@@ -99,6 +100,8 @@ export default function App() {
             <Route path="/reportar/mi-mascota" element={<MiPetReportPage />} />
             <Route path="/reportar/encontrada" element={<FoundPetReportPage />} />
             <Route path="/comunidad" element={<CommunityPage />} />
+            <Route path="/adopcion" element={<PetListPage mode="adoption" />} />
+            <Route path="/encontrados" element={<PetListPage mode="found" />} />
             <Route path="/notificaciones" element={<NotificationsPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
             <Route path="/mascotas/nueva" element={<PetFormPage />} />
