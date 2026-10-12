@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import ForumPost from "../components/ForumPost.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
+import ImageViewer from "../components/ui/ImageViewer";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -70,6 +71,7 @@ export default function CommunityPage() {
   const [matchesByReport, setMatchesByReport] = useState<Record<string, ReportMatch[]>>({});
   const [resolvedReports, setResolvedReports] = useState<Record<string, boolean>>({});
   const [matchBusyId, setMatchBusyId] = useState<string | null>(null);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -353,14 +355,19 @@ export default function CommunityPage() {
               onClick={() => void openComments(item.id)}
             />
             {item.image_url && (
-              <img
-                className="forum-post__image"
-                src={item.image_url}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                style={{ marginTop: 8 }}
-              />
+              <div className="post-media">
+                <img
+                  className="post-media__img"
+                  src={item.image_url}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewerUrl(item.image_url);
+                  }}
+                />
+              </div>
             )}
             {item.type === "alert" && item.report_id && (
               <Link className="feed-alert-link" to={`/mapa?report=${item.report_id}`}>
@@ -489,6 +496,8 @@ export default function CommunityPage() {
           </div>
         ))}
       </div>
+
+      {viewerUrl && <ImageViewer src={viewerUrl} onClose={() => setViewerUrl(null)} />}
     </div>
   );
 }

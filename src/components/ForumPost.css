@@ -63,12 +63,26 @@
   color: var(--pc-text);
 }
 
-.forum-post__image {
+/* Imagen de publicación: sin recorte, con bordes laterales neutros (estilo Facebook) */
+
+.post-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ece8f4;
   border-radius: var(--pc-radius-sm);
-  margin-bottom: 12px;
-  max-height: 260px;
-  width: 100%;
-  object-fit: cover;
+  overflow: hidden;
+  margin: 8px 0 12px;
+}
+
+.post-media__img {
+  display: block;
+  max-width: 100%;
+  max-height: 520px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: zoom-in;
 }
 
 .forum-post__interactions {
