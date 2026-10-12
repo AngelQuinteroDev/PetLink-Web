@@ -76,7 +76,7 @@ export interface ReportNear {
   owner_name: string | null;
   lost_at: string | null;
   post_id: string | null;
-  distance_m: number;
+  distance_m: number | null;
   longitude: number;
   latitude: number;
   created_at: string;

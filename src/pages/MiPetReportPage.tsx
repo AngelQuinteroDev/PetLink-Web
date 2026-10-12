@@ -5,13 +5,15 @@ import PetSelectCard from "../components/PetSelectCard";
 import LocationField from "../components/report/LocationField";
 import PhotoGridField from "../components/report/PhotoGridField";
 import PrimaryButton from "../components/PrimaryButton.jsx";
+import ChipGroup from "../components/ui/ChipGroup";
 import { LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
-import { createAlert, getPostByReportId, myPets, uploadPhotos } from "../lib/api";
+import { createAlert, getPostByReportId, listSpecies, myPets, uploadPhotos } from "../lib/api";
 import { approximatePoint } from "../lib/geo";
 import { searchPlace } from "../lib/geocode";
+import { COLOR_OPTIONS, SEX_OPTIONS, SIZE_OPTIONS } from "../lib/petOptions";
 import { usePrefs } from "../hooks/usePrefs";
-import type { GeoPoint, Pet } from "../lib/types";
+import type { GeoPoint, Pet, PetSex, PetSize, Species } from "../lib/types";
 import "../components/report/report.css";
 
 const MAX_EXTRA_PHOTOS = 3;
@@ -34,6 +36,14 @@ export default function MiPetReportPage() {
   const [petId, setPetId] = useState<string | null>(null);
   const [notListed, setNotListed] = useState(false);
 
+  const [species, setSpecies] = useState<Species[]>([]);
+  const [speciesId, setSpeciesId] = useState<string | null>(null);
+  const [sex, setSex] = useState<PetSex | null>(null);
+  const [size, setSize] = useState<PetSize | null>(null);
+  const [color, setColor] = useState<string | null>(null);
+  const [breed, setBreed] = useState("");
+  const [ageEstimate, setAgeEstimate] = useState("");
+
   const [placeText, setPlaceText] = useState("");
   const [point, setPoint] = useState<GeoPoint | null>(null);
   const [characteristics, setCharacteristics] = useState("");
@@ -53,10 +63,41 @@ export default function MiPetReportPage() {
   }, []);
 
   useEffect(() => {
+    void listSpecies()
+      .then(setSpecies)
+      .catch(() => setSpecies([]));
+  }, []);
+
+  useEffect(() => {
     if (!locLoading && !point && userPoint) setPoint(userPoint);
   }, [locLoading, point, userPoint]);
 
   const selectedPet = pets.find((p) => p.id === petId) ?? null;
+
+  // Prellena los detalles con los datos de la mascota registrada (si los tiene).
+  useEffect(() => {
+    if (!selectedPet) return;
+    setSpeciesId(selectedPet.species_id ?? selectedPet.species?.id ?? null);
+    setSex(selectedPet.sex ?? null);
+    setSize(selectedPet.size ?? null);
+    setColor(
+      selectedPet.color && COLOR_OPTIONS.some((o) => o.value === selectedPet.color)
+        ? selectedPet.color
+        : null
+    );
+    setBreed(selectedPet.breed ?? "");
+  }, [selectedPet]);
+
+  const speciesOptions = species.map((s) => ({ value: s.id, label: s.name }));
+
+  function clearDetails() {
+    setSpeciesId(null);
+    setSex(null);
+    setSize(null);
+    setColor(null);
+    setBreed("");
+    setAgeEstimate("");
+  }
 
   async function submit() {
     if (busyRef.current) return;
@@ -90,6 +131,12 @@ export default function MiPetReportPage() {
         point: prefs.exactLocation ? finalPoint : approximatePoint(finalPoint),
         photos: photoUrls,
         lostAt,
+        speciesId,
+        sex,
+        breed: breed.trim() || null,
+        size,
+        color,
+        ageEstimate: ageEstimate.trim() || null,
       });
       const post = await getPostByReportId(reportId).catch(() => null);
       navigate(post ? `/comunidad?post=${post.id}` : "/mapa");
@@ -133,11 +180,65 @@ export default function MiPetReportPage() {
               onClick={() => {
                 setPetId(null);
                 setNotListed(true);
+                clearDetails();
               }}
             >
               <HelpCircle size={16} style={{ marginRight: 8 }} />
               No está en la lista
             </button>
+          </div>
+        </div>
+
+        <div className="pc-field">
+          <span className="pc-field-label">Detalles de tu mascota (opcional)</span>
+          <p className="pc-muted location-help">
+            Completarlos hace tu alerta más descriptiva para quien la vea en el mapa.
+            {selectedPet && " Ya tomamos los datos de tu mascota registrada."}
+          </p>
+          <div className="pc-field">
+            <span className="pc-field-label">Especie</span>
+            <ChipGroup
+              options={speciesOptions}
+              value={speciesId}
+              onChange={setSpeciesId}
+              label="Especie"
+            />
+          </div>
+          <div className="pc-field">
+            <span className="pc-field-label">Sexo</span>
+            <ChipGroup options={SEX_OPTIONS} value={sex} onChange={setSex} label="Sexo" />
+          </div>
+          <div className="pc-field">
+            <span className="pc-field-label">Tamaño</span>
+            <ChipGroup options={SIZE_OPTIONS} value={size} onChange={setSize} label="Tamaño" />
+          </div>
+          <div className="pc-field">
+            <span className="pc-field-label">Color</span>
+            <ChipGroup options={COLOR_OPTIONS} value={color} onChange={setColor} label="Color" />
+          </div>
+          <div className="pc-field">
+            <label className="pc-field-label" htmlFor="lost-breed">
+              Raza (opcional)
+            </label>
+            <input
+              id="lost-breed"
+              className="pc-input"
+              placeholder="Ej: Criollo"
+              value={breed}
+              onChange={(e) => setBreed(e.target.value)}
+            />
+          </div>
+          <div className="pc-field">
+            <label className="pc-field-label" htmlFor="lost-age">
+              Edad aproximada (opcional)
+            </label>
+            <input
+              id="lost-age"
+              className="pc-input"
+              placeholder="Ej: 2 años"
+              value={ageEstimate}
+              onChange={(e) => setAgeEstimate(e.target.value)}
+            />
           </div>
         </div>
 

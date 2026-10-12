@@ -36,6 +36,18 @@ export function getUserPoint(): Promise<GeoPoint> {
   });
 }
 
+/** Posición puntual (botón "mi ubicación"): null si no hay permiso o falla. */
+export function getFreshPoint(): Promise<GeoPoint | null> {
+  if (!("geolocation" in navigator)) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      () => resolve(null),
+      { timeout: 8000, maximumAge: 15000 }
+    );
+  });
+}
+
 export function requestGeoConsent(): Promise<boolean> {
   if (!("geolocation" in navigator)) return Promise.resolve(false);
   return new Promise((resolve) => {

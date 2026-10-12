@@ -21,23 +21,12 @@ import {
 import { approximatePoint } from "../lib/geo";
 import { dayLabel } from "../lib/format";
 import { searchPlace } from "../lib/geocode";
+import { COLOR_OPTIONS, SEX_OPTIONS, SIZE_OPTIONS } from "../lib/petOptions";
 import { usePrefs } from "../hooks/usePrefs";
 import type { GeoPoint, PetSex, PetSize, ReportNear, Species } from "../lib/types";
 import "../components/report/report.css";
 
 const MAX_EXTRA_PHOTOS = 3;
-
-const SEX_OPTIONS: { value: PetSex; label: string }[] = [
-  { value: "male", label: "Macho" },
-  { value: "female", label: "Hembra" },
-  { value: "unknown", label: "No sé" },
-];
-
-const SIZE_OPTIONS: { value: PetSize; label: string }[] = [
-  { value: "small", label: "Pequeño" },
-  { value: "medium", label: "Mediano" },
-  { value: "large", label: "Grande" },
-];
 
 export default function FoundPetReportPage() {
   const navigate = useNavigate();
@@ -48,6 +37,7 @@ export default function FoundPetReportPage() {
   const [speciesId, setSpeciesId] = useState<string | null>(null);
   const [sex, setSex] = useState<PetSex | null>(null);
   const [size, setSize] = useState<PetSize | null>(null);
+  const [color, setColor] = useState<string | null>(null);
   const [ageEstimate, setAgeEstimate] = useState("");
   const [breed, setBreed] = useState("");
   const [characteristics, setCharacteristics] = useState("");
@@ -170,6 +160,7 @@ export default function FoundPetReportPage() {
         sex,
         breed: breed.trim() || null,
         size,
+        color,
         ageEstimate: ageEstimate.trim() || null,
         photos: photoUrls,
       });
@@ -292,6 +283,11 @@ export default function FoundPetReportPage() {
         <div className="pc-field">
           <span className="pc-field-label">Tamaño</span>
           <ChipGroup options={SIZE_OPTIONS} value={size} onChange={setSize} label="Tamaño" />
+        </div>
+
+        <div className="pc-field">
+          <span className="pc-field-label">Color</span>
+          <ChipGroup options={COLOR_OPTIONS} value={color} onChange={setColor} label="Color" />
         </div>
 
         <div className="pc-field">

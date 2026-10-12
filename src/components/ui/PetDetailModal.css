@@ -144,6 +144,16 @@
   line-height: 1.55;
 }
 
+.pet-detail__empty {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--pc-radius-sm);
+  background: #f4f1fb;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--pc-muted);
+}
+
 .pet-detail__owner {
   margin: 14px 0 0;
   font-size: 13px;

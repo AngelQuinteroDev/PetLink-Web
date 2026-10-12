@@ -338,8 +338,15 @@ export async function uploadPhoto(
   return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
-export async function getReportById(id: string): Promise<ReportNear | null> {
-  const { data, error } = await supabase.rpc("report_by_id", { p_id: id });
+export async function getReportById(
+  id: string,
+  point?: GeoPoint | null
+): Promise<ReportNear | null> {
+  const { data, error } = await supabase.rpc("report_by_id", {
+    p_id: id,
+    p_lat: point?.lat ?? null,
+    p_lon: point?.lon ?? null,
+  });
   if (error) throw error;
   const rows = (data as ReportNear[]) ?? [];
   return rows[0] ?? null;
@@ -375,7 +382,7 @@ export async function getPostById(id: string): Promise<FeedItem | null> {
       .select("id", { count: "exact", head: true })
       .eq("post_id", id)
       .eq("is_hidden", false),
-    supabase.from("post_likes").select("id", { count: "exact", head: true }).eq("post_id", id),
+    supabase.from("post_likes").select("post_id", { count: "exact", head: true }).eq("post_id", id),
     userId
       ? supabase
           .from("post_likes")

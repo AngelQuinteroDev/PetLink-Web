@@ -68,6 +68,23 @@ export default function PetDetailModal({ data, onClose }: Props) {
 
   if (!data) return null;
 
+  const items = [
+    { icon: <PawPrint size={16} />, label: "Especie", value: data.species },
+    { icon: <Dna size={16} />, label: "Raza", value: data.breed },
+    { icon: <Clock size={16} />, label: "Edad", value: data.age },
+    {
+      icon: <VenusAndMars size={16} />,
+      label: "Sexo",
+      value: data.sex ? SEX_LABELS[data.sex] ?? data.sex : null,
+    },
+    {
+      icon: <Ruler size={16} />,
+      label: "Tamaño",
+      value: data.size ? SIZE_LABELS[data.size] ?? data.size : null,
+    },
+    { icon: <Palette size={16} />, label: "Color", value: data.color },
+  ].filter((item) => item.value != null && String(item.value).trim() !== "");
+
   return (
     <div className="pet-detail__overlay" onClick={onClose} role="presentation">
       <div
@@ -100,22 +117,18 @@ export default function PetDetailModal({ data, onClose }: Props) {
             </div>
 
             <h3 className="pet-detail__section">Información</h3>
-            <div className="pet-detail__grid">
-              <InfoItem icon={<PawPrint size={16} />} label="Especie" value={data.species} />
-              <InfoItem icon={<Dna size={16} />} label="Raza" value={data.breed} />
-              <InfoItem icon={<Clock size={16} />} label="Edad" value={data.age} />
-              <InfoItem
-                icon={<VenusAndMars size={16} />}
-                label="Sexo"
-                value={data.sex ? SEX_LABELS[data.sex] ?? data.sex : null}
-              />
-              <InfoItem
-                icon={<Ruler size={16} />}
-                label="Tamaño"
-                value={data.size ? SIZE_LABELS[data.size] ?? data.size : null}
-              />
-              <InfoItem icon={<Palette size={16} />} label="Color" value={data.color} />
-            </div>
+            {items.length > 0 ? (
+              <div className="pet-detail__grid">
+                {items.map((item) => (
+                  <InfoItem key={item.label} icon={item.icon} label={item.label} value={item.value} />
+                ))}
+              </div>
+            ) : (
+              <p className="pet-detail__empty">
+                Este reporte no incluye más detalles de la mascota. Revisa las señas
+                particulares o contacta a quien lo publicó.
+              </p>
+            )}
 
             <h3 className="pet-detail__section">Señas particulares</h3>
             <p className="pet-detail__marks">{data.marks || "Sin señas registradas."}</p>

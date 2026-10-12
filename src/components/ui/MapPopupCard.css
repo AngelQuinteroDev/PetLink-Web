@@ -1,0 +1,102 @@
+.map-popup-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 252px;
+  max-width: 100%;
+  padding: 10px;
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.map-popup-card--static {
+  cursor: default;
+}
+
+.map-popup-card__thumb {
+  width: 52px;
+  height: 46px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #e6e0f0;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: var(--pc-muted-soft);
+}
+
+.map-popup-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.map-popup-card__title {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--pc-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-popup-card__meta {
+  font-size: 12px;
+  color: var(--pc-muted-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-popup-card__hint {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pc-primary);
+}
+
+.map-popup-card__badge {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--pc-primary);
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+.map-popup-card__call {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--pc-primary);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+/* El popup de Leaflet pierde su padding para que la card lo llene */
+.map-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(37, 22, 66, 0.22);
+}
+
+.map-popup .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+  line-height: normal;
+}
+
+.map-popup .leaflet-popup-tip {
+  box-shadow: none;
+}
