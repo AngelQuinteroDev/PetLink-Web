@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Bell, LogOut } from "lucide-react";
 import NavBar from "../NavBar.jsx";
 import PawHeartLogo from "../PawHeartLogo.jsx";
 import LogoutConfirm from "../ui/LogoutConfirm";
 import { useAuth } from "../../contexts/AuthContext";
-import { supabase } from "../../lib/supabase";
+import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
 import "./AppLayout.css";
 
 const NAV_ROUTES: Record<string, string> = {
@@ -38,34 +38,10 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useAuth();
-  const [unread, setUnread] = useState(0);
+  const unread = useUnreadNotifications();
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const active = ROUTE_TO_NAV[location.pathname] ?? "home";
-
-  useEffect(() => {
-    let mounted = true;
-    async function count() {
-      const { count } = await supabase
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("is_read", false);
-      if (mounted) setUnread(count ?? 0);
-    }
-    void count();
-    const channel = supabase
-      .channel("layout-notifications")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
-        () => void count()
-      )
-      .subscribe();
-    return () => {
-      mounted = false;
-      void supabase.removeChannel(channel);
-    };
-  }, [location.pathname]);
 
   return (
     <div className="pc-shell">
@@ -74,9 +50,9 @@ export default function AppLayout() {
           type="button"
           className="pc-sidebar__brand"
           onClick={() => navigate("/")}
+          aria-label="Inicio"
         >
           <PawHeartLogo />
-          <span>PetClue</span>
         </button>
 
         <nav className="pc-sidebar__nav" aria-label="Navegación principal">

@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Heart, Map as MapIcon, MessageCircle } from "lucide-react";
-import AlertNotification from "../components/AlertNotification.jsx";
 import PetCard from "../components/PetCard.jsx";
 import ForumPost from "../components/ForumPost.jsx";
 import QuickActions from "../components/QuickActions";
 import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
-import { usePrefs } from "../hooks/usePrefs";
+import { useUnreadNotifications } from "../hooks/useUnreadNotifications";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { getFeed, reportsNear } from "../lib/api";
 import { hasGeoDecision } from "../lib/geo";
-import { dayLabel, distanceLabel, timeAgo } from "../lib/format";
+import { dayLabel, timeAgo } from "../lib/format";
 import { petToDetailData, reportToDetailData } from "../lib/petDetail";
 import { supabase } from "../lib/supabase";
 import type { FeedItem, GeoPoint, Pet, ReportNear } from "../lib/types";
@@ -26,9 +25,8 @@ export default function HomePage() {
   const [reports, setReports] = useState<ReportNear[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [adoption, setAdoption] = useState<Pet[]>([]);
-  const [alertDismissed, setAlertDismissed] = useState(false);
   const [detail, setDetail] = useState<PetDetailData | null>(null);
-  const { prefs } = usePrefs();
+  const unread = useUnreadNotifications();
   const { point, radius, consent, loading: locLoading, requestConsent } = useUserLocation();
   const askedRef = useRef(false);
 
@@ -69,7 +67,6 @@ export default function HomePage() {
     }
   }, [locLoading, consent, requestConsent]);
 
-  const geoAlert = reports.find((r) => r.type === "lost");
   const found = reports.filter((r) => r.type === "found");
   const lost = reports.filter((r) => r.type === "lost");
 
@@ -84,9 +81,10 @@ export default function HomePage() {
           type="button"
           className="home__bell"
           onClick={() => navigate("/notificaciones")}
-          aria-label="Notificaciones"
+          aria-label={`Notificaciones${unread ? ` (${unread} sin leer)` : ""}`}
         >
           <Bell size={17} />
+          {unread > 0 && <span className="home__bell-badge">{unread}</span>}
         </button>
       </header>
 
@@ -100,25 +98,6 @@ export default function HomePage() {
 
       {!loading && !error && (
         <>
-          {prefs.petAlerts && geoAlert && !alertDismissed && (
-            <AlertNotification
-              description={
-                `${
-                  geoAlert.pet_name
-                    ? `Se perdió ${geoAlert.pet_name}`
-                    : "Se perdió una mascota"
-                } a ${distanceLabel(geoAlert.distance_m)} de tu ubicación.` +
-                (geoAlert.description ? ` Detalles: ${geoAlert.description}.` : "")
-              }
-              onViewDetail={() =>
-                geoAlert.post_id
-                  ? navigate(`/comunidad?post=${geoAlert.post_id}`)
-                  : navigate("/mapa")
-              }
-              onNotMyArea={() => setAlertDismissed(true)}
-            />
-          )}
-
           <section className="home__section">
             <div className="home__section-header">
               <h2 className="pc-section-title">Cerca de ti</h2>

@@ -19,6 +19,7 @@
 }
 
 .home__bell {
+  position: relative;
   width: 38px;
   height: 38px;
   border: none;
@@ -30,6 +31,24 @@
   justify-content: center;
   cursor: pointer;
   box-shadow: var(--pc-shadow);
+}
+
+.home__bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ff5d5d;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .home__section {
@@ -68,11 +87,6 @@
 @media (min-width: 1024px) {
   .pc-cards-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .home__feed {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .home__title {

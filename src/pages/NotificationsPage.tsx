@@ -104,7 +104,8 @@ export default function NotificationsPage() {
 
   const visible = items
     .filter((n) => prefs.postReplies || n.type !== "post_reply")
-    .filter((n) => prefs.reportUpdates || n.type !== "geo_alert");
+    .filter((n) => prefs.petAlerts || n.type !== "geo_alert")
+    .filter((n) => prefs.reportUpdates || n.type !== "pet_reminder");
 
   return (
     <div>
