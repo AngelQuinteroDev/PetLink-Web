@@ -7,6 +7,7 @@ export interface Profile {
   name: string;
   role: Role;
   vet_status: string | null;
+  avatar_url: string | null;
   created_at: string;
 }
 

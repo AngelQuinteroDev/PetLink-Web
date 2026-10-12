@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   HelpCircle,
   Lock,
   LogOut,
   PawPrint,
+  Pencil,
   Plus,
   Settings as SettingsIcon,
   ShieldCheck,
@@ -19,7 +20,7 @@ import LogoutConfirm from "../components/ui/LogoutConfirm";
 import { EmptyState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
 import { usePrefs } from "../hooks/usePrefs";
-import { getMyStats, myPets } from "../lib/api";
+import { getMyStats, myPets, removePhoto, updateAvatar, uploadPhoto } from "../lib/api";
 import { ageFromBirthDate } from "../lib/format";
 import type { Pet } from "../lib/types";
 import "../styles/pages.css";
@@ -32,15 +33,20 @@ const ROLE_LABELS: Record<string, string> = {
   admin: "Administrador",
 };
 
+const MAX_AVATAR_MB = 5;
+
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const { prefs } = usePrefs();
   const [pets, setPets] = useState<Pet[]>([]);
   const [stats, setStats] = useState({ posts: 0, activeReports: 0 });
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<PetDetailData | null>(null);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -56,6 +62,32 @@ export default function ProfilePage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function handleAvatarFile(file: File | null) {
+    if (!file || avatarBusy) return;
+    setAvatarError(null);
+    if (!file.type.startsWith("image/")) {
+      setAvatarError("Elige una imagen (JPG, PNG…).");
+      return;
+    }
+    if (file.size > MAX_AVATAR_MB * 1024 * 1024) {
+      setAvatarError(`La imagen no puede superar ${MAX_AVATAR_MB} MB.`);
+      return;
+    }
+    setAvatarBusy(true);
+    const previous = profile?.avatar_url ?? null;
+    try {
+      const url = await uploadPhoto(file, "avatars");
+      await updateAvatar(url);
+      if (previous) void removePhoto("avatars", previous).catch(() => undefined);
+      await refreshProfile();
+    } catch {
+      setAvatarError("No pudimos guardar tu foto. Intenta de nuevo.");
+    } finally {
+      setAvatarBusy(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  }
 
   function petDetail(p: Pet): PetDetailData {
     return {
@@ -90,15 +122,51 @@ export default function ProfilePage() {
       </div>
 
       <div className="profile-card">
-        <span className="profile-card__avatar" aria-hidden="true">
-          {(profile?.name ?? "U").charAt(0).toUpperCase()}
-        </span>
+        <div className="profile-card__photo">
+          {profile?.avatar_url ? (
+            <img
+              className="profile-card__avatar-img"
+              src={profile.avatar_url}
+              alt={`Foto de perfil de ${profile.name}`}
+            />
+          ) : (
+            <span className="profile-card__avatar" aria-hidden="true">
+              {(profile?.name ?? "U").charAt(0).toUpperCase()}
+            </span>
+          )}
+          <button
+            type="button"
+            className="profile-card__edit"
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={avatarBusy}
+            aria-label="Cambiar foto de perfil"
+            title="Cambiar foto de perfil"
+          >
+            {avatarBusy ? (
+              <span className="profile-card__edit-spinner" aria-hidden="true" />
+            ) : (
+              <Pencil size={12} />
+            )}
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="profile-card__file"
+            onChange={(e) => void handleAvatarFile(e.target.files?.[0] ?? null)}
+          />
+        </div>
         <div>
           <p className="profile-card__name">{profile?.name ?? "…"}</p>
           <p className="profile-card__city">{prefs.city}</p>
           <span className="pc-badge pc-badge--question">
             {ROLE_LABELS[profile?.role ?? "owner"] ?? profile?.role}
           </span>
+          {avatarError && (
+            <p className="profile-card__error" role="alert">
+              {avatarError}
+            </p>
+          )}
         </div>
       </div>
 

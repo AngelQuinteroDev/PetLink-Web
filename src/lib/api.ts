@@ -326,7 +326,7 @@ export async function setMyLocation(
 
 export async function uploadPhoto(
   file: File,
-  bucket: "pet-photos" | "post-images"
+  bucket: "pet-photos" | "post-images" | "avatars"
 ): Promise<string> {
   const userId = (await supabase.auth.getUser()).data.user?.id ?? "anon";
   const path = `${userId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
@@ -336,6 +336,28 @@ export async function uploadPhoto(
   });
   if (error) throw error;
   return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+
+/** Borra un archivo público del storage a partir de su URL (best-effort). */
+export async function removePhoto(
+  bucket: "pet-photos" | "post-images" | "avatars",
+  url: string
+): Promise<void> {
+  const marker = `/object/public/${bucket}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return;
+  const path = decodeURIComponent(url.slice(index + marker.length));
+  await supabase.storage.from(bucket).remove([path]);
+}
+
+export async function updateAvatar(url: string | null): Promise<void> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) throw new Error("No hay sesión activa.");
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_url: url })
+    .eq("id", userId);
+  if (error) throw error;
 }
 
 export async function getReportById(

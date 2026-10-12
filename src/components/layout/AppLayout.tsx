@@ -83,7 +83,11 @@ export default function AppLayout() {
         <div className="pc-sidebar__footer">
           <div className="pc-sidebar__user">
             <span className="pc-sidebar__avatar" aria-hidden="true">
-              {(profile?.name ?? "U").charAt(0).toUpperCase()}
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" />
+              ) : (
+                (profile?.name ?? "U").charAt(0).toUpperCase()
+              )}
             </span>
             <div>
               <p className="pc-sidebar__name">{profile?.name ?? "…"}</p>
