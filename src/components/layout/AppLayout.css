@@ -8,6 +8,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .pc-main {
@@ -61,6 +63,7 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    z-index: 1;
   }
 
   .pc-sidebar__brand {

@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import ForumPost from "../components/ForumPost.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
+import GlassHeader from "../components/ui/GlassHeader";
 import ImageViewer from "../components/ui/ImageViewer";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
@@ -277,7 +278,8 @@ export default function CommunityPage() {
   }
 
   return (
-    <div>
+    <div className="community-page">
+      <GlassHeader title="Comunidad" />
       <h1 className="community-title">¿Qué quieres compartir con la comunidad?</h1>
 
       <div className="community-filters">

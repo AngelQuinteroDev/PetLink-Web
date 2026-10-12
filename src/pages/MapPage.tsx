@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
 import { MapPin, Phone } from "lucide-react";
 import "leaflet/dist/leaflet.css";
+import GlassHeader from "../components/ui/GlassHeader";
 import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
@@ -104,9 +105,7 @@ export default function MapPage() {
 
   return (
     <div>
-      <div className="pc-page-header">
-        <h1 className="pc-title">Mapa</h1>
-      </div>
+      <GlassHeader title="Mapa" />
 
       <div className="map-filters" role="tablist" aria-label="Filtros del mapa">
         {FILTERS.map((f) => (

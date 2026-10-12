@@ -1,10 +1,24 @@
-import { Heart, PawPrint } from "lucide-react";
+import huellaIcon from "../assets/svg/Huella.svg";
+import corazonIcon from "../assets/svg/corazon.svg";
 import "./QuickActions.css";
 
 type Props = {
   onLost: () => void;
   onFound: () => void;
 };
+
+function MaskIcon({ src, className }: { src: string; className: string }) {
+  return (
+    <span
+      className={className}
+      aria-hidden="true"
+      style={{
+        WebkitMaskImage: `url("${src}")`,
+        maskImage: `url("${src}")`,
+      }}
+    />
+  );
+}
 
 export default function QuickActions({ onLost, onFound }: Props) {
   return (
@@ -14,7 +28,7 @@ export default function QuickActions({ onLost, onFound }: Props) {
         className="quick-actions__btn quick-actions__btn--lost"
         onClick={onLost}
       >
-        <PawPrint size={34} strokeWidth={1.8} aria-hidden="true" />
+        <MaskIcon src={huellaIcon} className="quick-actions__paw" />
         <span>¡PERDÍ MI MASCOTA!</span>
       </button>
 
@@ -23,7 +37,7 @@ export default function QuickActions({ onLost, onFound }: Props) {
         className="quick-actions__btn quick-actions__btn--found"
         onClick={onFound}
       >
-        <Heart size={32} strokeWidth={1.8} aria-hidden="true" />
+        <MaskIcon src={corazonIcon} className="quick-actions__heart" />
         <span>ENCONTRÉ UN ANIMAL</span>
       </button>
     </div>

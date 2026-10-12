@@ -665,6 +665,11 @@
   margin-bottom: 12px;
 }
 
+.community-page {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
 .community-filters {
   margin-bottom: 16px;
 }

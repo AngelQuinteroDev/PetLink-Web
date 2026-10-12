@@ -52,3 +52,31 @@
   outline: 2px solid var(--pc-primary-strong);
   outline-offset: 2px;
 }
+
+/* Huella (perdí mi mascota): blanca, usa el SVG del proyecto */
+.quick-actions__paw {
+  display: block;
+  width: 40px;
+  height: 34px;
+  background-color: #ffffff;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* Corazón (encontré un animal): morado, usa el SVG del proyecto */
+.quick-actions__heart {
+  display: block;
+  width: 36px;
+  height: 32px;
+  background-color: var(--pc-primary-strong);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}

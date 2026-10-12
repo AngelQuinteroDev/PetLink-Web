@@ -4,6 +4,7 @@ import { Bell, LogOut } from "lucide-react";
 import NavBar from "../NavBar.jsx";
 import PawHeartLogo from "../PawHeartLogo.jsx";
 import LogoutConfirm from "../ui/LogoutConfirm";
+import PawBackground from "../ui/PawBackground";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
 import "./AppLayout.css";
@@ -45,6 +46,7 @@ export default function AppLayout() {
 
   return (
     <div className="pc-shell">
+      <PawBackground />
       <aside className="pc-sidebar">
         <button
           type="button"

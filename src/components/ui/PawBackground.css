@@ -1,0 +1,21 @@
+.paw-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.paw-bg__paw {
+  position: absolute;
+  background-color: #66557e;
+  opacity: 0.18;
+  -webkit-mask-image: url("../../assets/svg/Huella.svg");
+  mask-image: url("../../assets/svg/Huella.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
