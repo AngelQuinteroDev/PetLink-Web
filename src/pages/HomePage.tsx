@@ -9,7 +9,7 @@ import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
 import { useUnreadNotifications } from "../hooks/useUnreadNotifications";
 import { useUserLocation } from "../hooks/useUserLocation";
-import { getFeed, reportsNear } from "../lib/api";
+import { getFeed, reportsNear, togglePostLike } from "../lib/api";
 import { hasGeoDecision } from "../lib/geo";
 import { dayLabel, timeAgo } from "../lib/format";
 import { petToDetailData, reportToDetailData } from "../lib/petDetail";
@@ -69,6 +69,25 @@ export default function HomePage() {
 
   const found = reports.filter((r) => r.type === "found");
   const lost = reports.filter((r) => r.type === "lost");
+
+  async function handleLike(postId: string) {
+    try {
+      const nowLiked = await togglePostLike(postId);
+      setFeed((prev) =>
+        prev.map((f) =>
+          f.id === postId
+            ? {
+                ...f,
+                liked_by_me: nowLiked,
+                like_count: f.like_count + (nowLiked ? 1 : -1),
+              }
+            : f
+        )
+      );
+    } catch {
+      /* el me gusta no es crítico */
+    }
+  }
 
   return (
     <div className="home">
@@ -158,6 +177,7 @@ export default function HomePage() {
                     likes={item.like_count}
                     replies={item.comment_count}
                     liked={item.liked_by_me}
+                    onLike={() => void handleLike(item.id)}
                     onClick={() => navigate("/comunidad")}
                   />
                 ))}

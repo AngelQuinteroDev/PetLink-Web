@@ -1,4 +1,4 @@
-import likesIcon from "../assets/svg/Likes.svg";
+import { Heart } from "lucide-react";
 import commentsIcon from "../assets/svg/uil_comments.svg";
 import "./ForumPost.css";
 
@@ -54,11 +54,12 @@ function ForumPost({
             onLike?.();
           }}
           aria-label={liked ? "Quitar me gusta" : "Me gusta"}
+          aria-pressed={liked}
         >
-          <img
-            src={likesIcon}
-            alt=""
+          <Heart
+            size={16}
             className="forum-post__icon"
+            fill={liked ? "#e0447c" : "none"}
           />
           <span className="forum-post__count">{likes}</span>
         </button>

@@ -69,7 +69,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ece8f4;
+  background: var(--pc-input);
   border-radius: var(--pc-radius-sm);
   overflow: hidden;
   margin: 8px 0 12px;
@@ -100,6 +100,14 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
+}
+
+.forum-post__likes {
+  color: var(--pc-muted);
+}
+
+.forum-post__likes--active {
+  color: #e0447c;
 }
 
 .forum-post__likes--active .forum-post__count {
