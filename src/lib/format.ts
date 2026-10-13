@@ -35,3 +35,23 @@ export function ageFromBirthDate(birthDate: string | null): string | null {
   const rest = months % 12;
   return rest === 0 ? `${years} años` : `${years} años y ${rest} meses`;
 }
+
+const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000;
+
+/**
+ * La BD guarda la fecha de nacimiento: la edad en años que escribe el usuario
+ * se convierte en una fecha aproximada (igual que en la app).
+ */
+export function yearsToBirthDate(years: string | number): string | null {
+  const n = parseFloat(String(years).replace(",", "."));
+  if (!Number.isFinite(n) || n < 0) return null;
+  return new Date(Date.now() - n * YEAR_MS).toISOString().slice(0, 10);
+}
+
+/** Fecha de nacimiento → años (con un decimal), para editar con el campo "Edad (años)". */
+export function birthDateToYears(birthDate: string | null): string {
+  if (!birthDate) return "";
+  return String(
+    Math.round(((Date.now() - new Date(birthDate).getTime()) / YEAR_MS) * 10) / 10
+  );
+}

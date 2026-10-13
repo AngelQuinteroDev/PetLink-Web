@@ -7,7 +7,7 @@ import SpeciesPicker from "../components/ui/SpeciesPicker";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { createPet, deletePet, getMyPet, listSpecies, updatePet, uploadPhoto } from "../lib/api";
-import { ageFromBirthDate } from "../lib/format";
+import { birthDateToYears, yearsToBirthDate } from "../lib/format";
 import type { PetSex, PetSize, Species } from "../lib/types";
 import "../components/report/report.css";
 import "../styles/pages.css";
@@ -35,7 +35,7 @@ export default function PetFormPage() {
   const [sex, setSex] = useState<PetSex | null>(null);
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+  const [ageYears, setAgeYears] = useState("");
   const [color, setColor] = useState("");
   const [size, setSize] = useState<PetSize | null>(null);
   const [markings, setMarkings] = useState("");
@@ -67,7 +67,7 @@ export default function PetFormPage() {
         setSpeciesId(pet.species_id);
         setSex(pet.sex);
         setBreed(pet.breed ?? "");
-        setBirthDate(pet.birth_date ?? "");
+        setAgeYears(birthDateToYears(pet.birth_date));
         setColor(pet.color ?? "");
         setSize(pet.size);
         setMarkings(pet.description ?? "");
@@ -101,7 +101,7 @@ export default function PetFormPage() {
         name: name.trim(),
         speciesId,
         description: markings.trim() || null,
-        birthDate: birthDate || null,
+        birthDate: yearsToBirthDate(ageYears),
         photoUrl,
         sex,
         breed: breed.trim() || null,
@@ -227,22 +227,34 @@ export default function PetFormPage() {
         </div>
 
         <div className="pc-field">
-          <label className="pc-field-label" htmlFor="pet-birth">
-            Edad
+          <label className="pc-field-label" htmlFor="pet-age">
+            Edad (años)
           </label>
           <input
-            id="pet-birth"
+            id="pet-age"
             className="pc-input"
-            type="date"
-            max={new Date().toISOString().slice(0, 10)}
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
+            type="number"
+            min={0}
+            step="any"
+            inputMode="decimal"
+            placeholder="Ej: 2 o 0.5 para 6 meses"
+            value={ageYears}
+            onChange={(e) => setAgeYears(e.target.value)}
           />
-          {birthDate && (
-            <p className="pc-muted location-help">
-              Edad aproximada: {ageFromBirthDate(birthDate)}
-            </p>
-          )}
+          <p className="pc-muted location-help">
+            {yearsToBirthDate(ageYears) ? (
+              <>
+                Nacimiento aproximado:{" "}
+                {new Date(yearsToBirthDate(ageYears) as string).toLocaleDateString("es-CO", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </>
+            ) : (
+              "Si no sabes la fecha exacta, pon los años aproximados."
+            )}
+          </p>
         </div>
 
         <div className="pc-field">

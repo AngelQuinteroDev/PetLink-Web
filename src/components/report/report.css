@@ -1,19 +1,8 @@
 /* ---------- Campos compartidos de reportes ---------- */
 
-.location-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.location-actions .place-hint {
-  margin-top: 0;
-}
-
 .location-map {
-  height: 200px;
+  position: relative;
+  height: 320px;
   border-radius: var(--pc-radius);
   overflow: hidden;
   margin-top: 12px;
