@@ -235,6 +235,23 @@ export default function MyClinicPage() {
           )}
         </div>
       </div>
+
+      {profile?.vet_status === "verified" && (
+        <div className="pc-form-card" style={{ marginTop: 14 }}>
+          <span className="pc-field-label">Adopciones</span>
+          <p className="pc-muted location-help">
+            Comparte mascotas en adopción; aparecerán en la sección de adopción de la
+            comunidad con tu etiqueta verificada.
+          </p>
+          <button
+            type="button"
+            className="pc-outline-btn"
+            onClick={() => navigate("/reportar/adopcion")}
+          >
+            Publicar mascota en adopción
+          </button>
+        </div>
+      )}
     </div>
   );
 }

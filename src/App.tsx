@@ -10,6 +10,7 @@ import MapPage from "./pages/MapPage";
 import ReportPage from "./pages/ReportPage";
 import MiPetReportPage from "./pages/MiPetReportPage";
 import FoundPetReportPage from "./pages/FoundPetReportPage";
+import AdoptionPetPage from "./pages/AdoptionPetPage";
 import CommunityPage from "./pages/CommunityPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -99,6 +100,7 @@ export default function App() {
             <Route path="/reportar" element={<ReportPage />} />
             <Route path="/reportar/mi-mascota" element={<MiPetReportPage />} />
             <Route path="/reportar/encontrada" element={<FoundPetReportPage />} />
+            <Route path="/reportar/adopcion" element={<AdoptionPetPage />} />
             <Route path="/comunidad" element={<CommunityPage />} />
             <Route path="/adopcion" element={<PetListPage mode="adoption" />} />
             <Route path="/encontrados" element={<PetListPage mode="found" />} />

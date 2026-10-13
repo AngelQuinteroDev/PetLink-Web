@@ -186,6 +186,7 @@ export async function createPet(input: {
   breed?: string | null;
   color?: string | null;
   size?: "small" | "medium" | "large" | null;
+  status?: "active" | "for_adoption";
 }): Promise<void> {
   const userId = (await supabase.auth.getUser()).data.user?.id;
   if (!userId) throw new Error("No hay sesión activa.");
@@ -200,7 +201,7 @@ export async function createPet(input: {
     breed: input.breed ?? null,
     color: input.color ?? null,
     size: input.size ?? null,
-    status: "active",
+    status: input.status ?? "active",
   });
   if (error) throw error;
 }

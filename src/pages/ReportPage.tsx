@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, PawPrint, Search } from "lucide-react";
+import starIcon from "../assets/svg/Star_R.svg";
 import "../components/report/report.css";
 
 export default function ReportPage() {
@@ -38,6 +39,20 @@ export default function ReportPage() {
           <span className="report-option__text">
             <strong>Encontré una mascota</strong>
             <small>Reporta una mascota perdida que encontraste en tu zona</small>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="report-option"
+          onClick={() => navigate("/reportar/adopcion")}
+        >
+          <span className="report-option__icon">
+            <img className="report-option__icon-img" src={starIcon} alt="" />
+          </span>
+          <span className="report-option__text">
+            <strong>Voy a dar en adopción</strong>
+            <small>Comparte una mascota en adopción (veterinarios y refugios verificados)</small>
           </span>
         </button>
 

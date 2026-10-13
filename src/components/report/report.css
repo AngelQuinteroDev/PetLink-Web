@@ -121,6 +121,11 @@
   flex-shrink: 0;
 }
 
+.report-option__icon-img {
+  width: 22px;
+  height: 20px;
+}
+
 .report-option__text {
   display: flex;
   flex-direction: column;
