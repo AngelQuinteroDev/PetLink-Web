@@ -339,44 +339,33 @@ export default function CommunityPage() {
       )}
 
       <div className="home__feed">
-        {feed.map((item) => (
-          <div
-            key={item.id}
-            data-post-id={item.id}
-            className={highlightPost === item.id ? "flash-highlight" : undefined}
-          >
-            <ForumPost
-              userName={item.author_name}
-              avatarUrl={item.author_avatar_url ?? ""}
-              timeAgo={timeAgo(item.created_at)}
-              category={TYPE_LABELS[item.type] ?? item.type}
-              question={item.content}
-              likes={item.like_count}
-              replies={item.comment_count}
-              liked={item.liked_by_me}
-              onLike={() => void handleLike(item.id)}
-              onClick={() => void openComments(item.id)}
-            />
-            {item.image_url && (
-              <div className="post-media">
-                <img
-                  className="post-media__img"
-                  src={item.image_url}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setViewerUrl(item.image_url);
-                  }}
-                />
-              </div>
-            )}
-            {item.type === "alert" && item.report_id && (
-              <Link className="feed-alert-link" to={`/mapa?report=${item.report_id}`}>
-                <MapPin size={14} /> Ver en mapa
-              </Link>
-            )}
+        {feed.map((item) => {
+          const imageUrl = item.image_url;
+          return (
+            <div
+              key={item.id}
+              data-post-id={item.id}
+              className={highlightPost === item.id ? "flash-highlight" : undefined}
+            >
+              <ForumPost
+                userName={item.author_name}
+                avatarUrl={item.author_avatar_url ?? ""}
+                imageUrl={imageUrl ?? ""}
+                onImageClick={imageUrl ? () => setViewerUrl(imageUrl) : undefined}
+                timeAgo={timeAgo(item.created_at)}
+                category={TYPE_LABELS[item.type] ?? item.type}
+                question={item.content}
+                likes={item.like_count}
+                replies={item.comment_count}
+                liked={item.liked_by_me}
+                onLike={() => void handleLike(item.id)}
+                onClick={() => void openComments(item.id)}
+              />
+              {item.type === "alert" && item.report_id && (
+                <Link className="feed-alert-link" to={`/mapa?report=${item.report_id}`}>
+                  <MapPin size={14} /> Ver en mapa
+                </Link>
+              )}
             {item.type === "alert" && item.report_id && user && item.user_id === user.id && (
               <div className="match-panel">
                 <div className="match-panel__header">
@@ -506,7 +495,8 @@ export default function CommunityPage() {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {viewerUrl && <ImageViewer src={viewerUrl} onClose={() => setViewerUrl(null)} />}

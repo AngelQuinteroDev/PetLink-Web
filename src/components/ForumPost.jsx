@@ -10,9 +10,11 @@ function ForumPost({
   likes = 0,
   replies = 0,
   avatarUrl = "",
+  imageUrl = "",
   liked = false,
   onLike = () => {},
   onClick = () => {},
+  onImageClick = /** @type {(() => void) | undefined} */ (undefined),
 }) {
   return (
     <article className="forum-post" onClick={onClick}>
@@ -46,6 +48,25 @@ function ForumPost({
       <p className="forum-post__question">
         {question}
       </p>
+
+      {/* Imagen de la publicación: dentro de la tarjeta (diseño del Fix) */}
+      {imageUrl && (
+        <img
+          className={`forum-post__image ${onImageClick ? "forum-post__image--zoom" : ""}`}
+          src={imageUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onClick={
+            onImageClick
+              ? (e) => {
+                  e.stopPropagation();
+                  onImageClick();
+                }
+              : undefined
+          }
+        />
+      )}
 
       {/* Interacciones */}
       <div className="forum-post__interactions">
