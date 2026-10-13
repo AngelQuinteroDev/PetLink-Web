@@ -1,0 +1,42 @@
+.carousel {
+  display: flex;
+  gap: 12px;
+
+  /* Deja respirar bordes y sombras de las tarjetas */
+  margin: 0 -2px;
+  padding: 4px 2px 14px;
+
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 2px;
+
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel > * {
+  flex: 0 0 calc(50% - 6px);
+  min-width: 160px;
+  scroll-snap-align: start;
+}
+
+.carousel .pet-card {
+  width: 100%;
+  max-width: none;
+}
+
+@media (min-width: 700px) {
+  .carousel > * {
+    flex-basis: calc(33.333% - 8px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .carousel > * {
+    flex-basis: calc(25% - 9px);
+  }
+}

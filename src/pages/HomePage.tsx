@@ -4,6 +4,7 @@ import { Bell, Heart, Map as MapIcon, MessageCircle } from "lucide-react";
 import PetCard from "../components/PetCard.jsx";
 import ForumPost from "../components/ForumPost.jsx";
 import QuickActions from "../components/QuickActions";
+import Carousel from "../components/ui/Carousel";
 import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
@@ -134,8 +135,8 @@ export default function HomePage() {
                 body="Cuando haya reportes cerca de tu ubicación los verás en esta sección."
               />
             ) : (
-              <div className="pc-cards-grid">
-                {reports.slice(0, 4).map((r) => (
+              <Carousel>
+                {reports.map((r) => (
                   <PetCard
                     key={r.id}
                     status={r.type === "lost" ? "Perdido" : "Encontrado"}
@@ -145,7 +146,7 @@ export default function HomePage() {
                     onClick={() => setDetail(reportToDetailData(r))}
                   />
                 ))}
-              </div>
+              </Carousel>
             )}
           </section>
 
@@ -204,8 +205,8 @@ export default function HomePage() {
                 body="Las mascotas que busquen hogar aparecerán aquí."
               />
             ) : (
-              <div className="pc-cards-grid">
-                {adoption.slice(0, 4).map((p) => (
+              <Carousel>
+                {adoption.map((p) => (
                   <PetCard
                     key={p.id}
                     status={p.species?.name ?? "Mascota"}
@@ -215,7 +216,7 @@ export default function HomePage() {
                     onClick={() => setDetail(petToDetailData(p))}
                   />
                 ))}
-              </div>
+              </Carousel>
             )}
           </section>
 
@@ -236,8 +237,8 @@ export default function HomePage() {
                 body="Cuando alguien reporte una mascota encontrada cerca, aparecerá aquí."
               />
             ) : (
-              <div className="pc-cards-grid">
-                {found.slice(0, 4).map((r) => (
+              <Carousel>
+                {found.map((r) => (
                   <PetCard
                     key={r.id}
                     status="Encontrado"
@@ -247,7 +248,7 @@ export default function HomePage() {
                     onClick={() => setDetail(reportToDetailData(r))}
                   />
                 ))}
-              </div>
+              </Carousel>
             )}
           </section>
 
@@ -261,8 +262,8 @@ export default function HomePage() {
                 body="Si alguien reporta una mascota perdida en tu zona, la verás aquí."
               />
             ) : (
-              <div className="pc-cards-grid">
-                {lost.slice(0, 4).map((r) => (
+              <Carousel>
+                {lost.map((r) => (
                   <PetCard
                     key={r.id}
                     status="Perdido"
@@ -272,7 +273,7 @@ export default function HomePage() {
                     onClick={() => setDetail(reportToDetailData(r))}
                   />
                 ))}
-              </div>
+              </Carousel>
             )}
           </section>
         </>
