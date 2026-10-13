@@ -13,8 +13,8 @@ import "../styles/pages.css";
 type ProRole = "vet" | "foundation";
 
 const ROLE_OPTIONS: { value: ProRole; label: string }[] = [
-  { value: "vet", label: "Veterinario/a" },
-  { value: "foundation", label: "Refugio o fundación" },
+  { value: "vet", label: "Médico veterinario" },
+  { value: "foundation", label: "Establecimiento" },
 ];
 
 const MAX_DOC_MB = 10;
@@ -156,7 +156,7 @@ export default function VetApplicationPage() {
             <div>
               <p className="pro-status__title">Solicitud en revisión</p>
               <p className="pc-muted pro-status__meta">
-                {app.target_role === "foundation" ? "Refugio o fundación" : "Veterinario/a"} ·{" "}
+                {app.target_role === "foundation" ? "Establecimiento" : "Médico veterinario"} ·{" "}
                 enviada {timeAgo(app.created_at)}
               </p>
             </div>
@@ -186,6 +186,13 @@ export default function VetApplicationPage() {
           <div className="pc-field">
             <span className="pc-field-label">¿Qué quieres verificar?</span>
             <ChipGroup options={ROLE_OPTIONS} value={role} onChange={setRole} label="Tipo de perfil" />
+            {!isVet && (
+              <p className="pc-muted pro-hint" style={{ marginTop: 8 }}>
+                Un administrador revisará tu solicitud y definirá si tu establecimiento es un
+                <strong> refugio</strong> o una <strong>veterinaria</strong>; al aprobarla
+                aparecerás en el mapa.
+              </p>
+            )}
           </div>
 
           <div className="pc-field">
@@ -230,13 +237,13 @@ export default function VetApplicationPage() {
 
           <div className="pc-field">
             <label className="pc-field-label" htmlFor="vet-degree">
-              {isVet ? "Título y universidad" : "Ciudad y país de la organización"}
+              {isVet ? "Título y universidad" : "Dirección del establecimiento"}
             </label>
             <input
               id="vet-degree"
               className="pc-input"
               placeholder={
-                isVet ? "Médico veterinario · Universidad Nacional" : "Ej: Bogotá, Colombia"
+                isVet ? "Médico veterinario · Universidad Nacional" : "Ej: Cra 7 # 45-12, Bogotá"
               }
               value={degree}
               onChange={(e) => setDegree(e.target.value)}

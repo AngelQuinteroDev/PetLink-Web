@@ -140,6 +140,7 @@ export default function App() {
             <Route path="/comunidad" element={<CommunityPage />} />
             <Route path="/adopcion" element={<PetListPage mode="adoption" />} />
             <Route path="/encontrados" element={<PetListPage mode="found" />} />
+            <Route path="/perdidos" element={<PetListPage mode="lost" />} />
             <Route path="/notificaciones" element={<NotificationsPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
             <Route path="/mis-reportes" element={<MyReportsPage />} />

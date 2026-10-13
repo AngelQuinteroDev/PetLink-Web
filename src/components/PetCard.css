@@ -1,5 +1,6 @@
 /* ========================================
-   TARJETA PRINCIPAL
+   TARJETA PRINCIPAL (homologada de la app)
+   La foto llega hasta los bordes de la tarjeta (sin margen blanco arriba)
 ======================================== */
 
 .pet-card {
@@ -9,20 +10,23 @@
 
   width: 100%;
   min-width: 0;
+  max-width: 100%;
 
-  padding: 10px 10px 12px;
+  aspect-ratio: 182 / 189;
 
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
 
-  gap: 10px;
+  gap: 6px;
 
-  border-radius: 15px;
-  border: 1px solid #e1d9ec;
-
+  padding: 0;
+  border: none;
+  border-radius: 10px;
   background: #ffffff;
+  box-shadow: 0 4px 4px 0 rgba(148, 132, 191, 0.42);
 
   box-sizing: border-box;
+  overflow: hidden; /* la foto respeta las esquinas redondeadas */
 
   cursor: pointer;
 }
@@ -32,55 +36,33 @@
   outline-offset: 2px;
 }
 
-/* Botón de edición (lápiz) sobre la foto */
-.pet-card__edit {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  z-index: 2;
-
-  display: flex;
-  width: 30px;
-  height: 30px;
-
-  align-items: center;
-  justify-content: center;
-
-  border: none;
-  border-radius: 50%;
-
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--pc-primary-strong);
-
-  box-shadow: 0 2px 6px rgba(20, 16, 28, 0.18);
-
-  cursor: pointer;
-}
-
-.pet-card__edit:hover {
-  background: #ffffff;
-}
-
-
 /* ========================================
    FOTO / PLACEHOLDER
 ======================================== */
 
 .pet-card__photo {
+  position: relative;
+
+  display: flex;
   width: 100%;
-  aspect-ratio: 8 / 5;
+  height: 54%; /* como la app: 102px de 189px */
 
   flex-shrink: 0;
 
-  border-radius: 18px;
-
-  background: #fed3ff;
-
-  display: flex;
   align-items: center;
   justify-content: center;
 
+  background: #fed3ff;
+
   overflow: hidden;
+}
+
+.pet-card__photo img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  display: block;
 }
 
 .pet-card__photo span {
@@ -95,6 +77,41 @@
   color: #505050;
 }
 
+/* Badge del publicador verificado sobre la foto */
+.pet-card__publisher {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+
+  display: inline-flex;
+  align-items: center;
+
+  height: 18px;
+  padding: 0 8px;
+
+  border-radius: 9px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  color: #ffffff;
+  font-family: "Kodchasan", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.pet-card__publisher--clinic {
+  background: #2f80ed;
+}
+
+.pet-card__publisher--shelter {
+  background: #7519ff;
+}
+
+/* Médico veterinario (persona verificada, sin establecimiento) */
+.pet-card__publisher--doctor {
+  background: #2e9e63;
+}
 
 /* ========================================
    INFORMACIÓN DE LA MASCOTA
@@ -106,16 +123,18 @@
   width: 100%;
   min-width: 0;
 
-  padding: 2px 0;
+  padding: 0 10px 8px;
+
+  flex: 1;
+  min-height: 0;
 
   flex-direction: column;
   align-items: flex-start;
 
-  gap: 4px;
+  gap: 2px;
 
   box-sizing: border-box;
 }
-
 
 /* ========================================
    ETIQUETA DE ESTADO
@@ -183,13 +202,23 @@
 
 
 /* ========================================
-   NOMBRE
+   NOMBRE (+ lápiz en la misma fila)
 ======================================== */
+
+.pet-card__name-row {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+
+  align-items: center;
+  gap: 6px;
+}
 
 .pet-card__name {
   margin: 0;
 
-  max-width: 100%;
+  flex: 1;
+  min-width: 0;
 
   font-family: "Nata Sans", sans-serif;
 
@@ -204,6 +233,27 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pet-card__edit {
+  display: flex;
+  flex-shrink: 0;
+
+  padding: 2px;
+
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background: transparent;
+
+  color: var(--pc-primary-strong);
+
+  cursor: pointer;
+}
+
+.pet-card__edit:hover {
+  color: var(--pc-primary);
 }
 
 

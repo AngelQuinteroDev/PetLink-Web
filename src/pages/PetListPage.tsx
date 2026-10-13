@@ -6,21 +6,35 @@ import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { reportsNear } from "../lib/api";
 import { dayLabel } from "../lib/format";
+import { publisherKinds, type PublisherKind } from "../lib/publisher";
 import { petToDetailData, reportToDetailData } from "../lib/petDetail";
 import { supabase } from "../lib/supabase";
 import type { Pet, ReportNear } from "../lib/types";
 import "../styles/pages.css";
 
-type Mode = "adoption" | "found";
+type Mode = "adoption" | "found" | "lost";
 
 const TITLES: Record<Mode, string> = {
   adoption: "En adopción",
-  found: "Encontrados",
+  found: "Mascotas encontradas",
+  lost: "Mascotas perdidas",
+};
+
+const EMPTY_TEXTS: Record<"found" | "lost", { title: string; body: string }> = {
+  found: {
+    title: "Sin mascotas encontradas cerca",
+    body: "Cuando alguien reporte una mascota encontrada en tu zona, aparecerá aquí.",
+  },
+  lost: {
+    title: "Sin mascotas perdidas cerca",
+    body: "Cuando alguien reporte una mascota perdida en tu zona, aparecerá aquí.",
+  },
 };
 
 export default function PetListPage({ mode }: { mode: Mode }) {
   const navigate = useNavigate();
   const [pets, setPets] = useState<Pet[]>([]);
+  const [kinds, setKinds] = useState<Record<string, PublisherKind>>({});
   const [reports, setReports] = useState<ReportNear[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +54,17 @@ export default function PetListPage({ mode }: { mode: Mode }) {
           .order("created_at", { ascending: false })
           .limit(60);
         if (qError) throw qError;
-        setPets((data as unknown as Pet[]) ?? []);
+        const rows = (data as unknown as Pet[]) ?? [];
+        setPets(rows);
+        setKinds(
+          await publisherKinds(rows.map((p) => p.user_id)).catch(
+            () => ({}) as Record<string, PublisherKind>
+          )
+        );
       } else {
         // "Ver todo": radio amplio (máx. del RPC) para no limitar a la alerta personal
         const near = await reportsNear(point, 50000, 200);
-        setReports(near.filter((r) => r.type === "found"));
+        setReports(near.filter((r) => r.type === mode));
       }
     } catch {
       setError("No pudimos cargar la lista.");
@@ -90,24 +110,22 @@ export default function PetListPage({ mode }: { mode: Mode }) {
                 name={p.name}
                 location={`${p.breed || p.species?.name || "Mascota"} · ${dayLabel(p.created_at).toLowerCase()}`}
                 photoUrl={p.photo_url ?? undefined}
+                publisherKind={kinds[p.user_id] ?? null}
                 onClick={() => setDetail(petToDetailData(p))}
               />
             ))}
           </div>
         ))}
 
-      {!loading && !error && mode === "found" &&
+      {!loading && !error && (mode === "found" || mode === "lost") &&
         (reports.length === 0 ? (
-          <EmptyState
-            title="Sin mascotas encontradas cerca"
-            body="Cuando alguien reporte una mascota encontrada en tu zona, aparecerá aquí."
-          />
+          <EmptyState title={EMPTY_TEXTS[mode].title} body={EMPTY_TEXTS[mode].body} />
         ) : (
           <div className="pc-cards-grid">
             {reports.map((r) => (
               <PetCard
                 key={r.id}
-                status="Encontrado"
+                status={r.type === "lost" ? "Perdido" : "Encontrado"}
                 name={r.pet_name ?? r.species_name ?? "Mascota"}
                 location={`${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`}
                 photoUrl={r.pet_photo_url ?? undefined}

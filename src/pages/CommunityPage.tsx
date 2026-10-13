@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { MapPin } from "lucide-react";
+import { MapPin, PawPrint } from "lucide-react";
 import ForumPost from "../components/ForumPost.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
 import GlassHeader from "../components/ui/GlassHeader";
 import ImageViewer from "../components/ui/ImageViewer";
+import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -14,6 +15,7 @@ import {
   getCommentById,
   getFeed,
   getPostById,
+  getReportById,
   listComments,
   listReportMatches,
   resolveMyReport,
@@ -22,6 +24,7 @@ import {
   uploadPhoto,
 } from "../lib/api";
 import { timeAgo } from "../lib/format";
+import { reportToDetailData } from "../lib/petDetail";
 import { verifiedRoleBadge } from "../lib/roles";
 import { supabase } from "../lib/supabase";
 import type { CommentRow, FeedItem, ReportMatch } from "../lib/types";
@@ -75,6 +78,20 @@ export default function CommunityPage() {
   const [resolvedReports, setResolvedReports] = useState<Record<string, boolean>>({});
   const [matchBusyId, setMatchBusyId] = useState<string | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [detail, setDetail] = useState<PetDetailData | null>(null);
+  const [detailBusy, setDetailBusy] = useState<string | null>(null);
+
+  /** Abre la ficha completa de la mascota de una alerta desde su publicación. */
+  async function openReportDetail(reportId: string) {
+    if (detailBusy) return;
+    setDetailBusy(reportId);
+    try {
+      const rep = await getReportById(reportId).catch(() => null);
+      if (rep) setDetail(reportToDetailData(rep));
+    } finally {
+      setDetailBusy(null);
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -380,9 +397,20 @@ export default function CommunityPage() {
                 onClick={() => void openComments(item.id)}
               />
               {item.type === "alert" && item.report_id && (
-                <Link className="feed-alert-link" to={`/mapa?report=${item.report_id}`}>
-                  <MapPin size={14} /> Ver en mapa
-                </Link>
+                <div className="feed-alert-actions">
+                  <Link className="feed-alert-link" to={`/mapa?report=${item.report_id}`}>
+                    <MapPin size={14} /> Ver en mapa
+                  </Link>
+                  <button
+                    type="button"
+                    className="feed-alert-link feed-alert-detail"
+                    disabled={detailBusy === item.report_id}
+                    onClick={() => void openReportDetail(item.report_id as string)}
+                  >
+                    <PawPrint size={14} />{" "}
+                    {detailBusy === item.report_id ? "Abriendo…" : "Ver ficha completa"}
+                  </button>
+                </div>
               )}
             {item.type === "alert" && item.report_id && user && item.user_id === user.id && (
               <div className="match-panel">
@@ -518,6 +546,8 @@ export default function CommunityPage() {
       </div>
 
       {viewerUrl && <ImageViewer src={viewerUrl} onClose={() => setViewerUrl(null)} />}
+
+      <PetDetailModal data={detail} onClose={() => setDetail(null)} />
     </div>
   );
 }

@@ -46,8 +46,8 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  vet: "Veterinario",
-  foundation: "Refugio / Fundación",
+  vet: "Médico veterinario",
+  foundation: "Establecimiento",
 };
 
 export default function AdminPage() {
@@ -125,7 +125,7 @@ export default function AdminPage() {
 
   const tabs: { value: Tab; label: string }[] = [
     { value: "posts", label: `Publicaciones (${posts.length})` },
-    { value: "vets", label: `Veterinarios (${vets.length})` },
+    { value: "vets", label: `Solicitudes (${vets.length})` },
     { value: "clinics", label: `Clínicas (${clinics.length})` },
     { value: "comments", label: `Comentarios (${reports.length})` },
   ];
@@ -164,7 +164,7 @@ export default function AdminPage() {
         >
           <ShieldCheck size={18} />
           <strong>{vets.length}</strong>
-          <span>Solicitudes de veterinarios</span>
+          <span>Solicitudes profesionales</span>
         </button>
         <button
           type="button"
@@ -288,7 +288,7 @@ export default function AdminPage() {
                   <p className="admin-item__meta">
                     {timeAgo(v.created_at)} ·{" "}
                     <span className="pc-badge pc-badge--vet">
-                      {ROLE_LABELS[v.target_role ?? "vet"] ?? "Veterinario"}
+                      {ROLE_LABELS[v.target_role ?? "vet"] ?? "Médico veterinario"}
                     </span>
                   </p>
                 </div>

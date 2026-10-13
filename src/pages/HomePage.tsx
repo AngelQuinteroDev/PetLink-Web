@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Heart, Map as MapIcon, MessageCircle } from "lucide-react";
+import { Bell, Heart, Map as MapIcon, MessageCircle, PawPrint } from "lucide-react";
 import PetCard from "../components/PetCard.jsx";
 import ForumPost from "../components/ForumPost.jsx";
 import QuickActions from "../components/QuickActions";
@@ -14,6 +14,7 @@ import { getFeed, reportsNear, togglePostLike } from "../lib/api";
 import { hasGeoDecision } from "../lib/geo";
 import { dayLabel, timeAgo } from "../lib/format";
 import { verifiedRoleBadge } from "../lib/roles";
+import { publisherKinds, type PublisherKind } from "../lib/publisher";
 import { petToDetailData, reportToDetailData } from "../lib/petDetail";
 import { supabase } from "../lib/supabase";
 import type { FeedItem, GeoPoint, Pet, ReportNear } from "../lib/types";
@@ -27,6 +28,7 @@ export default function HomePage() {
   const [reports, setReports] = useState<ReportNear[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [adoption, setAdoption] = useState<Pet[]>([]);
+  const [kinds, setKinds] = useState<Record<string, PublisherKind>>({});
   const [detail, setDetail] = useState<PetDetailData | null>(null);
   const unread = useUnreadNotifications();
   const { point, radius, consent, loading: locLoading, requestConsent } = useUserLocation();
@@ -51,6 +53,11 @@ export default function HomePage() {
       setReports(near);
       setFeed(posts);
       setAdoption(adoptionPets);
+      setKinds(
+        await publisherKinds(adoptionPets.map((p) => p.user_id)).catch(
+          () => ({}) as Record<string, PublisherKind>
+        )
+      );
     } catch {
       setError("No pudimos cargar tu inicio.");
     } finally {
@@ -215,6 +222,7 @@ export default function HomePage() {
                     name={p.name}
                     location={`${p.breed || p.species?.name || "Mascota"} · ${dayLabel(p.created_at).toLowerCase()}`}
                     photoUrl={p.photo_url ?? undefined}
+                    publisherKind={kinds[p.user_id] ?? null}
                     onClick={() => setDetail(petToDetailData(p))}
                   />
                 ))}
@@ -224,13 +232,13 @@ export default function HomePage() {
 
           <section className="home__section">
             <div className="home__section-header">
-              <h2 className="pc-section-title">Encontrados</h2>
+              <h2 className="pc-section-title">Mascotas encontradas</h2>
               <button
                 type="button"
                 className="pc-pill-btn"
                 onClick={() => navigate("/encontrados")}
               >
-                <Heart size={15} /> Ver todo
+                <PawPrint size={15} /> Ver todo
               </button>
             </div>
             {found.length === 0 ? (
@@ -256,7 +264,14 @@ export default function HomePage() {
 
           <section className="home__section">
             <div className="home__section-header">
-              <h2 className="pc-section-title">Pérdidos</h2>
+              <h2 className="pc-section-title">Mascotas perdidas</h2>
+              <button
+                type="button"
+                className="pc-pill-btn"
+                onClick={() => navigate("/perdidos")}
+              >
+                <PawPrint size={15} /> Ver todo
+              </button>
             </div>
             {lost.length === 0 ? (
               <EmptyState

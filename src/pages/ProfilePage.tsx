@@ -30,7 +30,7 @@ import "../styles/settings.css";
 
 const ROLE_LABELS: Record<string, string> = {
   owner: "Miembro",
-  vet: "Veterinario",
+  vet: "Médico veterinario",
   foundation: "Refugio",
   admin: "Administrador",
 };

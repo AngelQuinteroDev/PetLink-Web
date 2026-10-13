@@ -1,5 +1,6 @@
 import { Pencil } from "lucide-react";
 import StatusTag from "./StatusTag.jsx";
+import { PUBLISHER_LABEL } from "../lib/publisher";
 import "./PetCard.css";
 
 /**
@@ -10,6 +11,7 @@ import "./PetCard.css";
  *   photoUrl?: string;
  *   onClick?: () => void;
  *   onEdit?: (() => void) | null;
+ *   publisherKind?: "clinic" | "shelter" | "doctor" | null;
  * }} props
  */
 function PetCard({
@@ -19,8 +21,10 @@ function PetCard({
   photoUrl = "",
   onClick = () => {},
   onEdit = null,
+  publisherKind = null,
 }) {
   const interactive = Boolean(onClick);
+  const publisherLabel = publisherKind ? PUBLISHER_LABEL[publisherKind] : null;
 
   return (
     <article
@@ -41,36 +45,37 @@ function PetCard({
     >
       <div className="pet-card__photo">
         {photoUrl ? (
-          <img
-            src={photoUrl}
-            alt={name}
-            loading="lazy"
-            decoding="async"
-            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
-          />
+          <img src={photoUrl} alt={name} loading="lazy" decoding="async" />
         ) : (
           <span>Foto</span>
         )}
+        {publisherLabel && (
+          <span className={`pet-card__publisher pet-card__publisher--${publisherKind}`}>
+            ✓ {publisherLabel}
+          </span>
+        )}
       </div>
-
-      {onEdit && (
-        <button
-          type="button"
-          className="pet-card__edit"
-          aria-label={`Editar ${name}`}
-          onClick={(event) => {
-            event.stopPropagation();
-            onEdit();
-          }}
-        >
-          <Pencil size={14} />
-        </button>
-      )}
 
       <div className="pet-card__info">
         <StatusTag status={status} />
 
-        <h2 className="pet-card__name">{name}</h2>
+        <div className="pet-card__name-row">
+          <h2 className="pet-card__name">{name}</h2>
+
+          {onEdit && (
+            <button
+              type="button"
+              className="pet-card__edit"
+              aria-label={`Editar ${name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                onEdit();
+              }}
+            >
+              <Pencil size={15} />
+            </button>
+          )}
+        </div>
 
         <p className="pet-card__location">{location}</p>
       </div>

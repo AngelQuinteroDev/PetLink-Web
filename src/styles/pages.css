@@ -1058,6 +1058,29 @@
   background: #f3edff;
 }
 
+/* Acciones de una alerta en el feed: Ver en mapa + Ver ficha completa */
+.feed-alert-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.feed-alert-actions .feed-alert-link {
+  margin-top: 0;
+}
+
+button.feed-alert-link {
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button.feed-alert-link:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 /* ---------- Verificación profesional / Mi clínica ---------- */
 
 .pro-status {
