@@ -142,7 +142,17 @@ export default function MiPetReportPage() {
       navigate(post ? `/comunidad?post=${post.id}` : "/mapa");
     } catch (err) {
       console.error("createAlert (lost) falló:", err);
-      setError("No pudimos publicar la alerta. Intenta de nuevo.");
+      const message =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message: unknown }).message)
+          : "";
+      if (message.includes("alerta activa")) {
+        setError(
+          "Ya tienes una alerta activa para esta mascota. Revísala en el mapa o espera a que se cierre para crear otra."
+        );
+      } else {
+        setError("No pudimos publicar la alerta. Intenta de nuevo.");
+      }
       busyRef.current = false;
       setBusy(false);
     }
