@@ -26,6 +26,10 @@ export const supabase = createClient(url, key, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: "pkce",
+    // Implicit: los enlaces de correo (restablecer contraseña) traen el token
+    // en el hash y funcionan en cualquier navegador/dispositivo. Con PKCE el
+    // code verifier vive en el navegador donde se pidió el enlace y al
+    // abrirlo en otro (p. ej. el correo en el celular) el intercambio falla.
+    flowType: "implicit",
   },
 });

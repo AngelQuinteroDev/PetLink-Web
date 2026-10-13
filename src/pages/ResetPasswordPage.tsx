@@ -6,6 +6,7 @@ import PrimaryButton from "../components/PrimaryButton.jsx";
 import { LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
 import { setNewPassword } from "../lib/api";
+import { PASSWORD_POLICY_HINT } from "../lib/authErrors";
 import "../styles/auth.css";
 
 export default function ResetPasswordPage() {
@@ -18,8 +19,8 @@ export default function ResetPasswordPage() {
   const [done, setDone] = useState(false);
 
   async function submit() {
-    if (password.length < 6) {
-      setError("La nueva contraseña debe tener al menos 6 caracteres.");
+    if (password.length < 8) {
+      setError(PASSWORD_POLICY_HINT);
       return;
     }
     if (password !== confirm) {

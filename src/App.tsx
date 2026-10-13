@@ -1,6 +1,7 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { supabase } from "./lib/supabase";
 import AppLayout from "./components/layout/AppLayout";
 import { LoadingState } from "./components/ui/States";
 import LoginPage from "./pages/LoginPage";
@@ -35,6 +36,38 @@ function FullLoading() {
   );
 }
 
+/**
+ * Enlaces de recuperación: Supabase puede redirigir a cualquier ruta (p. ej.
+ * la raíz si /restablecer no está en la allowlist). Si el enlace trae un
+ * token/error de recuperación, llevamos al usuario a /restablecer para que
+ * pueda elegir su nueva contraseña. Mientras redirige no se renderizan las
+ * rutas (evita que ProtectedArea mande al login por falta de sesión).
+ */
+function RecoveryGate({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const hash = window.location.hash;
+  const search = window.location.search;
+  const isRecovery =
+    hash.includes("type=recovery") ||
+    hash.includes("error_code=") ||
+    new URLSearchParams(search).has("code");
+  const needsRedirect = isRecovery && window.location.pathname !== "/restablecer";
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        navigate("/restablecer", { replace: true });
+      }
+    });
+    return () => data.subscription.unsubscribe();
+  }, [navigate]);
+
+  if (needsRedirect) {
+    return <Navigate to={`/restablecer${search}${hash}`} replace />;
+  }
+  return <>{children}</>;
+}
+
 function ProtectedArea({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <FullLoading />;
@@ -60,7 +93,8 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
+        <RecoveryGate>
+          <Routes>
           <Route
             path="/login"
             element={
@@ -124,7 +158,8 @@ export default function App() {
             />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+          </Routes>
+        </RecoveryGate>
       </BrowserRouter>
     </AuthProvider>
   );
