@@ -13,6 +13,7 @@ import { useUserLocation } from "../hooks/useUserLocation";
 import { getFeed, reportsNear, togglePostLike } from "../lib/api";
 import { hasGeoDecision } from "../lib/geo";
 import { dayLabel, timeAgo } from "../lib/format";
+import { verifiedRoleBadge } from "../lib/roles";
 import { petToDetailData, reportToDetailData } from "../lib/petDetail";
 import { supabase } from "../lib/supabase";
 import type { FeedItem, GeoPoint, Pet, ReportNear } from "../lib/types";
@@ -173,6 +174,7 @@ export default function HomePage() {
                     key={item.id}
                     userName={item.author_name}
                     avatarUrl={item.author_avatar_url ?? ""}
+                    authorBadge={verifiedRoleBadge(item.author_role, item.author_vet_status) ?? ""}
                     imageUrl={item.image_url ?? ""}
                     timeAgo={timeAgo(item.created_at)}
                     category={item.type === "question" ? "Pregunta" : "Post"}

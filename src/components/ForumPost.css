@@ -47,6 +47,35 @@
   font-size: 14px;
 }
 
+/* Autor verificado: veterinario / refugio con escudo (homologado de la app) */
+
+.forum-post__name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.forum-post__author-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 1px 5px;
+  border-radius: 10px;
+  background: var(--pc-primary);
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.forum-post__author-badge-icon {
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
 .forum-post__time {
   margin: 0;
   font-size: 12px;

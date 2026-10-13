@@ -9,6 +9,7 @@ import ChipGroup from "../components/ui/ChipGroup";
 import SpeciesPicker from "../components/ui/SpeciesPicker";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
+import PhotoCropModal from "../components/ui/PhotoCropModal";
 import { LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
 import {
@@ -45,6 +46,7 @@ export default function FoundPetReportPage() {
 
   const [mainPhoto, setMainPhoto] = useState<File | null>(null);
   const [mainPickerOpen, setMainPickerOpen] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null); // foto elegida, esperando que el usuario la ajuste
   const [extraPhotos, setExtraPhotos] = useState<File[]>([]);
 
   const [placeText, setPlaceText] = useState("");
@@ -251,7 +253,16 @@ export default function FoundPetReportPage() {
           <PhotoPickerModal
             open={mainPickerOpen}
             onClose={() => setMainPickerOpen(false)}
-            onPick={setMainPhoto}
+            onPick={setCropFile}
+          />
+          {/* Elegir qué parte de la foto se ve en la tarjeta y en la ficha expandida */}
+          <PhotoCropModal
+            file={cropFile}
+            onCancel={() => setCropFile(null)}
+            onDone={(file) => {
+              setCropFile(null);
+              setMainPhoto(file);
+            }}
           />
         </div>
 

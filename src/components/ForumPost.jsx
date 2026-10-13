@@ -1,5 +1,6 @@
 import { Heart } from "lucide-react";
 import commentsIcon from "../assets/svg/uil_comments.svg";
+import escudoIcon from "../assets/svg/Ajustes/Escudo.svg";
 import "./ForumPost.css";
 
 function ForumPost({
@@ -11,6 +12,7 @@ function ForumPost({
   replies = 0,
   avatarUrl = "",
   imageUrl = "",
+  authorBadge = "",
   liked = false,
   onLike = () => {},
   onClick = () => {},
@@ -33,7 +35,15 @@ function ForumPost({
         </div>
 
         <div className="forum-post__name-time">
-          <p className="forum-post__name">{userName}</p>
+          <div className="forum-post__name-row">
+            <p className="forum-post__name">{userName}</p>
+            {authorBadge && (
+              <span className="forum-post__author-badge">
+                <img src={escudoIcon} alt="" className="forum-post__author-badge-icon" />
+                {authorBadge}
+              </span>
+            )}
+          </div>
           <p className="forum-post__time">{timeAgo}</p>
         </div>
 

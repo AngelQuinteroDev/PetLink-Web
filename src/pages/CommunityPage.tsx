@@ -22,6 +22,7 @@ import {
   uploadPhoto,
 } from "../lib/api";
 import { timeAgo } from "../lib/format";
+import { verifiedRoleBadge } from "../lib/roles";
 import { supabase } from "../lib/supabase";
 import type { CommentRow, FeedItem, ReportMatch } from "../lib/types";
 import "../styles/pages.css";
@@ -366,6 +367,7 @@ export default function CommunityPage() {
               <ForumPost
                 userName={item.author_name}
                 avatarUrl={item.author_avatar_url ?? ""}
+                authorBadge={verifiedRoleBadge(item.author_role, item.author_vet_status) ?? ""}
                 imageUrl={imageUrl ?? ""}
                 onImageClick={imageUrl ? () => setViewerUrl(imageUrl) : undefined}
                 timeAgo={timeAgo(item.created_at)}

@@ -52,6 +52,8 @@ export interface FeedItem {
   latitude: number | null;
   author_name: string;
   author_avatar_url: string | null;
+  author_role: string | null;
+  author_vet_status: string | null;
   tags: string[];
   comment_count: number;
   like_count: number;

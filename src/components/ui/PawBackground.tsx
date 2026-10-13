@@ -14,9 +14,9 @@ const PAWS = [
   { top: 93, left: 86, size: 30, rot: 35 },
 ];
 
-export default function PawBackground() {
+export default function PawBackground({ contained = false }: { contained?: boolean }) {
   return (
-    <div className="paw-bg" aria-hidden="true">
+    <div className={`paw-bg ${contained ? "paw-bg--contained" : ""}`} aria-hidden="true">
       {PAWS.map((p, i) => (
         <span
           key={i}

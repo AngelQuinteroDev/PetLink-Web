@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BadgeCheck, Camera } from "lucide-react";
+import { Camera } from "lucide-react";
 import LocationField from "../components/report/LocationField";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
 import SpeciesPicker from "../components/ui/SpeciesPicker";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
-import { EmptyState, LoadingState } from "../components/ui/States";
-import { useAuth } from "../contexts/AuthContext";
+import PhotoCropModal from "../components/ui/PhotoCropModal";
 import { createPet, listSpecies, uploadPhotos } from "../lib/api";
 import { SEX_OPTIONS, SIZE_OPTIONS } from "../lib/petOptions";
 import type { GeoPoint, PetSex, PetSize, Species } from "../lib/types";
@@ -16,12 +15,6 @@ import "../styles/pages.css";
 
 export default function AdoptionPetPage() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
-
-  const isPro = profile?.role === "vet" || profile?.role === "foundation";
-  const isVerifiedPro =
-    profile?.vet_status === "verified" &&
-    (isPro || profile?.role === "admin");
 
   const [species, setSpecies] = useState<Species[]>([]);
   const [speciesId, setSpeciesId] = useState<string | null>(null);
@@ -34,6 +27,7 @@ export default function AdoptionPetPage() {
   const [description, setDescription] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null); // foto elegida, esperando que el usuario la ajuste
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,36 +81,6 @@ export default function AdoptionPetPage() {
     }
   }
 
-  if (!profile) return <LoadingState label="Cargando tu cuenta…" />;
-
-  if (!isVerifiedPro) {
-    return (
-      <div>
-        <div className="pc-page-header">
-          <button type="button" className="pc-back-btn" onClick={() => navigate(-1)} aria-label="Volver">
-            ‹
-          </button>
-          <h1 className="pc-title">Dar en adopción</h1>
-          <span style={{ width: 42 }} />
-        </div>
-        <EmptyState
-          icon={<BadgeCheck size={40} strokeWidth={1.6} />}
-          title={isPro ? "Tu solicitud está en revisión" : "Necesitas verificación"}
-          body={
-            isPro
-              ? "Un administrador está revisando tu solicitud de veterinario/refugio. Cuando sea aprobada podrás publicar mascotas en adopción."
-              : "Verificamos cada solicitud. Para dar mascotas en adopción debes ser veterinario o refugio verificado: la comunidad verá tu etiqueta en la publicación."
-          }
-          action={
-            <PrimaryButton onClick={() => navigate("/verificacion")} type="button">
-              {isPro ? "Ver mi solicitud" : "Solicitar verificación"}
-            </PrimaryButton>
-          }
-        />
-      </div>
-    );
-  }
-
   return (
     <div>
       <div className="pc-page-header">
@@ -129,9 +93,7 @@ export default function AdoptionPetPage() {
 
       <div className="pc-form-card">
         <p className="pc-muted location-help">
-          Tu cuenta está verificada
-          {profile.role === "foundation" ? " como refugio" : profile.role === "vet" ? " como veterinario" : ""}
-          : la comunidad verá tu etiqueta en la publicación.
+          Comparte una mascota que busque hogar; aparecerá en la sección de adopción.
         </p>
 
         <div className="pc-field">
@@ -222,7 +184,16 @@ export default function AdoptionPetPage() {
           <PhotoPickerModal
             open={pickerOpen}
             onClose={() => setPickerOpen(false)}
-            onPick={setPhoto}
+            onPick={setCropFile}
+          />
+          {/* Elegir qué parte de la foto se ve en la tarjeta y en la ficha expandida */}
+          <PhotoCropModal
+            file={cropFile}
+            onCancel={() => setCropFile(null)}
+            onDone={(file) => {
+              setCropFile(null);
+              setPhoto(file);
+            }}
           />
         </div>
 

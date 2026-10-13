@@ -380,7 +380,7 @@ export async function getPostById(id: string): Promise<FeedItem | null> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "id, user_id, pet_id, type, content, image_url, report_id, created_at, author:profiles!posts_user_id_fkey(name, avatar_url)"
+      "id, user_id, pet_id, type, content, image_url, report_id, created_at, author:profiles!posts_user_id_fkey(name, avatar_url, role, vet_status)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -396,7 +396,7 @@ export async function getPostById(id: string): Promise<FeedItem | null> {
     image_url: string | null;
     report_id: string | null;
     created_at: string;
-    author: { name: string; avatar_url: string | null } | null;
+    author: { name: string; avatar_url: string | null; role: string | null; vet_status: string | null } | null;
   };
 
   const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -428,6 +428,8 @@ export async function getPostById(id: string): Promise<FeedItem | null> {
     latitude: null,
     author_name: row.author?.name ?? "Usuario",
     author_avatar_url: row.author?.avatar_url ?? null,
+    author_role: row.author?.role ?? null,
+    author_vet_status: row.author?.vet_status ?? null,
     tags: [],
     comment_count: comments.count ?? 0,
     like_count: likes.count ?? 0,

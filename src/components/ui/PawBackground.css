@@ -6,6 +6,11 @@
   overflow: hidden;
 }
 
+/* Dentro de una hoja/modal (no cubrir toda la pantalla) */
+.paw-bg--contained {
+  position: absolute;
+}
+
 .paw-bg__paw {
   position: absolute;
   background-color: #66557e;

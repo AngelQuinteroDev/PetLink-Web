@@ -5,6 +5,7 @@ import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
 import SpeciesPicker from "../components/ui/SpeciesPicker";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
+import PhotoCropModal from "../components/ui/PhotoCropModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { createPet, deletePet, getMyPet, listSpecies, updatePet, uploadPhoto } from "../lib/api";
 import { birthDateToYears, yearsToBirthDate } from "../lib/format";
@@ -31,6 +32,7 @@ export default function PetFormPage() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null); // foto elegida, esperando que el usuario la ajuste
   const [speciesId, setSpeciesId] = useState<string | null>(null);
   const [sex, setSex] = useState<PetSex | null>(null);
   const [name, setName] = useState("");
@@ -186,7 +188,16 @@ export default function PetFormPage() {
           <PhotoPickerModal
             open={pickerOpen}
             onClose={() => setPickerOpen(false)}
-            onPick={setPhoto}
+            onPick={setCropFile}
+          />
+          {/* Elegir qué parte de la foto se ve en la tarjeta y en la ficha expandida */}
+          <PhotoCropModal
+            file={cropFile}
+            onCancel={() => setCropFile(null)}
+            onDone={(file) => {
+              setCropFile(null);
+              setPhoto(file);
+            }}
           />
         </div>
 

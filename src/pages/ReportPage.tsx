@@ -52,7 +52,7 @@ export default function ReportPage() {
           </span>
           <span className="report-option__text">
             <strong>Voy a dar en adopción</strong>
-            <small>Comparte una mascota en adopción (veterinarios y refugios verificados)</small>
+            <small>Comparte una mascota en adopción con la comunidad</small>
           </span>
         </button>
 
