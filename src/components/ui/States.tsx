@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
+import PawLoader from "./PawLoader";
 import "./States.css";
 
 export function LoadingState({ label = "Cargando…" }: { label?: string }) {
   return (
     <div className="pc-state" role="status" aria-live="polite">
-      <span className="pc-spinner" aria-hidden="true" />
+      <PawLoader size={52} />
       <p className="pc-muted">{label}</p>
     </div>
   );

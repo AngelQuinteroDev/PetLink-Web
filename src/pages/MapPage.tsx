@@ -6,6 +6,7 @@ import { House, LocateFixed, MapPin, PawPrint, Phone, Stethoscope } from "lucide
 import "leaflet/dist/leaflet.css";
 import GlassHeader from "../components/ui/GlassHeader";
 import MapPopupCard from "../components/ui/MapPopupCard";
+import PawLoader from "../components/ui/PawLoader";
 import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
@@ -290,7 +291,7 @@ export default function MapPage() {
 
             {loading && (
               <span className="map-refresh" role="status">
-                <span className="map-refresh__spinner" aria-hidden="true" />
+                <PawLoader size={18} />
                 Actualizando…
               </span>
             )}

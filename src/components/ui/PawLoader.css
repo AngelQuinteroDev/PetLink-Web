@@ -1,0 +1,23 @@
+.paw-loader {
+  display: inline-block;
+  flex-shrink: 0;
+  background-image: url("../../assets/svg/paw-frames.svg");
+  background-repeat: no-repeat;
+  background-size: 400% 100%;
+  animation: paw-loader-walk 0.9s steps(4, jump-none) infinite;
+}
+
+@keyframes paw-loader-walk {
+  from {
+    background-position: 0% 0;
+  }
+  to {
+    background-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paw-loader {
+    animation-duration: 1.8s;
+  }
+}
