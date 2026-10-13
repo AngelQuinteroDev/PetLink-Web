@@ -71,15 +71,16 @@
   color: var(--pc-text);
 }
 
-/* Imagen de publicación: dentro de la tarjeta, esquinas redondeadas (diseño del Fix) */
+/* Imagen de publicación: dentro de la tarjeta, sin recorte.
+   Los bordes laterales usan el mismo color de la tarjeta para que se integren. */
 
 .forum-post__image {
   display: block;
   width: 100%;
-  max-height: 320px;
+  max-height: 520px;
   border-radius: 14px;
-  object-fit: cover;
-  background: #f7f5fc;
+  object-fit: contain;
+  background: var(--pc-surface);
   margin-bottom: 12px;
 }
 
