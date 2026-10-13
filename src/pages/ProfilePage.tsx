@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  ClipboardList,
   HelpCircle,
   Lock,
   LogOut,
+  MessageCircle,
   PawPrint,
   Pencil,
   Plus,
@@ -226,6 +228,18 @@ export default function ProfilePage() {
             icon={<UserRound size={17} />}
             label="Editar información personal"
             onClick={() => navigate("/ajustes")}
+          />
+          <SettingsRow
+            icon={<ClipboardList size={17} />}
+            label="Mis reportes"
+            sublabel="Cambia el estado de tus alertas"
+            onClick={() => navigate("/mis-reportes")}
+          />
+          <SettingsRow
+            icon={<MessageCircle size={17} />}
+            label="Mis publicaciones"
+            sublabel="Revisa el estado de tus posts"
+            onClick={() => navigate("/mis-publicaciones")}
           />
           {profile?.role === "vet" || profile?.role === "foundation" ? (
             <SettingsRow

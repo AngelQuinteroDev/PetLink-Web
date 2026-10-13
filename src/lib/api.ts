@@ -676,6 +676,136 @@ export async function resolveMyReport(reportId: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------
+// Mi actividad: mis reportes (alertas) y mis publicaciones
+// (homologado de la app: MyReportsPage)
+// ---------------------------------------------------------------
+
+/** Texto con el que empieza el comentario de resolución que el dueño deja en su alerta. */
+export const RESOLUTION_PREFIX = "Resolución: ";
+
+export interface MyReportRow {
+  id: string;
+  type: string;
+  status: string;
+  description: string | null;
+  photos: string[] | null;
+  created_at: string;
+  resolved_at: string | null;
+  resolution: string | null;
+  species_name: string | null;
+  pet_name: string | null;
+  pet_photo_url: string | null;
+  post_id: string | null;
+}
+
+function joinedName(value: unknown): string | null {
+  const row = Array.isArray(value) ? value[0] : value;
+  return row && typeof row === "object" && "name" in row ? String((row as { name: unknown }).name) : null;
+}
+
+function joinedField(value: unknown, field: string): string | null {
+  const row = Array.isArray(value) ? value[0] : value;
+  return row && typeof row === "object" && field in row
+    ? ((row as Record<string, unknown>)[field] as string | null)
+    : null;
+}
+
+/** Alertas del usuario (más nueva primero) con su publicación y la última resolución escrita. */
+export async function myReports(): Promise<MyReportRow[]> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) return [];
+  const { data, error } = await supabase
+    .from("reports")
+    .select(
+      "id, type, status, description, photos, created_at, resolved_at, species:species(name), pet:pets(name, photo_url), post:posts(id)"
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  const rows = (data ?? []) as Record<string, unknown>[];
+  const postIdOf = (r: Record<string, unknown>) => joinedField(r.post, "id");
+  const postIds = rows.map(postIdOf).filter(Boolean) as string[];
+
+  // La resolución no tiene columna propia: es el comentario más reciente del
+  // dueño que empieza por RESOLUTION_PREFIX.
+  const resolutions: Record<string, string> = {};
+  if (postIds.length) {
+    const { data: comments } = await supabase
+      .from("comments")
+      .select("post_id, text, created_at")
+      .in("post_id", postIds)
+      .like("text", `${RESOLUTION_PREFIX}%`)
+      .order("created_at", { ascending: false });
+    for (const c of (comments ?? []) as { post_id: string; text: string }[]) {
+      if (!resolutions[c.post_id]) resolutions[c.post_id] = c.text.slice(RESOLUTION_PREFIX.length);
+    }
+  }
+
+  return rows.map((r) => {
+    const postId = postIdOf(r);
+    return {
+      id: r.id as string,
+      type: r.type as string,
+      status: r.status as string,
+      description: (r.description as string) ?? null,
+      photos: (r.photos as string[]) ?? null,
+      created_at: r.created_at as string,
+      resolved_at: (r.resolved_at as string) ?? null,
+      resolution: postId ? resolutions[postId] ?? null : null,
+      species_name: joinedName(r.species),
+      pet_name: joinedName(r.pet),
+      pet_photo_url: joinedField(r.pet, "photo_url"),
+      post_id: postId,
+    };
+  });
+}
+
+/** Cambia el estado de una alerta propia; al resolverla/cerrarla deja una resolución. */
+export async function updateMyReport(
+  reportId: string,
+  input: {
+    status: "open" | "searching" | "resolved" | "closed";
+    resolution?: string;
+    postId?: string | null;
+  }
+): Promise<void> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) throw new Error("No hay sesión activa.");
+  const finished = input.status === "resolved" || input.status === "closed";
+  const { error } = await supabase
+    .from("reports")
+    .update({ status: input.status, resolved_at: finished ? new Date().toISOString() : null })
+    .eq("id", reportId)
+    .eq("user_id", userId);
+  if (error) throw error;
+  const text = input.resolution?.trim();
+  if (text && input.postId) await addComment(input.postId, `${RESOLUTION_PREFIX}${text}`);
+}
+
+export interface MyPostRow {
+  id: string;
+  type: string;
+  content: string;
+  image_url: string | null;
+  moderation_status: string;
+  created_at: string;
+}
+
+/** Publicaciones propias de la comunidad (más nueva primero), con su estado de moderación. */
+export async function myPosts(): Promise<MyPostRow[]> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) return [];
+  const { data, error } = await supabase
+    .from("posts")
+    .select("id, type, content, image_url, moderation_status, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as MyPostRow[];
+}
+
+// ---------------------------------------------------------------
 // Verificación profesional (vet / fundación) y mi clínica
 // ---------------------------------------------------------------
 

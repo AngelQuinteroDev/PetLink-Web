@@ -15,6 +15,8 @@ import AdoptionPetPage from "./pages/AdoptionPetPage";
 import CommunityPage from "./pages/CommunityPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ProfilePage from "./pages/ProfilePage";
+import MyReportsPage from "./pages/MyReportsPage";
+import MyPostsPage from "./pages/MyPostsPage";
 import PetFormPage from "./pages/PetFormPage";
 import ChangeEmailPage from "./pages/ChangeEmailPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
@@ -140,6 +142,8 @@ export default function App() {
             <Route path="/encontrados" element={<PetListPage mode="found" />} />
             <Route path="/notificaciones" element={<NotificationsPage />} />
             <Route path="/perfil" element={<ProfilePage />} />
+            <Route path="/mis-reportes" element={<MyReportsPage />} />
+            <Route path="/mis-publicaciones" element={<MyPostsPage />} />
             <Route path="/mascotas/nueva" element={<PetFormPage />} />
             <Route path="/mascotas/:id/editar" element={<PetFormPage />} />
             <Route path="/ajustes" element={<SettingsPage />} />
