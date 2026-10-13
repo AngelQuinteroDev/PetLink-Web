@@ -98,20 +98,26 @@
   gap: 10px;
   padding: 9px 10px;
   border-radius: var(--pc-radius-sm);
-  background: #f4f1fb;
+  background: #ece8f7;
   min-width: 0;
 }
 
 .pet-detail__item-icon {
   display: flex;
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: #ede8ff;
+  border-radius: 8px;
+  background: #ffffff;
   color: var(--pc-primary-strong);
+}
+
+.pet-detail__item-icon img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .pet-detail__item-text {
@@ -176,6 +182,96 @@
 
 .pet-detail__contact:hover {
   filter: brightness(1.08);
+}
+
+/* Panel del dueño: interesados en adoptar (homologado de la app) */
+
+.adoption-interests {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.adoption-interests__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ede8ff;
+}
+
+.adoption-interests__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--pc-font-display);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.adoption-interests__status {
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.adoption-interests__status--approved {
+  background: #c9f3df;
+  color: #1f6b45;
+}
+
+.adoption-interests__status--rejected {
+  background: #ffe3e3;
+  color: #a0403c;
+}
+
+.adoption-interests__message {
+  margin: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.adoption-interests__time {
+  color: var(--pc-muted-soft);
+  font-size: 11px;
+}
+
+.adoption-interests__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.adoption-interests__reject,
+.adoption-interests__accept {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 20px;
+  font-family: var(--pc-font-display);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.adoption-interests__reject {
+  border: 1.5px solid #e0554f;
+  background: #ffffff;
+  color: #a0403c;
+}
+
+.adoption-interests__accept {
+  border: none;
+  background: var(--pc-primary-strong);
+  color: var(--pc-on-primary);
+}
+
+.adoption-interests__reject:disabled,
+.adoption-interests__accept:disabled {
+  opacity: 0.5;
 }
 
 @media (min-width: 700px) {

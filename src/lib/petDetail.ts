@@ -5,6 +5,9 @@ import type { Pet, ReportNear } from "./types";
 /** Datos de la card expandida a partir de un reporte (perdido/encontrado). */
 export function reportToDetailData(r: ReportNear): PetDetailData {
   return {
+    kind: "report",
+    reportId: r.id,
+    ownerId: r.user_id,
     name: r.pet_name ?? r.species_name ?? "Mascota",
     photoUrl: r.pet_photo_url,
     location: `${r.description || "Cerca de ti"} · ${dayLabel(r.created_at).toLowerCase()}`,
@@ -17,13 +20,15 @@ export function reportToDetailData(r: ReportNear): PetDetailData {
     age: r.pet_birth_date ? ageFromBirthDate(r.pet_birth_date) : r.age_estimate,
     marks: r.description || null,
     ownerName: r.owner_name,
-    postId: r.post_id,
   };
 }
 
 /** Datos de la card expandida a partir de una mascota registrada (adopción). */
 export function petToDetailData(p: Pet): PetDetailData {
   return {
+    kind: p.status === "for_adoption" ? "adoption" : "pet",
+    petId: p.id,
+    ownerId: p.user_id,
     name: p.name,
     photoUrl: p.photo_url,
     location: `${p.species?.name ?? "Mascota"} · ${dayLabel(p.created_at).toLowerCase()}`,

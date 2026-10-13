@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import { isWeakPasswordError, PASSWORD_POLICY_HINT } from "./authErrors";
 import type {
+  AdoptionInterest,
   CommentReport,
   CommentRow,
   FeedItem,
@@ -750,6 +751,37 @@ export async function sendSupportMessage(input: {
   });
   if (insertError) throw error;
   return { emailed: false };
+}
+
+/** "Me interesa adoptar": mensaje privado al dueño (le llega como interesado). */
+export async function expressAdoptionInterest(petId: string, message: string): Promise<void> {
+  const { error } = await supabase.rpc("express_adoption_interest", {
+    p_pet_id: petId,
+    p_message: message,
+  });
+  if (error) throw error;
+}
+
+export async function listAdoptionInterests(petId: string): Promise<AdoptionInterest[]> {
+  const { data, error } = await supabase
+    .from("adoption_interests")
+    .select("*, interested:profiles(name)")
+    .eq("pet_id", petId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as AdoptionInterest[];
+}
+
+/** El dueño aprueba o rechaza; al aprobar la mascota pasa a "adopted". */
+export async function respondAdoptionInterest(
+  interestId: string,
+  status: "approved" | "rejected"
+): Promise<void> {
+  const { error } = await supabase.rpc("respond_adoption_interest", {
+    p_interest_id: interestId,
+    p_status: status,
+  });
+  if (error) throw error;
 }
 
 export async function myVetApplication(): Promise<VetApplication | null> {

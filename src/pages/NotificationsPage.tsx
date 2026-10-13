@@ -20,6 +20,8 @@ const TYPE_ICONS: Record<string, typeof Bell> = {
   post_like: Heart,
   pet_reminder: CalendarDays,
   report_match: HeartHandshake,
+  adoption_interest: HeartHandshake,
+  adoption_response: Heart,
 };
 
 export default function NotificationsPage() {
@@ -96,6 +98,13 @@ export default function NotificationsPage() {
       }
       if (n.type === "pet_reminder") {
         navigate("/perfil");
+      }
+      if (n.type === "adoption_interest") {
+        // El dueño ve a los interesados en la ficha de su mascota (Mis mascotas)
+        navigate("/perfil");
+      }
+      if (n.type === "adoption_response") {
+        navigate("/adopcion");
       }
     } catch {
       /* si no se puede resolver el destino, la notificación queda como leída */

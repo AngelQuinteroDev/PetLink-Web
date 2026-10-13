@@ -91,6 +91,9 @@ export default function ProfilePage() {
 
   function petDetail(p: Pet): PetDetailData {
     return {
+      kind: p.status === "for_adoption" ? "adoption" : "pet",
+      petId: p.id,
+      ownerId: p.user_id,
       name: p.name,
       photoUrl: p.photo_url,
       location: `${p.breed || p.species?.name || "Mascota"}`,

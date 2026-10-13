@@ -76,6 +76,7 @@ export interface ReportNear {
   age_estimate: string | null;
   pet_birth_date: string | null;
   owner_name: string | null;
+  user_id: string | null;
   lost_at: string | null;
   post_id: string | null;
   distance_m: number | null;
@@ -109,12 +110,29 @@ export interface CommentRow {
 export interface NotificationRow {
   id: string;
   user_id: string;
-  type: "geo_alert" | "post_reply" | "pet_reminder" | "post_like" | "report_match";
+  type:
+    | "geo_alert"
+    | "post_reply"
+    | "pet_reminder"
+    | "post_like"
+    | "report_match"
+    | "adoption_interest"
+    | "adoption_response";
   title: string;
   body: string | null;
   reference_id: string | null;
   is_read: boolean;
   created_at: string;
+}
+
+export interface AdoptionInterest {
+  id: string;
+  pet_id: string;
+  user_id: string;
+  message: string | null;
+  status: "pending" | "approved" | "rejected" | "withdrawn";
+  created_at: string;
+  interested?: { name: string } | null;
 }
 
 export interface ReportMatch {
