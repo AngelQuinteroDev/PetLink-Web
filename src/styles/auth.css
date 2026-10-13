@@ -19,10 +19,23 @@
   border-radius: 50%;
   background: var(--pc-surface-strong);
   color: var(--pc-text);
-  font-size: 24px;
+  font-size: 0;
   line-height: 1;
   cursor: pointer;
   box-shadow: var(--pc-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Chevron de la app en vez del carácter ‹ */
+.auth-page__back::before {
+  content: "";
+  width: 10px;
+  height: 20px;
+  background: currentColor;
+  -webkit-mask: url("../assets/svg/Back.svg") center / contain no-repeat;
+  mask: url("../assets/svg/Back.svg") center / contain no-repeat;
 }
 
 .auth-page__hero {

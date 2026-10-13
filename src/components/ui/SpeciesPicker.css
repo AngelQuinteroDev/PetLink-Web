@@ -1,0 +1,9 @@
+.species-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.species-picker__select {
+  margin-top: 2px;
+}

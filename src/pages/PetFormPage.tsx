@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Camera, Trash2 } from "lucide-react";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
+import SpeciesPicker from "../components/ui/SpeciesPicker";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import { createPet, deletePet, getMyPet, listSpecies, updatePet, uploadPhoto } from "../lib/api";
@@ -191,12 +192,7 @@ export default function PetFormPage() {
 
         <div className="pc-field">
           <span className="pc-field-label">Especie</span>
-          <ChipGroup
-            options={species.map((s) => ({ value: s.id, label: s.name }))}
-            value={speciesId}
-            onChange={setSpeciesId}
-            label="Especie"
-          />
+          <SpeciesPicker species={species} value={speciesId} onChange={setSpeciesId} />
         </div>
 
         <div className="pc-field">

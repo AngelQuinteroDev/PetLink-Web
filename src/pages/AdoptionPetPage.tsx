@@ -4,6 +4,7 @@ import { BadgeCheck, Camera } from "lucide-react";
 import LocationField from "../components/report/LocationField";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
+import SpeciesPicker from "../components/ui/SpeciesPicker";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
 import { EmptyState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
@@ -42,8 +43,6 @@ export default function AdoptionPetPage() {
       .then(setSpecies)
       .catch(() => setSpecies([]));
   }, []);
-
-  const speciesOptions = species.map((s) => ({ value: s.id, label: s.name }));
 
   async function submit() {
     if (busyRef.current) return;
@@ -150,12 +149,7 @@ export default function AdoptionPetPage() {
 
         <div className="pc-field">
           <span className="pc-field-label">Especie</span>
-          <ChipGroup
-            options={speciesOptions}
-            value={speciesId}
-            onChange={setSpeciesId}
-            label="Especie"
-          />
+          <SpeciesPicker species={species} value={speciesId} onChange={setSpeciesId} />
         </div>
 
         <LocationField

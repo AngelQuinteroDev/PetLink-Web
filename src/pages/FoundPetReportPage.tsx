@@ -6,6 +6,7 @@ import PhotoGridField from "../components/report/PhotoGridField";
 import PetCard from "../components/PetCard.jsx";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
+import SpeciesPicker from "../components/ui/SpeciesPicker";
 import ConfirmModal from "../components/ui/ConfirmModal";
 import PhotoPickerModal from "../components/ui/PhotoPickerModal";
 import { LoadingState } from "../components/ui/States";
@@ -95,8 +96,6 @@ export default function FoundPetReportPage() {
   useEffect(() => {
     if (!locLoading && !point && userPoint) setPoint(userPoint);
   }, [locLoading, point, userPoint]);
-
-  const speciesOptions = species.map((s) => ({ value: s.id, label: s.name }));
 
   async function sendMatch() {
     if (!selected || matchBusy) return;
@@ -267,12 +266,7 @@ export default function FoundPetReportPage() {
 
         <div className="pc-field">
           <span className="pc-field-label">Especie</span>
-          <ChipGroup
-            options={speciesOptions}
-            value={speciesId}
-            onChange={setSpeciesId}
-            label="Especie"
-          />
+          <SpeciesPicker species={species} value={speciesId} onChange={setSpeciesId} />
         </div>
 
         <div className="pc-field">

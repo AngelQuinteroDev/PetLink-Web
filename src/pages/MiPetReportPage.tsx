@@ -6,6 +6,7 @@ import LocationField from "../components/report/LocationField";
 import PhotoGridField from "../components/report/PhotoGridField";
 import PrimaryButton from "../components/PrimaryButton.jsx";
 import ChipGroup from "../components/ui/ChipGroup";
+import SpeciesPicker from "../components/ui/SpeciesPicker";
 import { LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { createAlert, getPostByReportId, listSpecies, myPets, uploadPhotos } from "../lib/api";
@@ -88,8 +89,6 @@ export default function MiPetReportPage() {
     setBreed(selectedPet.breed ?? "");
   }, [selectedPet]);
 
-  const speciesOptions = species.map((s) => ({ value: s.id, label: s.name }));
-
   function clearDetails() {
     setSpeciesId(null);
     setSex(null);
@@ -148,7 +147,7 @@ export default function MiPetReportPage() {
           : "";
       if (message.includes("alerta activa")) {
         setError(
-          "Ya tienes una alerta activa para esta mascota. Revísala en el mapa o espera a que se cierre para crear otra."
+          "Ya hay un anuncio de mascota perdida para esta mascota. No puedes crear otro mientras siga activo; puedes verlo en el mapa."
         );
       } else {
         setError("No pudimos publicar la alerta. Intenta de nuevo.");
@@ -207,12 +206,7 @@ export default function MiPetReportPage() {
           </p>
           <div className="pc-field">
             <span className="pc-field-label">Especie</span>
-            <ChipGroup
-              options={speciesOptions}
-              value={speciesId}
-              onChange={setSpeciesId}
-              label="Especie"
-            />
+            <SpeciesPicker species={species} value={speciesId} onChange={setSpeciesId} />
           </div>
           <div className="pc-field">
             <span className="pc-field-label">Sexo</span>

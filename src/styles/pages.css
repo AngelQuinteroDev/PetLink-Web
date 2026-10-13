@@ -121,11 +121,24 @@
   border-radius: 50%;
   background: var(--pc-surface-strong);
   color: var(--pc-text);
-  font-size: 22px;
+  font-size: 0;
   line-height: 1;
   cursor: pointer;
   box-shadow: var(--pc-shadow);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Chevron de la app (18 px) en vez del carácter ‹ (se veía pequeño) */
+.pc-back-btn::before {
+  content: "";
+  width: 10px;
+  height: 19px;
+  background: currentColor;
+  -webkit-mask: url("../assets/svg/Back.svg") center / contain no-repeat;
+  mask: url("../assets/svg/Back.svg") center / contain no-repeat;
 }
 
 .pc-icon-btn {
@@ -447,6 +460,17 @@
 
 .help-form__sent a {
   color: inherit;
+}
+
+.composer__notice {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: var(--pc-radius-sm);
+  background: #eaf7ef;
+  color: #23794c;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 /* ---------- Comunidad ---------- */

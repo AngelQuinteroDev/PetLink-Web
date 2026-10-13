@@ -50,7 +50,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default function CommunityPage() {
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +63,7 @@ export default function CommunityPage() {
   const [draftType, setDraftType] = useState("question");
   const [draftImage, setDraftImage] = useState<File | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [publishNotice, setPublishNotice] = useState<string | null>(null);
 
   const [openPost, setOpenPost] = useState<string | null>(null);
   const [comments, setComments] = useState<CommentRow[]>([]);
@@ -200,12 +201,18 @@ export default function CommunityPage() {
   async function handlePublish() {
     if (draft.trim().length < 3) return;
     setPublishing(true);
+    setPublishNotice(null);
     try {
       let imageUrl: string | null = null;
       if (draftImage) imageUrl = await uploadPhoto(draftImage, "post-images");
       await createPost({ type: draftType, content: draft.trim(), imageUrl });
       setDraft("");
       setDraftImage(null);
+      setPublishNotice(
+        profile?.role === "admin"
+          ? "Tu publicación ya está visible en la comunidad."
+          : "Tu publicación fue enviada. Un administrador la revisará y aparecerá en la comunidad cuando sea aprobada."
+      );
       await load();
     } catch {
       setError("No pudimos publicar. Intenta de nuevo.");
@@ -296,7 +303,10 @@ export default function CommunityPage() {
           className="pc-textarea"
           placeholder="Pregunta o comparte algo con la comunidad…"
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            setPublishNotice(null);
+          }}
           aria-label="Nueva publicación"
         />
         {draftImage && <p className="pc-muted" style={{ margin: 0 }}>Imagen: {draftImage.name}</p>}
@@ -327,6 +337,12 @@ export default function CommunityPage() {
           </PrimaryButton>
         </div>
       </div>
+
+      {publishNotice && (
+        <p className="composer__notice" role="status">
+          {publishNotice}
+        </p>
+      )}
 
       {loading && <LoadingState label="Cargando publicaciones…" />}
       {!loading && error && <ErrorState message={error} onRetry={() => void load()} />}
