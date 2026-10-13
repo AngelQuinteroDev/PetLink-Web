@@ -725,6 +725,33 @@ export async function setNewPassword(newPassword: string): Promise<string | null
   return isWeakPasswordError(error) ? PASSWORD_POLICY_HINT : error.message;
 }
 
+/**
+ * Ayuda y soporte: guarda el mensaje y lo envía a soporte@petclue.co
+ * (Edge Function `send-support-message`). Si la función no está disponible,
+ * el mensaje queda igualmente registrado en la BD.
+ */
+export async function sendSupportMessage(input: {
+  message: string;
+  email: string;
+  subject?: string;
+}): Promise<{ emailed: boolean }> {
+  const { data, error } = await supabase.functions.invoke("send-support-message", {
+    body: input,
+  });
+  if (!error) {
+    return { emailed: Boolean((data as { emailed?: boolean } | null)?.emailed) };
+  }
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  const { error: insertError } = await supabase.from("support_messages").insert({
+    user_id: userId ?? null,
+    email: input.email,
+    subject: input.subject ?? null,
+    message: input.message,
+  });
+  if (insertError) throw error;
+  return { emailed: false };
+}
+
 export async function myVetApplication(): Promise<VetApplication | null> {
   const userId = (await supabase.auth.getUser()).data.user?.id;
   if (!userId) return null;

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ShieldCheck } from "lucide-react";
+import PrimaryButton from "../components/PrimaryButton.jsx";
 import { LoadingState } from "../components/ui/States";
-import { searchGuides } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
+import { searchGuides, sendSupportMessage } from "../lib/api";
 import type { GuideRow } from "../lib/types";
 import "../styles/pages.css";
 
@@ -55,9 +57,47 @@ function matches(text: string, query: string): boolean {
 
 export default function AyudaPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [guides, setGuides] = useState<GuideRow[]>([]);
   const [guidesLoading, setGuidesLoading] = useState(false);
+
+  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+  const [emailedOk, setEmailedOk] = useState(false);
+
+  async function submitSupport() {
+    if (busy) return;
+    setError(null);
+    const cleanMessage = message.trim();
+    if (cleanMessage.length < 10) {
+      setError("Cuéntanos un poco más (mínimo 10 caracteres).");
+      return;
+    }
+    if (!email.includes("@") || email.trim().length < 5) {
+      setError("Escribe un correo válido para responderte.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { emailed } = await sendSupportMessage({
+        message: cleanMessage,
+        email: email.trim(),
+      });
+      setSent(true);
+      setEmailedOk(emailed);
+      setMessage("");
+    } catch {
+      setError(
+        "No pudimos enviar tu mensaje. Intenta de nuevo o escríbenos a soporte@petclue.co."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -151,6 +191,76 @@ export default function AyudaPage() {
             <p>{item.a}</p>
           </details>
         ))}
+      </div>
+
+      <h2 className="pc-section-title" style={{ margin: "22px 0 0" }}>
+        ¿No encontraste tu respuesta?
+      </h2>
+      <p className="pc-muted" style={{ margin: "4px 0 12px" }}>
+        Cuéntanos qué pasó y lo revisamos.
+      </p>
+
+      <div className="pc-form-card">
+        <div className="pc-field">
+          <label className="pc-field-label" htmlFor="help-message">
+            Describe el problema
+          </label>
+          <textarea
+            id="help-message"
+            className="pc-textarea"
+            rows={4}
+            placeholder="Ej: No puedo actualizar la foto de mi mascota…"
+            value={message}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              setSent(false);
+              setError(null);
+            }}
+          />
+        </div>
+
+        <div className="pc-field">
+          <label className="pc-field-label" htmlFor="help-email">
+            Correo para responderte
+          </label>
+          <input
+            id="help-email"
+            className="pc-input"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setSent(false);
+              setError(null);
+            }}
+          />
+        </div>
+
+        {error && (
+          <p className="pc-error-text" role="alert">
+            {error}
+          </p>
+        )}
+
+        {sent && (
+          <p className="help-form__sent" role="status">
+            ¡Gracias! Revisaremos tu reporte pronto.
+            {!emailedOk && (
+              <>
+                {" "}
+                También puedes escribirnos a{" "}
+                <a href="mailto:soporte@petclue.co">soporte@petclue.co</a>.
+              </>
+            )}
+          </p>
+        )}
+
+        <div className="pc-form-actions">
+          <PrimaryButton onClick={() => void submitSupport()} type="button" disabled={busy}>
+            {busy ? "Enviando…" : "Enviar reporte"}
+          </PrimaryButton>
+        </div>
       </div>
     </div>
   );
