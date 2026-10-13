@@ -120,7 +120,7 @@ export async function createPost(input: {
 export async function listComments(postId: string): Promise<CommentRow[]> {
   const { data, error } = await supabase
     .from("comments")
-    .select("id, post_id, user_id, text, created_at, is_hidden, author:profiles!comments_user_id_fkey(name)")
+    .select("id, post_id, user_id, text, created_at, is_hidden, author:profiles!comments_user_id_fkey(name, avatar_url)")
     .eq("post_id", postId)
     .eq("is_hidden", false)
     .order("created_at", { ascending: true });
@@ -379,7 +379,7 @@ export async function getPostById(id: string): Promise<FeedItem | null> {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "id, user_id, pet_id, type, content, image_url, report_id, created_at, author:profiles!posts_user_id_fkey(name)"
+      "id, user_id, pet_id, type, content, image_url, report_id, created_at, author:profiles!posts_user_id_fkey(name, avatar_url)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -395,7 +395,7 @@ export async function getPostById(id: string): Promise<FeedItem | null> {
     image_url: string | null;
     report_id: string | null;
     created_at: string;
-    author: { name: string } | null;
+    author: { name: string; avatar_url: string | null } | null;
   };
 
   const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -426,6 +426,7 @@ export async function getPostById(id: string): Promise<FeedItem | null> {
     longitude: null,
     latitude: null,
     author_name: row.author?.name ?? "Usuario",
+    author_avatar_url: row.author?.avatar_url ?? null,
     tags: [],
     comment_count: comments.count ?? 0,
     like_count: likes.count ?? 0,
@@ -457,7 +458,7 @@ export async function getCommentById(id: string): Promise<CommentRow | null> {
 
 export async function uploadPhotos(
   files: File[],
-  bucket: "pet-photos" | "post-images"
+  bucket: "pet-photos" | "post-images" | "avatars"
 ): Promise<string[]> {
   const urls: string[] = [];
   for (const file of files) {

@@ -21,8 +21,12 @@ function ForumPost({
       <div className="forum-post__profile">
 
         <div className="forum-post__avatar">
-          {avatarUrl && (
+          {avatarUrl ? (
             <img src={avatarUrl} alt={userName} loading="lazy" decoding="async" />
+          ) : (
+            <span className="forum-post__avatar-letter" aria-hidden="true">
+              {userName.charAt(0).toUpperCase()}
+            </span>
           )}
         </div>
 

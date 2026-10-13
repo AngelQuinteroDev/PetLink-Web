@@ -51,6 +51,7 @@ export interface FeedItem {
   longitude: number | null;
   latitude: number | null;
   author_name: string;
+  author_avatar_url: string | null;
   tags: string[];
   comment_count: number;
   like_count: number;
@@ -102,7 +103,7 @@ export interface CommentRow {
   text: string;
   created_at: string;
   is_hidden: boolean;
-  author?: Pick<Profile, "name"> | null;
+  author?: Pick<Profile, "name" | "avatar_url"> | null;
 }
 
 export interface NotificationRow {

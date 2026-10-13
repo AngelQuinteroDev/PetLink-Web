@@ -22,9 +22,17 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #c026c0;
+  background: var(--pc-primary-soft);
+  color: var(--pc-primary-strong);
+  display: grid;
+  place-items: center;
   overflow: hidden;
   flex-shrink: 0;
+}
+
+.forum-post__avatar-letter {
+  font-weight: 700;
+  font-size: 15px;
 }
 
 .forum-post__avatar img {

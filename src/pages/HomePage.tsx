@@ -171,6 +171,7 @@ export default function HomePage() {
                   <ForumPost
                     key={item.id}
                     userName={item.author_name}
+                    avatarUrl={item.author_avatar_url ?? ""}
                     timeAgo={timeAgo(item.created_at)}
                     category={item.type === "question" ? "Pregunta" : "Post"}
                     question={item.content}

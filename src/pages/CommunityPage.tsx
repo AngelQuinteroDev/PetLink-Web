@@ -347,6 +347,7 @@ export default function CommunityPage() {
           >
             <ForumPost
               userName={item.author_name}
+              avatarUrl={item.author_avatar_url ?? ""}
               timeAgo={timeAgo(item.created_at)}
               category={TYPE_LABELS[item.type] ?? item.type}
               question={item.content}
@@ -470,11 +471,20 @@ export default function CommunityPage() {
                       data-comment-id={c.id}
                       className={`comment-row ${highlightComment === c.id ? "flash-highlight" : ""}`}
                     >
-                      <p className="comment-row__author">
-                        {c.author?.name ?? "Alguien"}{" "}
-                        <span className="comment-row__time">{timeAgo(c.created_at)}</span>
-                      </p>
-                      <p className="comment-row__text">{c.text}</p>
+                      <span className="comment-row__avatar" aria-hidden="true">
+                        {c.author?.avatar_url ? (
+                          <img src={c.author.avatar_url} alt="" loading="lazy" decoding="async" />
+                        ) : (
+                          (c.author?.name ?? "A").charAt(0).toUpperCase()
+                        )}
+                      </span>
+                      <div className="comment-row__body">
+                        <p className="comment-row__author">
+                          {c.author?.name ?? "Alguien"}{" "}
+                          <span className="comment-row__time">{timeAgo(c.created_at)}</span>
+                        </p>
+                        <p className="comment-row__text">{c.text}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
