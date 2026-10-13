@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -24,6 +24,7 @@ import CityPickerModal from "../components/ui/CityPickerModal";
 import { useAuth } from "../contexts/AuthContext";
 import { usePrefs } from "../hooks/usePrefs";
 import { useUserLocation } from "../hooks/useUserLocation";
+import { updateProfileName } from "../lib/api";
 import "../styles/pages.css";
 import "../styles/settings.css";
 
@@ -39,13 +40,44 @@ const SUPPORT_EMAIL = "soporte@petclue.co";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const { prefs, setPref } = usePrefs();
   const { radius, consent, requestConsent, saveRadius } = useUserLocation();
   const [cityOpen, setCityOpen] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
   const [danger, setDanger] = useState<null | "deactivate" | "delete">(null);
   const [savingRadius, setSavingRadius] = useState(false);
+
+  const [name, setName] = useState(profile?.name ?? "");
+  const [nameBusy, setNameBusy] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [nameSaved, setNameSaved] = useState(false);
+  const nameChanged = name.trim() !== (profile?.name ?? "").trim();
+
+  useEffect(() => {
+    setName(profile?.name ?? "");
+  }, [profile?.name]);
+
+  async function saveName() {
+    const clean = name.trim();
+    if (clean.length < 2) {
+      setNameError("Escribe tu nombre (mínimo 2 letras).");
+      setNameSaved(false);
+      return;
+    }
+    setNameBusy(true);
+    setNameError(null);
+    setNameSaved(false);
+    try {
+      await updateProfileName(clean);
+      await refreshProfile();
+      setNameSaved(true);
+    } catch {
+      setNameError("No pudimos guardar tu nombre. Intenta de nuevo.");
+    } finally {
+      setNameBusy(false);
+    }
+  }
 
   async function pickRadius(value: number) {
     setSavingRadius(true);
@@ -81,6 +113,45 @@ export default function SettingsPage() {
       <section className="settings-section">
         <h2 className="settings-section__title">Cuenta</h2>
         <div className="settings-card">
+          <div className="settings-name">
+            <label className="settings-name__label" htmlFor="profile-name">
+              Nombre
+            </label>
+            <div className="settings-name__row">
+              <input
+                id="profile-name"
+                className="pc-input settings-name__input"
+                placeholder="Tu nombre"
+                value={name}
+                maxLength={60}
+                autoComplete="name"
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setNameError(null);
+                  setNameSaved(false);
+                }}
+              />
+              <button
+                type="button"
+                className="settings-row__action"
+                disabled={!nameChanged || nameBusy}
+                onClick={() => void saveName()}
+              >
+                {nameBusy ? "Guardando…" : "Guardar"}
+              </button>
+            </div>
+            {nameError && (
+              <p className="pc-error-text" role="alert">
+                {nameError}
+              </p>
+            )}
+            {nameSaved && (
+              <p className="settings-name__saved" role="status">
+                Nombre actualizado.
+              </p>
+            )}
+          </div>
+
           <SettingsRow
             icon={<Mail size={17} />}
             label="Correo electrónico"
