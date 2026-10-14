@@ -47,7 +47,7 @@
   font-size: 14px;
 }
 
-/* Autor verificado: veterinario / refugio con escudo (homologado de la app) */
+/* Autor verificado: etiqueta junto al nombre con los colores de la app (RoleBadge) */
 
 .forum-post__name-row {
   display: flex;
@@ -59,22 +59,23 @@
 .forum-post__author-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px 1px 5px;
-  border-radius: 10px;
-  background: var(--pc-primary);
-  color: #ffffff;
-  font-size: 10.5px;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: 9px;
+  background: #f3edff;
+  color: var(--pc-primary-strong);
+  font-size: 10px;
   font-weight: 700;
+  line-height: 1;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
-.forum-post__author-badge-icon {
-  width: 13px;
-  height: 13px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-}
+/* Colores del diseño (rama de la app): fondo claro + texto oscuro. Médico vet. ≠ Veterinaria */
+.forum-post__author-badge--vet { background: #c9f8e6; color: #0d6b50; }      /* Médico veterinario (persona) */
+.forum-post__author-badge--clinic { background: #c3c5ff; color: #14101c; }   /* Veterinaria (establecimiento) */
+.forum-post__author-badge--shelter { background: #ffe1c0; color: #14101c; }  /* Refugio */
+.forum-post__author-badge--admin { background: #3b2a5c; color: #ffffff; }    /* Administrador */
 
 .forum-post__time {
   margin: 0;

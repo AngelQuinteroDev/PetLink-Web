@@ -1,0 +1,36 @@
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  height: 44px;
+  padding: 0 14px;
+
+  border-radius: 20px;
+  background: var(--pc-surface-strong);
+  box-shadow: var(--pc-shadow);
+
+  box-sizing: border-box;
+}
+
+.search-bar__icon {
+  flex-shrink: 0;
+  color: var(--pc-muted);
+}
+
+.search-bar__input {
+  flex: 1;
+  min-width: 0;
+
+  border: none;
+  background: transparent;
+  outline: none;
+
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--pc-text);
+}
+
+.search-bar__input::placeholder {
+  color: var(--pc-muted-soft);
+}

@@ -1,6 +1,5 @@
 import { Heart } from "lucide-react";
 import commentsIcon from "../assets/svg/uil_comments.svg";
-import escudoIcon from "../assets/svg/Ajustes/Escudo.svg";
 import "./ForumPost.css";
 
 function ForumPost({
@@ -13,6 +12,8 @@ function ForumPost({
   avatarUrl = "",
   imageUrl = "",
   authorBadge = "",
+  /** "clinic" | "shelter" | "vet" | "admin": color de la etiqueta (como en la app) */
+  authorBadgeKind = "",
   liked = false,
   onLike = () => {},
   onClick = () => {},
@@ -38,9 +39,12 @@ function ForumPost({
           <div className="forum-post__name-row">
             <p className="forum-post__name">{userName}</p>
             {authorBadge && (
-              <span className="forum-post__author-badge">
-                <img src={escudoIcon} alt="" className="forum-post__author-badge-icon" />
-                {authorBadge}
+              <span
+                className={`forum-post__author-badge${
+                  authorBadgeKind ? ` forum-post__author-badge--${authorBadgeKind}` : ""
+                }`}
+              >
+                ✓ {authorBadge}
               </span>
             )}
           </div>

@@ -44,6 +44,17 @@
   box-shadow: var(--pc-shadow);
 }
 
+.glass-header__circle--active {
+  background: var(--pc-primary-strong);
+  color: #ffffff;
+}
+
+/* Mismo ancho que el botón de búsqueda, para centrar el título en desktop */
+.glass-header__desktop-spacer {
+  width: 42px;
+  flex-shrink: 0;
+}
+
 .glass-header__title {
   flex: 1;
   min-width: 0;

@@ -13,8 +13,13 @@ import { useUserLocation } from "../hooks/useUserLocation";
 import { getFeed, reportsNear, togglePostLike } from "../lib/api";
 import { hasGeoDecision } from "../lib/geo";
 import { dayLabel, timeAgo } from "../lib/format";
-import { verifiedRoleBadge } from "../lib/roles";
-import { publisherKinds, type PublisherKind } from "../lib/publisher";
+import {
+  publisherKinds,
+  roleBadges,
+  ROLE_BADGE_LABEL,
+  type PublisherKind,
+  type RoleBadgeKind,
+} from "../lib/publisher";
 import { petToDetailData, reportToDetailData } from "../lib/petDetail";
 import { supabase } from "../lib/supabase";
 import type { FeedItem, GeoPoint, Pet, ReportNear } from "../lib/types";
@@ -29,6 +34,7 @@ export default function HomePage() {
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [adoption, setAdoption] = useState<Pet[]>([]);
   const [kinds, setKinds] = useState<Record<string, PublisherKind>>({});
+  const [badges, setBadges] = useState<Record<string, RoleBadgeKind>>({});
   const [detail, setDetail] = useState<PetDetailData | null>(null);
   const unread = useUnreadNotifications();
   const { point, radius, consent, loading: locLoading, requestConsent } = useUserLocation();
@@ -53,11 +59,16 @@ export default function HomePage() {
       setReports(near);
       setFeed(posts);
       setAdoption(adoptionPets);
-      setKinds(
-        await publisherKinds(adoptionPets.map((p) => p.user_id)).catch(
+      const [kindsMap, badgesMap] = await Promise.all([
+        publisherKinds(adoptionPets.map((p) => p.user_id)).catch(
           () => ({}) as Record<string, PublisherKind>
-        )
-      );
+        ),
+        roleBadges(posts.map((p) => p.user_id)).catch(
+          () => ({}) as Record<string, RoleBadgeKind>
+        ),
+      ]);
+      setKinds(kindsMap);
+      setBadges(badgesMap);
     } catch {
       setError("No pudimos cargar tu inicio.");
     } finally {
@@ -181,7 +192,10 @@ export default function HomePage() {
                     key={item.id}
                     userName={item.author_name}
                     avatarUrl={item.author_avatar_url ?? ""}
-                    authorBadge={verifiedRoleBadge(item.author_role, item.author_vet_status) ?? ""}
+                    authorBadge={
+                      badges[item.user_id] ? ROLE_BADGE_LABEL[badges[item.user_id]] : ""
+                    }
+                    authorBadgeKind={badges[item.user_id] ?? ""}
                     imageUrl={item.image_url ?? ""}
                     timeAgo={timeAgo(item.created_at)}
                     category={item.type === "question" ? "Pregunta" : "Post"}

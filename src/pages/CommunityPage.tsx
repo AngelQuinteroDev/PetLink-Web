@@ -7,6 +7,7 @@ import ChipGroup from "../components/ui/ChipGroup";
 import GlassHeader from "../components/ui/GlassHeader";
 import ImageViewer from "../components/ui/ImageViewer";
 import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
+import SearchBar from "../components/ui/SearchBar";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -25,7 +26,11 @@ import {
 } from "../lib/api";
 import { timeAgo } from "../lib/format";
 import { reportToDetailData } from "../lib/petDetail";
-import { verifiedRoleBadge } from "../lib/roles";
+import {
+  roleBadges,
+  ROLE_BADGE_LABEL,
+  type RoleBadgeKind,
+} from "../lib/publisher";
 import { supabase } from "../lib/supabase";
 import type { CommentRow, FeedItem, ReportMatch } from "../lib/types";
 import "../styles/pages.css";
@@ -52,16 +57,25 @@ const TYPE_LABELS: Record<string, string> = {
   meme: "Meme",
 };
 
+const normalize = (s: string | null | undefined) =>
+  (s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 export default function CommunityPage() {
   const [searchParams] = useSearchParams();
   const { user, profile } = useAuth();
   const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [badges, setBadges] = useState<Record<string, RoleBadgeKind>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterValue>("all");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const [highlightPost, setHighlightPost] = useState<string | null>(null);
   const [highlightComment, setHighlightComment] = useState<string | null>(null);
   const deepLinkHandled = useRef(false);
+
+  const searching = query.trim().length > 0;
+  const q = normalize(query.trim());
 
   const [draft, setDraft] = useState("");
   const [draftType, setDraftType] = useState("question");
@@ -97,15 +111,23 @@ export default function CommunityPage() {
     setLoading(true);
     setError(null);
     try {
-      setFeed(
-        await getFeed({ type: filter === "all" ? undefined : filter, limit: 30 })
+      const posts = await getFeed({
+        type: filter === "all" ? undefined : filter,
+        // Mientras se busca se cargan más publicaciones (como en la app)
+        limit: searching ? 100 : 30,
+      });
+      setFeed(posts);
+      setBadges(
+        await roleBadges(posts.map((p) => p.user_id)).catch(
+          () => ({}) as Record<string, RoleBadgeKind>
+        )
       );
     } catch {
       setError("No pudimos cargar la comunidad.");
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, searching]);
 
   useEffect(() => {
     void load();
@@ -131,6 +153,10 @@ export default function CommunityPage() {
       const post = await getPostById(targetId).catch(() => null);
       if (post) {
         setFeed((prev) => (prev.some((f) => f.id === post.id) ? prev : [post, ...prev]));
+        const b = await roleBadges([post.user_id]).catch(
+          () => ({}) as Record<string, RoleBadgeKind>
+        );
+        setBadges((prev) => ({ ...b, ...prev }));
       }
       setOpenPost(targetId);
       setCommentDraft("");
@@ -302,10 +328,38 @@ export default function CommunityPage() {
     }
   }
 
+  // Búsqueda (lupa del header): filtra por texto, autor o tipo
+  const visibleFeed = searching
+    ? feed.filter((p) =>
+        [p.content, p.author_name, TYPE_LABELS[p.type] ?? p.type].some((field) =>
+          normalize(field).includes(q)
+        )
+      )
+    : feed;
+
   return (
     <div className="community-page">
-      <GlassHeader title="Comunidad" />
+      <GlassHeader
+        title="Comunidad"
+        searchOpen={searchOpen}
+        onToggleSearch={() => {
+          setSearchOpen((open) => !open);
+          setQuery("");
+        }}
+      />
       <h1 className="community-title">¿Qué quieres compartir con la comunidad?</h1>
+
+      {searchOpen && (
+        <div className="community-page__search">
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            placeholder="Buscar por texto, autor o tipo"
+            autoFocus
+            label="Buscar publicaciones"
+          />
+        </div>
+      )}
 
       <div className="community-filters">
         <ChipGroup
@@ -372,8 +426,15 @@ export default function CommunityPage() {
         />
       )}
 
+      {!loading && searching && visibleFeed.length === 0 && !error && (
+        <EmptyState
+          title="Sin resultados"
+          body={`No encontramos publicaciones con «${query.trim()}».`}
+        />
+      )}
+
       <div className="home__feed">
-        {feed.map((item) => {
+        {visibleFeed.map((item) => {
           const imageUrl = item.image_url;
           return (
             <div
@@ -384,7 +445,8 @@ export default function CommunityPage() {
               <ForumPost
                 userName={item.author_name}
                 avatarUrl={item.author_avatar_url ?? ""}
-                authorBadge={verifiedRoleBadge(item.author_role, item.author_vet_status) ?? ""}
+                authorBadge={badges[item.user_id] ? ROLE_BADGE_LABEL[badges[item.user_id]] : ""}
+                authorBadgeKind={badges[item.user_id] ?? ""}
                 imageUrl={imageUrl ?? ""}
                 onImageClick={imageUrl ? () => setViewerUrl(imageUrl) : undefined}
                 timeAgo={timeAgo(item.created_at)}
