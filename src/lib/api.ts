@@ -9,6 +9,7 @@ import type {
   GuideRow,
   ModerationPost,
   MyClinic,
+  MyPlace,
   NotificationRow,
   PendingClinic,
   Pet,
@@ -578,6 +579,15 @@ export async function verifyClinic(
   if (error) throw error;
 }
 
+/** El admin cambia la etiqueta de un lugar: clinic = Veterinaria, shelter = Refugio (RLS admin). */
+export async function updatePlaceKind(
+  placeId: string,
+  kind: "clinic" | "shelter"
+): Promise<void> {
+  const { error } = await supabase.from("vet_clinics").update({ kind }).eq("id", placeId);
+  if (error) throw error;
+}
+
 export async function listCommentReports(): Promise<CommentReport[]> {
   const { data, error } = await supabase
     .from("comment_reports")
@@ -955,18 +965,58 @@ export async function submitVetApplication(
   if (error) throw error;
 }
 
-export async function myClinic(): Promise<MyClinic | null> {
+/** Punto de un lugar: PostGIS (geography) llega como GeoJSON o WKB hex por PostgREST. */
+export function parseGeoPoint(value: unknown): GeoPoint | null {
+  if (!value) return null;
+  if (typeof value === "object") {
+    const coords = (value as { coordinates?: number[] }).coordinates;
+    return coords?.length === 2 ? { lon: coords[0], lat: coords[1] } : null;
+  }
+  if (typeof value !== "string" || !/^[0-9a-fA-F]+$/.test(value) || value.length < 42) return null;
+  const bytes = new Uint8Array(value.match(/../g)!.map((h) => parseInt(h, 16)));
+  const view = new DataView(bytes.buffer);
+  const little = bytes[0] === 1;
+  const type = view.getUint32(1, little);
+  let offset = 5;
+  if (type & 0x20000000) offset += 4; // trae SRID
+  if ((type & 0xff) !== 1) return null; // solo puntos
+  const lon = view.getFloat64(offset, little);
+  const lat = view.getFloat64(offset + 8, little);
+  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
+
+const PLACE_COLUMNS = "id, name, address, phone, kind, verified, created_at, location";
+
+const withPoint = (row: unknown): MyPlace => {
+  const { location, ...rest } = row as MyClinic & { location?: unknown };
+  return { ...(rest as MyClinic), point: parseGeoPoint(location) };
+};
+
+/** Todas las sedes (veterinarias / refugios / consultorios) de la cuenta, la más reciente primero. */
+export async function myPlaces(): Promise<MyPlace[]> {
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (!userId) return [];
+  const { data, error } = await supabase
+    .from("vet_clinics")
+    .select(PLACE_COLUMNS)
+    .eq("created_by", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(withPoint);
+}
+
+/** Una sede propia por id. */
+export async function getMyPlace(id: string): Promise<MyPlace | null> {
   const userId = (await supabase.auth.getUser()).data.user?.id;
   if (!userId) return null;
   const { data, error } = await supabase
     .from("vet_clinics")
-    .select("id, name, address, phone, kind, verified, created_at")
+    .select(PLACE_COLUMNS)
+    .eq("id", id)
     .eq("created_by", userId)
-    .order("created_at", { ascending: false })
-    .limit(1)
     .maybeSingle();
   if (error) throw error;
-  return (data as MyClinic | null) ?? null;
+  return data ? withPoint(data) : null;
 }
 
 export async function createMyClinic(input: {
@@ -987,13 +1037,45 @@ export async function createMyClinic(input: {
   if (error) throw error;
 }
 
-export async function updateMyClinic(
-  clinicId: string,
-  patch: { name?: string; address?: string; phone?: string | null }
-): Promise<void> {
-  const { error } = await supabase
+/**
+ * Editar una sede propia (RPC update_my_place): el teléfono cambia al instante; si cambian el
+ * nombre, la dirección o la ubicación, vuelve a revisión. Devuelve true si volvió a revisión.
+ */
+export async function updateMyPlace(
+  id: string,
+  patch: { name: string; address: string; phone: string | null; point?: GeoPoint | null }
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc("update_my_place", {
+    p_id: id,
+    p_name: patch.name,
+    p_address: patch.address,
+    p_phone: patch.phone,
+    p_lat: patch.point?.lat ?? null,
+    p_lon: patch.point?.lon ?? null,
+  });
+  if (!error) return data === true;
+  if (error.code !== "PGRST202") throw error;
+  // Sin la función (migración sin aplicar): solo funciona en sedes pendientes (RLS)
+  const direct = await supabase
     .from("vet_clinics")
-    .update(patch)
-    .eq("id", clinicId);
-  if (error) throw error;
+    .update({ name: patch.name, address: patch.address, phone: patch.phone })
+    .eq("id", id)
+    .select("id");
+  if (direct.error) throw direct.error;
+  if (!direct.data?.length) {
+    throw new Error("Para editar una sede ya verificada hay que aplicar la migración 0054_my_places.");
+  }
+  return false;
+}
+
+/** Eliminar una sede propia (RPC delete_my_place). */
+export async function deleteMyPlace(id: string): Promise<void> {
+  const { error } = await supabase.rpc("delete_my_place", { p_id: id });
+  if (!error) return;
+  if (error.code !== "PGRST202") throw error;
+  // Sin la función: borrado directo (la RLS solo lo permite en sedes pendientes)
+  const direct = await supabase.from("vet_clinics").delete().eq("id", id).select("id");
+  if (direct.error || !direct.data?.length) {
+    throw new Error("Para eliminar una sede ya verificada hay que aplicar la migración 0054_my_places.");
+  }
 }

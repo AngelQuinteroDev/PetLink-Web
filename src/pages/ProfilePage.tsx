@@ -22,7 +22,9 @@ import LogoutConfirm from "../components/ui/LogoutConfirm";
 import { EmptyState, LoadingState } from "../components/ui/States";
 import { useAuth } from "../contexts/AuthContext";
 import { usePrefs } from "../hooks/usePrefs";
-import { getMyStats, myPets, removePhoto, updateAvatar, uploadPhoto } from "../lib/api";
+import { getMyStats, myPets, myPlaces, removePhoto, updateAvatar, uploadPhoto } from "../lib/api";
+import { publisherKinds, type PublisherKind } from "../lib/publisher";
+import { PLACE_MENU, placeMenuKind } from "../lib/professional";
 import { ageFromBirthDate } from "../lib/format";
 import type { Pet } from "../lib/types";
 import "../styles/pages.css";
@@ -48,6 +50,7 @@ export default function ProfilePage() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [placeKind, setPlaceKind] = useState<PublisherKind | null>(null);
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   const load = useCallback(async () => {
@@ -64,6 +67,28 @@ export default function ProfilePage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // "Mis veterinarias / Mis refugios / Mis consultorios" según el tipo de cuenta profesional
+  useEffect(() => {
+    const id = profile?.id;
+    const role = profile?.role;
+    if (!id || (role !== "vet" && role !== "foundation")) {
+      setPlaceKind(null);
+      return;
+    }
+    let alive = true;
+    void (async () => {
+      try {
+        const [kinds, places] = await Promise.all([publisherKinds([id]), myPlaces()]);
+        if (alive) setPlaceKind(placeMenuKind(role, kinds[id], places[0]?.kind));
+      } catch {
+        if (alive) setPlaceKind(role === "foundation" ? "shelter" : "doctor");
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [profile?.id, profile?.role]);
 
   async function handleAvatarFile(file: File | null) {
     if (!file || avatarBusy) return;
@@ -244,8 +269,9 @@ export default function ProfilePage() {
           {profile?.role === "vet" || profile?.role === "foundation" ? (
             <SettingsRow
               icon={<ShieldCheck size={17} />}
-              label="Mi clínica"
-              onClick={() => navigate("/mi-clinica")}
+              label={placeKind ? PLACE_MENU[placeKind].label : "Mis lugares"}
+              sublabel={placeKind ? PLACE_MENU[placeKind].sub : "Tus sedes en el mapa"}
+              onClick={() => navigate("/mis-lugares")}
             />
           ) : (
             <SettingsRow

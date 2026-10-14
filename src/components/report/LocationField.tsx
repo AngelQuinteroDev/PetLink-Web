@@ -3,7 +3,7 @@ import { CircleMarker, MapContainer, TileLayer, useMap, useMapEvents } from "rea
 import type { Map as LeafletMap } from "leaflet";
 import { LocateFixed, MapPin } from "lucide-react";
 import "leaflet/dist/leaflet.css";
-import { reverseGeocode } from "../../lib/geocode";
+import { reverseGeocode, searchPlace } from "../../lib/geocode";
 import { getFreshPoint, requestGeoConsent } from "../../lib/geo";
 import { DEFAULT_CENTER, type GeoPoint } from "../../lib/types";
 
@@ -50,14 +50,16 @@ interface Props {
   text: string;
   onTextChange: (text: string) => void;
   point: GeoPoint | null;
-  onPointChange: (point: GeoPoint) => void;
+  onPointChange: (point: GeoPoint | null) => void;
   help?: string;
 }
 
 /**
- * Lugar del reporte: solo el mapa (sin alertas) con el punto elegido.
- * Se marca tocando el mapa o con el botón de ubicación actual (abajo a la
- * derecha, igual que en el mapa principal).
+ * Lugar de un formulario (reportes, adopción, sedes): dirección + mini mapa, y uno completa al
+ * otro (homologado de la app):
+ * - escribir la dirección → al dejar de escribir se ubica sola en el mapa;
+ * - tocar el mapa o usar la ubicación actual → se marca el punto y se escribe su dirección.
+ * Mientras se escribe, el punto anterior deja de valer hasta ubicar la nueva dirección.
  */
 export default function LocationField({
   label,
@@ -71,38 +73,89 @@ export default function LocationField({
   const [place, setPlace] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [locating, setLocating] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState<"" | "map" | "address">("");
+  const [note, setNote] = useState<string | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
-  const noticeTimer = useRef<number | null>(null);
+  const lastPick = useRef<GeoPoint | null>(null); // punto que puso el mapa (ya tiene nombre)
+  const fromMap = useRef<string | null>(null); // texto que puso el mapa: no se vuelve a buscar
+  const typed = useRef(false); // el usuario escribió (no viene del mapa)
 
+  // Nombre del lugar marcado (solo para el aviso bajo el campo)
   useEffect(() => {
-    if (!point) return;
+    if (!point) {
+      setPlace(null);
+      setBusy(false);
+      return;
+    }
+    if (lastPick.current === point) return; // ya lo resolvió pick()
     let active = true;
     setBusy(true);
     void reverseGeocode(point).then((name) => {
       if (!active) return;
       setPlace(name);
       setBusy(false);
-      if (name && !text.trim()) onTextChange(name);
     });
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [point]);
 
-  useEffect(
-    () => () => {
-      if (noticeTimer.current) window.clearTimeout(noticeTimer.current);
-    },
-    []
-  );
-
-  function flash(message: string) {
-    setNotice(message);
-    if (noticeTimer.current) window.clearTimeout(noticeTimer.current);
-    noticeTimer.current = window.setTimeout(() => setNotice(null), 3400);
+  function changeText(value: string) {
+    typed.current = true;
+    onTextChange(value);
+    onPointChange(null); // el punto anterior ya no corresponde al texto
   }
+
+  /** Tocar el mapa o usar el GPS: marca el punto y escribe su dirección. */
+  async function pick(p: GeoPoint) {
+    lastPick.current = p;
+    onPointChange(p);
+    setSyncing("address");
+    setNote(null);
+    const name = await reverseGeocode(p).catch(() => null);
+    setSyncing("");
+    if (name) {
+      setPlace(name);
+      setBusy(false);
+    }
+    const finalText = name ?? `Punto marcado en el mapa (${p.lat.toFixed(4)}, ${p.lon.toFixed(4)})`;
+    fromMap.current = finalText;
+    typed.current = false;
+    onTextChange(finalText);
+    setNote(
+      name
+        ? "Escribimos la dirección del punto que marcaste. Puedes corregirla."
+        : "Marcamos el punto en el mapa."
+    );
+  }
+
+  // Escribir la dirección: al dejar de escribir (0,9 s) se ubica sola en el mapa
+  useEffect(() => {
+    const value = text.trim();
+    if (!typed.current || value.length < 6 || value === fromMap.current) return undefined;
+    let alive = true;
+    const timer = window.setTimeout(async () => {
+      setSyncing("map");
+      const p = await searchPlace(value).catch(() => null);
+      if (!alive) return;
+      setSyncing("");
+      if (p) {
+        lastPick.current = p;
+        setPlace(value);
+        setBusy(false);
+        onPointChange(p);
+        setNote("Ubicamos la dirección en el mapa. Si no es exacto, toca el punto correcto.");
+      } else {
+        setNote("No encontramos esa dirección en el mapa: escríbela más completa o toca el mapa.");
+      }
+    }, 900);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+    // onPointChange cambia en cada render del padre: solo importa el texto
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text]);
 
   async function locateMe() {
     if (locating) return;
@@ -110,20 +163,27 @@ export default function LocationField({
     try {
       const granted = await requestGeoConsent();
       if (!granted) {
-        flash("Activa la ubicación en tu navegador para usar tu posición.");
+        setNote("Activa la ubicación en tu navegador para usar tu posición.");
         return;
       }
       const fresh = await getFreshPoint();
       if (!fresh) {
-        flash("No pudimos obtener tu ubicación. Marca el punto en el mapa.");
+        setNote("No pudimos obtener tu ubicación. Marca el punto en el mapa.");
         return;
       }
-      onPointChange(fresh);
       mapRef.current?.flyTo([fresh.lat, fresh.lon], 16, { duration: 0.7 });
+      await pick(fresh);
     } finally {
       setLocating(false);
     }
   }
+
+  const statusText =
+    syncing === "map"
+      ? "Buscando la dirección en el mapa…"
+      : syncing === "address"
+        ? "Buscando la dirección de ese punto…"
+        : note;
 
   return (
     <div className="pc-field">
@@ -135,7 +195,7 @@ export default function LocationField({
         className="pc-input"
         placeholder={placeholder}
         value={text}
-        onChange={(e) => onTextChange(e.target.value)}
+        onChange={(e) => changeText(e.target.value)}
       />
 
       {point && (
@@ -158,7 +218,7 @@ export default function LocationField({
           />
           <MapResizer />
           <InitialFocus point={point} />
-          <PointPicker onPick={onPointChange} />
+          <PointPicker onPick={(p) => void pick(p)} />
           {point && (
             <CircleMarker
               center={[point.lat, point.lon]}
@@ -179,9 +239,9 @@ export default function LocationField({
           <LocateFixed size={20} />
         </button>
 
-        {notice && (
+        {statusText && (
           <p className="map-notice" role="status">
-            {notice}
+            {statusText}
           </p>
         )}
       </div>

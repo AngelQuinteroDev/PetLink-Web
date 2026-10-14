@@ -138,10 +138,10 @@ export default function VetApplicationPage() {
         <EmptyState
           icon={<BadgeCheck size={40} strokeWidth={1.6} />}
           title="Ya eres parte del equipo profesional"
-          body="Tu cuenta está verificada. Crea o administra la página de tu clínica o refugio."
+          body="Tu cuenta está verificada. Crea o administra tus lugares en el mapa (veterinarias, refugios o consultorios)."
           action={
-            <PrimaryButton onClick={() => navigate("/mi-clinica")} type="button">
-              Ir a Mi clínica
+            <PrimaryButton onClick={() => navigate("/mis-lugares")} type="button">
+              Ir a mis lugares
             </PrimaryButton>
           }
         />

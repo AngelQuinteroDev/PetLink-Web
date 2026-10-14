@@ -21,6 +21,7 @@ import {
   moderatePost,
   resolveCommentReports,
   reviewVetApplication,
+  updatePlaceKind,
   verifyClinic,
 } from "../lib/api";
 import { timeAgo } from "../lib/format";
@@ -62,6 +63,8 @@ export default function AdminPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [docBusy, setDocBusy] = useState<string | null>(null);
+  // Etiqueta elegida por el admin al verificar una sede (Veterinaria / Refugio)
+  const [placeKinds, setPlaceKinds] = useState<Record<string, "clinic" | "shelter">>({});
 
   async function openDocument(pathOrUrl: string) {
     setDocBusy(pathOrUrl);
@@ -412,6 +415,25 @@ export default function AdminPage() {
               <p className="pc-muted admin-item__meta">
                 Creada por {c.creator?.name ?? "usuario"}
               </p>
+              <div className="pc-field" style={{ marginTop: 10 }}>
+                <label className="pc-field-label" htmlFor={`clinic-kind-${c.id}`}>
+                  Etiqueta en el mapa
+                </label>
+                <select
+                  id={`clinic-kind-${c.id}`}
+                  className="pc-input"
+                  value={placeKinds[c.id] ?? c.kind}
+                  onChange={(e) =>
+                    setPlaceKinds((prev) => ({
+                      ...prev,
+                      [c.id]: e.target.value as "clinic" | "shelter",
+                    }))
+                  }
+                >
+                  <option value="clinic">Veterinaria</option>
+                  <option value="shelter">Refugio</option>
+                </select>
+              </div>
               <div className="admin-item__actions">
                 <button
                   type="button"
@@ -420,7 +442,11 @@ export default function AdminPage() {
                   onClick={() =>
                     void run(
                       c.id,
-                      () => verifyClinic(c.id, true),
+                      async () => {
+                        const kind = placeKinds[c.id] ?? c.kind;
+                        if (kind !== c.kind) await updatePlaceKind(c.id, kind);
+                        await verifyClinic(c.id, true);
+                      },
                       () => setClinics((prev) => prev.filter((x) => x.id !== c.id)),
                       "No pudimos verificar la clínica."
                     )

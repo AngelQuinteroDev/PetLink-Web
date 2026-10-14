@@ -25,6 +25,7 @@ import SettingsPage from "./pages/SettingsPage";
 import AdminPage from "./pages/AdminPage";
 import VetApplicationPage from "./pages/VetApplicationPage";
 import MyClinicPage from "./pages/MyClinicPage";
+import MyPlacesPage from "./pages/MyPlacesPage";
 import RequestResetPage from "./pages/RequestResetPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import LegalPage from "./pages/LegalPage";
@@ -152,7 +153,10 @@ export default function App() {
             <Route path="/configuracion/contrasena" element={<ChangePasswordPage />} />
             <Route path="/ayuda" element={<AyudaPage />} />
             <Route path="/verificacion" element={<VetApplicationPage />} />
-            <Route path="/mi-clinica" element={<MyClinicPage />} />
+            <Route path="/mi-clinica" element={<Navigate to="/mis-lugares" replace />} />
+            <Route path="/mis-lugares" element={<MyPlacesPage />} />
+            <Route path="/mi-clinica/nueva" element={<MyClinicPage />} />
+            <Route path="/mi-clinica/:id" element={<MyClinicPage />} />
             <Route
               path="/admin"
               element={

@@ -224,4 +224,9 @@ export interface MyClinic {
   created_at: string;
 }
 
+/** Una sede propia (veterinaria / refugio / consultorio) con su punto en el mapa. */
+export interface MyPlace extends MyClinic {
+  point: GeoPoint | null;
+}
+
 export const DEFAULT_CENTER: GeoPoint = { lat: 4.67, lon: -74.04 };

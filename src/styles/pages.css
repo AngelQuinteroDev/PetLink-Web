@@ -350,6 +350,45 @@
   gap: 4px;
 }
 
+/* Columna derecha de la card del mapa: badge/llamar + "Ver en el mapa" */
+.map-row__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  align-self: stretch;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.map-row__locate {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  height: 24px;
+  padding: 0 10px;
+
+  border: 1.5px solid var(--pc-primary);
+  border-radius: 12px;
+  background: #ffffff;
+
+  color: var(--pc-primary-strong);
+  font-family: var(--pc-font-display);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.map-row__locate:hover {
+  background: #f3ecff;
+}
+
+.map-row__locate:active {
+  transform: scale(0.95);
+}
+
 @media (min-width: 1024px) {
   .map-layout {
     display: grid;
@@ -471,6 +510,11 @@
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.5;
+}
+
+.community-page__search {
+  max-width: 460px;
+  margin: 0 auto 14px;
 }
 
 /* ---------- Comunidad ---------- */
@@ -1120,4 +1164,140 @@ button.feed-alert-link:disabled {
   margin: 10px 0 0;
   font-size: 12.5px;
   line-height: 1.5;
+}
+
+/* ---------- Mis lugares (sedes: veterinarias / refugios / consultorios) ---------- */
+
+.places-intro {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+
+.places-empty {
+  font-size: 13.5px;
+  margin: 4px 0 12px;
+}
+
+.place-adopt-cta {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: var(--pc-radius-sm);
+  background: var(--pc-primary-soft);
+  color: var(--pc-primary-strong);
+  font-weight: 700;
+  font-size: 13.5px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.place-adopt-cta:hover {
+  background: #e9ddff;
+}
+
+.places-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.place-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--pc-surface-strong);
+  border-radius: var(--pc-radius-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.place-card:hover {
+  box-shadow: var(--pc-shadow);
+}
+
+.place-card:focus-visible {
+  outline: 2px solid var(--pc-primary);
+  outline-offset: 2px;
+}
+
+.place-card__pin {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--pc-primary-soft);
+  color: var(--pc-primary-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.place-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.place-card__name {
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.place-card__address {
+  font-size: 12.5px;
+  color: var(--pc-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.place-card__status {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pc-primary-strong);
+}
+
+.place-card__status.is-verified {
+  color: #2e9e63;
+}
+
+.place-card__map {
+  flex-shrink: 0;
+  font-size: 12.5px;
+  padding: 7px 12px;
+}
+
+.place-move-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.place-delete {
+  width: 100%;
+  margin-top: 12px;
+  height: 44px;
+  border-radius: var(--pc-radius-sm);
+  border: 1.5px solid #e5484d;
+  background: transparent;
+  color: #e5484d;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.place-delete:hover {
+  background: #fdeeee;
+}
+
+.place-delete:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
