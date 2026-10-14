@@ -81,7 +81,12 @@ export default function AppLayout() {
         </nav>
 
         <div className="pc-sidebar__footer">
-          <div className="pc-sidebar__user">
+          <button
+            type="button"
+            className="pc-sidebar__user"
+            onClick={() => navigate("/perfil")}
+            aria-label="Ir a mi perfil"
+          >
             <span className="pc-sidebar__avatar" aria-hidden="true">
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="" />
@@ -93,7 +98,7 @@ export default function AppLayout() {
               <p className="pc-sidebar__name">{profile?.name ?? "…"}</p>
               <p className="pc-muted">{profile?.role ?? ""}</p>
             </div>
-          </div>
+          </button>
           <button
             type="button"
             className="pc-sidebar__logout"
