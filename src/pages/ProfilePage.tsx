@@ -204,9 +204,16 @@ export default function ProfilePage() {
         pets={pets.length}
         posts={stats.posts}
         activeReports={stats.activeReports}
+        onPets={() =>
+          document
+            .getElementById("mis-mascotas")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+        onPosts={() => navigate("/mis-publicaciones")}
+        onReports={() => navigate("/mis-reportes")}
       />
 
-      <section className="home__section">
+      <section className="home__section" id="mis-mascotas">
         <div className="home__section-header">
           <h2 className="pc-section-title">Mis mascotas</h2>
           <button type="button" className="pc-pill-btn" onClick={() => navigate("/mascotas/nueva")}>

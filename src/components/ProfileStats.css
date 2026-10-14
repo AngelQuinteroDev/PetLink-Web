@@ -28,6 +28,25 @@
   padding: 4px 2px;
 }
 
+/* Contadores que llevan directo a donde se guardan (Mis mascotas / publicaciones / reportes) */
+.profile-stats__item--link {
+  border: none;
+  border-radius: var(--pc-radius-sm);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.profile-stats__item--link:hover {
+  background: #f3edff;
+}
+
+.profile-stats__item--link:focus-visible {
+  outline: 2px solid var(--pc-primary);
+  outline-offset: 1px;
+}
+
 .profile-stats__value {
   margin: 0 0 2px;
   color: var(--pc-primary-strong);
