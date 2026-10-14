@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
-import type { Map as LeafletMap } from "leaflet";
+import type { Map as LeafletMap, CircleMarker as LeafletCircleMarker } from "leaflet";
 import { House, LocateFixed, MapPin, PawPrint, Phone, Stethoscope } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import GlassHeader from "../components/ui/GlassHeader";
@@ -10,7 +10,7 @@ import PawLoader from "../components/ui/PawLoader";
 import PetDetailModal, { type PetDetailData } from "../components/ui/PetDetailModal";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import { useUserLocation } from "../hooks/useUserLocation";
-import { getReportById, placesNear, reportsNear } from "../lib/api";
+import { getMyPlace, getReportById, placesNear, reportsNear } from "../lib/api";
 import { distanceLabel, dayLabel } from "../lib/format";
 import { getFreshPoint } from "../lib/geo";
 import { reportToDetailData } from "../lib/petDetail";
@@ -28,7 +28,8 @@ const FILTERS: { id: Filter; label: string }[] = [
 ];
 
 const REPORT_COLORS: Record<string, string> = { lost: "#e05252", found: "#4a7dd6" };
-const PLACE_COLORS: Record<string, string> = { clinic: "#e0a52e", shelter: "#2e9e63" };
+// Colores de Veterinaria / Refugio del diseño (mismos pines y etiquetas que la app)
+const PLACE_COLORS: Record<string, string> = { clinic: "#7519ff", shelter: "#e08a2f" };
 
 type FlyTarget = { lat: number; lon: number; zoom: number; nonce: number };
 
@@ -78,7 +79,17 @@ export default function MapPage() {
   const deepLinkHandled = useRef(false);
   const noticeTimer = useRef<number | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
+  const reportLayers = useRef<Record<string, LeafletCircleMarker>>({});
+  const placeLayers = useRef<Record<string, LeafletCircleMarker>>({});
   const { point, radius, consent, loading: locLoading, requestConsent } = useUserLocation();
+
+  /** "Ver en el mapa" de una tarjeta: centra el mapa en la publicación y abre su globo. */
+  const locateOn = useCallback((key: string, lat: number, lon: number) => {
+    mapRef.current?.flyTo([lat, lon], 16, { duration: 0.6 });
+    const layers = key.startsWith("r-") ? reportLayers.current : placeLayers.current;
+    window.setTimeout(() => layers[key]?.openPopup(), 700);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const flash = useCallback((message: string) => {
     setNotice(message);
@@ -128,21 +139,39 @@ export default function MapPage() {
     if (locLoading || loading || deepLinkHandled.current) return;
     deepLinkHandled.current = true;
     const reportId = searchParams.get("report");
-    if (!reportId) return;
-    void (async () => {
-      const rep = await getReportById(reportId, point).catch(() => null);
-      if (!rep) return;
-      setFlyTarget({ lat: rep.latitude, lon: rep.longitude, zoom: 15, nonce: Date.now() });
-      setReports((prev) => (prev.some((r) => r.id === rep.id) ? prev : [rep, ...prev]));
-      setHighlightId(rep.id);
-      setTimeout(() => {
-        document
-          .querySelector(`[data-report-id="${rep.id}"]`)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 150);
-      setTimeout(() => setHighlightId(null), 2600);
-    })();
-  }, [locLoading, loading, searchParams, point]);
+    if (reportId) {
+      void (async () => {
+        const rep = await getReportById(reportId, point).catch(() => null);
+        if (!rep) return;
+        setFlyTarget({ lat: rep.latitude, lon: rep.longitude, zoom: 15, nonce: Date.now() });
+        setReports((prev) => (prev.some((r) => r.id === rep.id) ? prev : [rep, ...prev]));
+        setHighlightId(rep.id);
+        setTimeout(() => {
+          document
+            .querySelector(`[data-report-id="${rep.id}"]`)
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 150);
+        setTimeout(() => reportLayers.current[`r-${rep.id}`]?.openPopup(), 900);
+        setTimeout(() => setHighlightId(null), 2600);
+      })();
+      return;
+    }
+    // "Ver en el mapa" de una sede propia: /mapa?place=<id>
+    const placeId = searchParams.get("place");
+    if (placeId) {
+      void (async () => {
+        const mine = await getMyPlace(placeId).catch(() => null);
+        if (!mine?.point) {
+          flash("No pudimos ubicar esa sede en el mapa.");
+          return;
+        }
+        const target = mine.point;
+        await load(target, radius);
+        setFlyTarget({ lat: target.lat, lon: target.lon, zoom: 16, nonce: Date.now() });
+        setTimeout(() => placeLayers.current[`p-${mine.id}`]?.openPopup(), 900);
+      })();
+    }
+  }, [locLoading, loading, searchParams, point, radius, load, flash]);
 
   async function locateMe() {
     if (locating) return;
@@ -231,6 +260,9 @@ export default function MapPage() {
                 visibleReports.map((r) => (
                   <CircleMarker
                     key={r.id}
+                    ref={(layer) => {
+                      if (layer) reportLayers.current[`r-${r.id}`] = layer;
+                    }}
                     center={[r.latitude, r.longitude]}
                     radius={9}
                     pathOptions={{ color: REPORT_COLORS[r.type], fillColor: REPORT_COLORS[r.type], fillOpacity: 0.85 }}
@@ -257,6 +289,9 @@ export default function MapPage() {
                 visiblePlaces.map((p) => (
                   <CircleMarker
                     key={p.id}
+                    ref={(layer) => {
+                      if (layer) placeLayers.current[`p-${p.id}`] = layer;
+                    }}
                     center={[p.latitude, p.longitude]}
                     radius={9}
                     pathOptions={{ color: PLACE_COLORS[p.kind], fillColor: PLACE_COLORS[p.kind], fillOpacity: 0.85 }}
@@ -322,12 +357,19 @@ export default function MapPage() {
               <div className="map-list">
                 {showReports &&
                   visibleReports.map((r) => (
-                    <button
+                    <div
                       key={r.id}
-                      type="button"
                       data-report-id={r.id}
                       className={`map-row ${highlightId === r.id ? "flash-highlight" : ""}`}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setDetail(reportToDetailData(r))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setDetail(reportToDetailData(r));
+                        }
+                      }}
                     >
                       {r.pet_photo_url ? (
                         <img
@@ -349,8 +391,21 @@ export default function MapPage() {
                           {reportDistance(r) ? ` · ${reportDistance(r)}` : ""}
                         </span>
                       </span>
-                      <span className="pc-badge pc-badge--lost">{dayLabel(r.created_at)}</span>
-                    </button>
+                      <span className="map-row__side">
+                        <span className="pc-badge pc-badge--lost">{dayLabel(r.created_at)}</span>
+                        <button
+                          type="button"
+                          className="map-row__locate"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            locateOn(`r-${r.id}`, r.latitude, r.longitude);
+                          }}
+                          aria-label={`Ver ${r.pet_name ?? "esta mascota"} en el mapa`}
+                        >
+                          <MapPin size={12} /> Ver en el mapa
+                        </button>
+                      </span>
+                    </div>
                   ))}
                 {showPlaces &&
                   visiblePlaces.map((p) => (
@@ -362,16 +417,26 @@ export default function MapPage() {
                           {p.address ?? (p.kind === "clinic" ? "Veterinaria" : "Refugio")} · {distanceLabel(p.distance_m)}
                         </span>
                       </span>
-                      {p.phone && (
-                        <a
-                          className="pc-pill-btn"
-                          style={{ background: "var(--pc-primary)", color: "#fff" }}
-                          href={`tel:${p.phone}`}
-                          aria-label={`Llamar a ${p.name}`}
+                      <span className="map-row__side">
+                        {p.phone && (
+                          <a
+                            className="pc-pill-btn"
+                            style={{ background: "var(--pc-primary)", color: "#fff" }}
+                            href={`tel:${p.phone}`}
+                            aria-label={`Llamar a ${p.name}`}
+                          >
+                            <Phone size={15} />
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          className="map-row__locate"
+                          onClick={() => locateOn(`p-${p.id}`, p.latitude, p.longitude)}
+                          aria-label={`Ver ${p.name} en el mapa`}
                         >
-                          <Phone size={15} />
-                        </a>
-                      )}
+                          <MapPin size={12} /> Ver en el mapa
+                        </button>
+                      </span>
                     </div>
                   ))}
               </div>
