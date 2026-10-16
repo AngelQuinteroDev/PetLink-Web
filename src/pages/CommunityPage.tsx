@@ -609,7 +609,7 @@ export default function CommunityPage() {
 
       {viewerUrl && <ImageViewer src={viewerUrl} onClose={() => setViewerUrl(null)} />}
 
-      <PetDetailModal data={detail} onClose={() => setDetail(null)} />
+      <PetDetailModal data={detail} onClose={() => setDetail(null)} onDeleted={() => void load()} />
     </div>
   );
 }

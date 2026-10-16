@@ -310,7 +310,11 @@ export default function HomePage() {
         </>
       )}
 
-      <PetDetailModal data={detail} onClose={() => setDetail(null)} />
+      <PetDetailModal
+        data={detail}
+        onClose={() => setDetail(null)}
+        onDeleted={() => void load(point, radius)}
+      />
     </div>
   );
 }

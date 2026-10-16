@@ -6,6 +6,8 @@ import ConfirmModal from "./ConfirmModal";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLockBodyScroll } from "../../hooks/useLockBodyScroll";
 import {
+  adminDeletePet,
+  adminDeleteReport,
   createReportMatch,
   expressAdoptionInterest,
   listAdoptionInterests,
@@ -76,10 +78,12 @@ function InfoItem({ icon, label, value }: { icon: ReactNode; label: string; valu
 type Props = {
   data: PetDetailData | null;
   onClose: () => void;
+  /** Tras un borrado de admin: la página recarga sus listas (mapa, comunidad, adopción…) */
+  onDeleted?: () => void;
 };
 
-export default function PetDetailModal({ data, onClose }: Props) {
-  const { user } = useAuth();
+export default function PetDetailModal({ data, onClose, onDeleted }: Props) {
+  const { user, profile } = useAuth();
   useLockBodyScroll(Boolean(data));
 
   const [contactOpen, setContactOpen] = useState(false);
@@ -88,6 +92,11 @@ export default function PetDetailModal({ data, onClose }: Props) {
   const [contactBusy, setContactBusy] = useState(false);
   const [contactError, setContactError] = useState<string | null>(null);
   const [contactSent, setContactSent] = useState(false);
+
+  // Admin: eliminar alerta (report) o quitar mascota en adopción (borrado lógico)
+  const [adminConfirm, setAdminConfirm] = useState(false);
+  const [adminBusy, setAdminBusy] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
 
   const [interests, setInterests] = useState<AdoptionInterest[]>([]);
   const [interestsBusy, setInterestsBusy] = useState(false);
@@ -113,6 +122,8 @@ export default function PetDetailModal({ data, onClose }: Props) {
     setContactInfo("");
     setContactError(null);
     setContactSent(false);
+    setAdminConfirm(false);
+    setAdminError(null);
   }, [data?.reportId, data?.petId]);
 
   // Dueño de una mascota en adopción: carga los interesados
@@ -195,6 +206,35 @@ export default function PetDetailModal({ data, onClose }: Props) {
       setInterestError("No pudimos guardar la respuesta. Intenta de nuevo.");
     } finally {
       setInterestsBusy(false);
+    }
+  }
+
+  /** Admin: eliminar una alerta de otra persona (sale del mapa y de la comunidad) o quitar su
+   *  mascota en adopción (borrado lógico). Pide un segundo toque. */
+  async function adminRemove() {
+    if (!data || adminBusy) return;
+    if (!adminConfirm) {
+      setAdminConfirm(true);
+      setAdminError(null);
+      return;
+    }
+    setAdminBusy(true);
+    setAdminError(null);
+    try {
+      if (isAdoption && data.petId) {
+        await adminDeletePet(data.petId);
+      } else if (isReport && data.reportId) {
+        await adminDeleteReport(data.reportId);
+      }
+      onDeleted?.();
+      onClose();
+    } catch (err) {
+      console.error("borrado de admin falló:", err);
+      setAdminError(
+        err instanceof Error ? err.message : "No pudimos eliminar. Intenta de nuevo."
+      );
+      setAdminConfirm(false);
+      setAdminBusy(false);
     }
   }
 
@@ -318,6 +358,51 @@ export default function PetDetailModal({ data, onClose }: Props) {
                     ? "Contactar a quien la encontró"
                     : "Contactar al dueño"}
               </button>
+            )}
+
+            {/* Admin: eliminar una alerta de otra persona o quitar su publicación de adopción */}
+            {profile?.role === "admin" && !isMine && (isReport || isAdoption) && (
+              <div className="pet-detail__admin">
+                {adminConfirm && !adminBusy && (
+                  <p className="pet-detail__admin-warning">
+                    {isAdoption
+                      ? "Dejará de verse en «En adopción» y en los perfiles."
+                      : "Dejará de verse en el mapa y en la comunidad. No se puede deshacer."}
+                  </p>
+                )}
+                {adminError && (
+                  <p className="pc-error-text" role="alert">
+                    {adminError}
+                  </p>
+                )}
+                <div className="pet-detail__admin-row">
+                  {adminConfirm && !adminBusy && (
+                    <button
+                      type="button"
+                      className="pet-detail__admin-cancel"
+                      onClick={() => setAdminConfirm(false)}
+                    >
+                      Cancelar
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="pet-detail__admin-delete"
+                    disabled={adminBusy}
+                    onClick={() => void adminRemove()}
+                  >
+                    {adminBusy
+                      ? "Eliminando…"
+                      : adminConfirm
+                        ? isAdoption
+                          ? "Sí, quitarla"
+                          : "Sí, eliminar alerta"
+                        : isAdoption
+                          ? "Quitar publicación (admin)"
+                          : "Eliminar alerta (admin)"}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

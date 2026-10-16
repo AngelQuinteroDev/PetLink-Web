@@ -314,7 +314,7 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <PetDetailModal data={detail} onClose={() => setDetail(null)} />
+      <PetDetailModal data={detail} onClose={() => setDetail(null)} onDeleted={() => void load()} />
 
       {logoutOpen && <LogoutConfirm onClose={() => setLogoutOpen(false)} />}
     </div>

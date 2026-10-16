@@ -674,6 +674,21 @@ export async function adminDeletePost(postId: string): Promise<void> {
   if (error) throw error;
 }
 
+/**
+ * Admin: quita una mascota de otra persona, p. ej. una publicación de adopción
+ * (borrado lógico con `deleted_at`, igual que cuando la borra su dueño).
+ */
+export async function adminDeletePet(petId: string): Promise<void> {
+  const { error } = await supabase.rpc("admin_delete_pet", { p_pet_id: petId });
+  if (!error) return;
+  if (error.code === "PGRST202") {
+    throw new Error(
+      "Para que el admin borre mascotas falta aplicar la migración 0056_admin_delete_pet en Supabase."
+    );
+  }
+  throw error;
+}
+
 export async function listCommentReports(): Promise<CommentReport[]> {
   const { data, error } = await supabase
     .from("comment_reports")
