@@ -7,16 +7,20 @@ import {
   RefreshCw,
   ShieldCheck,
   Store,
+  Trash2,
   XCircle,
 } from "lucide-react";
 import ChipGroup from "../components/ui/ChipGroup";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui/States";
 import {
+  adminDeletePost,
+  adminDeleteReport,
   getModerationQueue,
   getVetDocumentUrl,
   listCommentReports,
   listPendingClinics,
   listPendingVetApplications,
+  listRecentContent,
   moderateCommentAndResolve,
   moderatePost,
   resolveCommentReports,
@@ -29,11 +33,12 @@ import type {
   CommentReport,
   ModerationPost,
   PendingClinic,
+  RecentContentRow,
   VetApplication,
 } from "../lib/types";
 import "../styles/admin.css";
 
-type Tab = "posts" | "vets" | "clinics" | "comments";
+type Tab = "posts" | "vets" | "clinics" | "comments" | "content";
 
 const TYPE_LABELS: Record<string, string> = {
   question: "Pregunta",
@@ -51,6 +56,23 @@ const ROLE_LABELS: Record<string, string> = {
   foundation: "Establecimiento",
 };
 
+/** Etiqueta y color de cada fila de la pestaña "Contenido" */
+const REPORT_LABELS: Record<string, string> = {
+  lost: "Alerta · Perdido",
+  found: "Alerta · Encontrado",
+  danger: "Alerta · Riesgo",
+};
+
+function contentLabel(item: RecentContentRow): string {
+  if (item.kind === "report") return REPORT_LABELS[item.type] ?? "Alerta";
+  return TYPE_LABELS[item.type] ?? "Publicación";
+}
+
+function contentBadgeClass(item: RecentContentRow): string {
+  if (item.kind === "report") return item.type === "found" ? "pc-badge--found" : "pc-badge--lost";
+  return "pc-badge--question";
+}
+
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("posts");
   const [loading, setLoading] = useState(true);
@@ -65,6 +87,9 @@ export default function AdminPage() {
   const [docBusy, setDocBusy] = useState<string | null>(null);
   // Etiqueta elegida por el admin al verificar una sede (Veterinaria / Refugio)
   const [placeKinds, setPlaceKinds] = useState<Record<string, "clinic" | "shelter">>({});
+  // Contenido reciente (alertas y publicaciones) para moderar/borrar
+  const [content, setContent] = useState<RecentContentRow[]>([]);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   async function openDocument(pathOrUrl: string) {
     setDocBusy(pathOrUrl);
@@ -84,17 +109,20 @@ export default function AdminPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setConfirmId(null);
     try {
-      const [p, v, c, r] = await Promise.all([
+      const [p, v, c, r, recent] = await Promise.all([
         getModerationQueue(),
         listPendingVetApplications(),
         listPendingClinics(),
         listCommentReports(),
+        listRecentContent(),
       ]);
       setPosts(p);
       setVets(v);
       setClinics(c);
       setReports(r);
+      setContent(recent);
     } catch {
       setError("No pudimos cargar la cola de moderación.");
     } finally {
@@ -131,6 +159,7 @@ export default function AdminPage() {
     { value: "vets", label: `Solicitudes (${vets.length})` },
     { value: "clinics", label: `Clínicas (${clinics.length})` },
     { value: "comments", label: `Comentarios (${reports.length})` },
+    { value: "content", label: `Contenido (${content.length})` },
   ];
 
   return (
@@ -539,6 +568,80 @@ export default function AdminPage() {
               </div>
             </article>
           ))}
+        </section>
+      )}
+
+      {!loading && !error && tab === "content" && (
+        <section className="admin-list">
+          {content.length === 0 && (
+            <EmptyState
+              title="No hay contenido reciente"
+              body="Las alertas del mapa y las publicaciones visibles aparecerán aquí para que puedas borrar lo que no corresponda."
+            />
+          )}
+          {content.map((item) => {
+            const key = `${item.kind}-${item.id}`;
+            const confirming = confirmId === key;
+            return (
+              <article key={key} className="admin-item">
+                <div className="admin-item__head">
+                  <div>
+                    <p className="admin-item__title">
+                      <span className={`pc-badge ${contentBadgeClass(item)}`}>{contentLabel(item)}</span>{" "}
+                      {item.author_name}
+                    </p>
+                    <p className="admin-item__meta">
+                      {timeAgo(item.created_at)}
+                      {item.image && " · Con imagen"}
+                      {item.kind === "report" && " · Visible en el mapa"}
+                    </p>
+                  </div>
+                </div>
+                {item.text && (
+                  <p className="pc-muted admin-item__meta admin-item__content">{item.text}</p>
+                )}
+                <div className="admin-item__actions">
+                  <button
+                    type="button"
+                    className="pc-outline-btn admin-danger"
+                    disabled={busyId === key}
+                    onClick={() => {
+                      if (!confirming) {
+                        setConfirmId(key);
+                        return;
+                      }
+                      setConfirmId(null);
+                      void run(
+                        key,
+                        () =>
+                          item.kind === "report"
+                            ? adminDeleteReport(item.id)
+                            : adminDeletePost(item.id),
+                        () => {
+                          setContent((prev) =>
+                            prev.filter((x) => !(x.kind === item.kind && x.id === item.id))
+                          );
+                          setNotice(
+                            item.kind === "report"
+                              ? "Alerta eliminada: ya no aparece en la comunidad ni en el mapa."
+                              : "Publicación eliminada."
+                          );
+                        },
+                        "No pudimos eliminar el contenido."
+                      );
+                    }}
+                  >
+                    <Trash2 size={15} /> {confirming ? "Confirmar borrado" : "Eliminar"}
+                  </button>
+                </div>
+                {confirming && (
+                  <p className="pc-muted admin-item__meta">
+                    Toca otra vez para confirmar: no se puede deshacer.
+                  </p>
+                )}
+              </article>
+            );
+          })}
         </section>
       )}
     </div>

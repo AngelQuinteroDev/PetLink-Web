@@ -214,6 +214,17 @@ export interface CommentReport {
   reporter?: { name: string } | null;
 }
 
+/** Contenido reciente para moderar (alertas de `reports` + publicaciones visibles). */
+export interface RecentContentRow {
+  kind: "report" | "post";
+  id: string;
+  type: string;
+  text: string | null;
+  image: boolean;
+  created_at: string;
+  author_name: string;
+}
+
 export interface MyClinic {
   id: string;
   name: string;

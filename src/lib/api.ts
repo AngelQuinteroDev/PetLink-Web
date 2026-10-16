@@ -15,6 +15,7 @@ import type {
   Pet,
   PlaceNear,
   PrivateProfile,
+  RecentContentRow,
   ReportMatch,
   ReportNear,
   Species,
@@ -585,6 +586,81 @@ export async function updatePlaceKind(
   kind: "clinic" | "shelter"
 ): Promise<void> {
   const { error } = await supabase.from("vet_clinics").update({ kind }).eq("id", placeId);
+  if (error) throw error;
+}
+
+/**
+ * Contenido reciente para moderar (pestaña "Contenido" del panel):
+ * alertas/reportes + publicaciones ya visibles (las alertas no salen como post suelto).
+ */
+export async function listRecentContent(limit = 30): Promise<RecentContentRow[]> {
+  const [reportsRes, postsRes] = await Promise.all([
+    supabase
+      .from("reports")
+      .select("id, type, description, photos, created_at, author:profiles!reports_user_id_fkey(name)")
+      .order("created_at", { ascending: false })
+      .limit(limit),
+    supabase
+      .from("posts")
+      .select("id, type, content, image_url, created_at, author:profiles!posts_user_id_fkey(name)")
+      .eq("moderation_status", "published")
+      .is("report_id", null)
+      .order("created_at", { ascending: false })
+      .limit(limit),
+  ]);
+  if (reportsRes.error) throw reportsRes.error;
+  if (postsRes.error) throw postsRes.error;
+
+  const reports = (reportsRes.data ?? []) as unknown as {
+    id: string;
+    type: string;
+    description: string | null;
+    photos: string[] | null;
+    created_at: string;
+    author?: { name: string } | null;
+  }[];
+  const posts = (postsRes.data ?? []) as unknown as {
+    id: string;
+    type: string;
+    content: string | null;
+    image_url: string | null;
+    created_at: string;
+    author?: { name: string } | null;
+  }[];
+
+  const rows: RecentContentRow[] = [
+    ...reports.map((r) => ({
+      kind: "report" as const,
+      id: r.id,
+      type: r.type,
+      text: r.description,
+      image: Array.isArray(r.photos) && r.photos.length > 0,
+      created_at: r.created_at,
+      author_name: r.author?.name ?? "Usuario",
+    })),
+    ...posts.map((p) => ({
+      kind: "post" as const,
+      id: p.id,
+      type: p.type,
+      text: p.content,
+      image: Boolean(p.image_url),
+      created_at: p.created_at,
+      author_name: p.author?.name ?? "Usuario",
+    })),
+  ];
+  rows.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+  return rows.slice(0, limit);
+}
+
+/** Admin: borra una alerta/reporte de otro usuario (y su publicación pareada). */
+export async function adminDeleteReport(reportId: string): Promise<void> {
+  const { error } = await supabase.rpc("admin_delete_report", { p_report_id: reportId });
+  if (error) throw error;
+}
+
+/** Admin: borra una publicación de otro usuario (si es alerta, también su reporte). */
+export async function adminDeletePost(postId: string): Promise<void> {
+  const { error } = await supabase.rpc("admin_delete_post", { p_post_id: postId });
   if (error) throw error;
 }
 

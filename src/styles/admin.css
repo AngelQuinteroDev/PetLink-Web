@@ -176,6 +176,24 @@
   background: #9d5dff;
 }
 
+/* Borrado de contenido (pestaña "Contenido"): rojo y con doble confirmación */
+.admin-item__actions .admin-danger {
+  border-color: #e5484d;
+  color: #c02626;
+}
+
+.admin-item__actions .admin-danger:hover {
+  background: #fdf4f4;
+}
+
+.admin-item__content {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
 @media (min-width: 1024px) {
   .admin-stats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
