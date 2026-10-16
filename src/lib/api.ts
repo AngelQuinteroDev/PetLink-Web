@@ -592,12 +592,15 @@ export async function updatePlaceKind(
 /**
  * Contenido reciente para moderar (pestaña "Contenido" del panel):
  * alertas/reportes + publicaciones ya visibles (las alertas no salen como post suelto).
+ * Límite amplio para que también aparezcan las alertas viejas (el buscador del panel filtra).
  */
-export async function listRecentContent(limit = 30): Promise<RecentContentRow[]> {
+export async function listRecentContent(limit = 200): Promise<RecentContentRow[]> {
   const [reportsRes, postsRes] = await Promise.all([
     supabase
       .from("reports")
-      .select("id, type, description, photos, created_at, author:profiles!reports_user_id_fkey(name)")
+      .select(
+        "id, type, status, description, photos, created_at, author:profiles!reports_user_id_fkey(name), pet:pets!reports_pet_id_fkey(name), species:species!reports_species_id_fkey(name)"
+      )
       .order("created_at", { ascending: false })
       .limit(limit),
     supabase
@@ -614,10 +617,13 @@ export async function listRecentContent(limit = 30): Promise<RecentContentRow[]>
   const reports = (reportsRes.data ?? []) as unknown as {
     id: string;
     type: string;
+    status: string;
     description: string | null;
     photos: string[] | null;
     created_at: string;
     author?: { name: string } | null;
+    pet?: { name: string } | null;
+    species?: { name: string } | null;
   }[];
   const posts = (postsRes.data ?? []) as unknown as {
     id: string;
@@ -633,19 +639,23 @@ export async function listRecentContent(limit = 30): Promise<RecentContentRow[]>
       kind: "report" as const,
       id: r.id,
       type: r.type,
+      status: r.status,
       text: r.description,
       image: Array.isArray(r.photos) && r.photos.length > 0,
       created_at: r.created_at,
       author_name: r.author?.name ?? "Usuario",
+      pet_name: r.pet?.name ?? r.species?.name ?? null,
     })),
     ...posts.map((p) => ({
       kind: "post" as const,
       id: p.id,
       type: p.type,
+      status: null,
       text: p.content,
       image: Boolean(p.image_url),
       created_at: p.created_at,
       author_name: p.author?.name ?? "Usuario",
+      pet_name: null,
     })),
   ];
   rows.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));

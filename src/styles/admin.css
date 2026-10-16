@@ -194,6 +194,12 @@
   overflow-wrap: anywhere;
 }
 
+/* Buscador de la pestaña "Contenido" */
+.admin-content__search {
+  margin-bottom: 14px;
+  max-width: 460px;
+}
+
 @media (min-width: 1024px) {
   .admin-stats {
     grid-template-columns: repeat(4, minmax(0, 1fr));

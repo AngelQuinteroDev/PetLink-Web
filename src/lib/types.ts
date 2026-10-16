@@ -219,10 +219,14 @@ export interface RecentContentRow {
   kind: "report" | "post";
   id: string;
   type: string;
+  /** En alertas: open/searching (visible en el mapa) vs resolved/closed; null en publicaciones */
+  status: string | null;
   text: string | null;
   image: boolean;
   created_at: string;
   author_name: string;
+  /** En alertas: nombre de la mascota (o la especie si es callejero) */
+  pet_name: string | null;
 }
 
 export interface MyClinic {

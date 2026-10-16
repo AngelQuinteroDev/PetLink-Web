@@ -73,6 +73,10 @@ function contentBadgeClass(item: RecentContentRow): string {
   return "pc-badge--question";
 }
 
+/** Búsqueda de contenido sin distinguir tildes ni mayúsculas */
+const normalize = (s: string | null | undefined) =>
+  (s ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("posts");
   const [loading, setLoading] = useState(true);
@@ -89,6 +93,7 @@ export default function AdminPage() {
   const [placeKinds, setPlaceKinds] = useState<Record<string, "clinic" | "shelter">>({});
   // Contenido reciente (alertas y publicaciones) para moderar/borrar
   const [content, setContent] = useState<RecentContentRow[]>([]);
+  const [contentQuery, setContentQuery] = useState("");
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   async function openDocument(pathOrUrl: string) {
@@ -161,6 +166,17 @@ export default function AdminPage() {
     { value: "comments", label: `Comentarios (${reports.length})` },
     { value: "content", label: `Contenido (${content.length})` },
   ];
+
+  const contentFiltered = content.filter((item) => {
+    const q = normalize(contentQuery.trim());
+    if (!q) return true;
+    return (
+      normalize(item.author_name).includes(q) ||
+      normalize(item.pet_name).includes(q) ||
+      normalize(item.text).includes(q) ||
+      normalize(contentLabel(item)).includes(q)
+    );
+  });
 
   return (
     <div>
@@ -573,13 +589,32 @@ export default function AdminPage() {
 
       {!loading && !error && tab === "content" && (
         <section className="admin-list">
+          <div className="admin-content__search">
+            <input
+              className="pc-input"
+              type="search"
+              placeholder="Buscar por texto, autor o tipo (ej: perdido, drogoperro)…"
+              value={contentQuery}
+              onChange={(e) => setContentQuery(e.target.value)}
+              aria-label="Buscar contenido"
+            />
+          </div>
+
           {content.length === 0 && (
             <EmptyState
               title="No hay contenido reciente"
               body="Las alertas del mapa y las publicaciones visibles aparecerán aquí para que puedas borrar lo que no corresponda."
             />
           )}
-          {content.map((item) => {
+
+          {content.length > 0 && contentFiltered.length === 0 && (
+            <EmptyState
+              title="Sin resultados"
+              body={`No encontramos contenido con «${contentQuery.trim()}».`}
+            />
+          )}
+
+          {contentFiltered.map((item) => {
             const key = `${item.kind}-${item.id}`;
             const confirming = confirmId === key;
             return (
@@ -589,11 +624,15 @@ export default function AdminPage() {
                     <p className="admin-item__title">
                       <span className={`pc-badge ${contentBadgeClass(item)}`}>{contentLabel(item)}</span>{" "}
                       {item.author_name}
+                      {item.pet_name && ` · ${item.pet_name}`}
                     </p>
                     <p className="admin-item__meta">
                       {timeAgo(item.created_at)}
                       {item.image && " · Con imagen"}
-                      {item.kind === "report" && " · Visible en el mapa"}
+                      {item.kind === "report" &&
+                        (item.status === "open" || item.status === "searching"
+                          ? " · Visible en el mapa"
+                          : " · Resuelta (ya no está en el mapa)")}
                     </p>
                   </div>
                 </div>
